@@ -1,0 +1,14 @@
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\GUI\Fonts\debug.xnb
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Wamo.exe
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Wamo.pdb
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Lidgren.Network.dll
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\obj\x86\Debug\Wamo.csprojResolveAssemblyReference.cache
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\obj\x86\Debug\Wamo.exe
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\obj\x86\Debug\Wamo.pdb
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\GUI\fade.xnb
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\GUI\Splash\1.xnb
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\GUI\Splash\3.xnb
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Load\splash.cme
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Load\menu.cme
+C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\GUI\null.xnb

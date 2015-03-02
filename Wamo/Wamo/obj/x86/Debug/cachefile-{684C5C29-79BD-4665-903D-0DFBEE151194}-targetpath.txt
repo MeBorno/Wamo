@@ -1,0 +1,7 @@
+Content\GUI\Fonts\debug.xnb
+Content\GUI\fade.xnb
+Content\GUI\Splash\1.xnb
+Content\GUI\Splash\3.xnb
+Content\GUI\null.xnb
+Content\Load\menu.cme
+Content\Load\splash.cme
