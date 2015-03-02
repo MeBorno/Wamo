@@ -45,3 +45,5 @@ Temporary Items
 # Bin files
 bin/
 obj/
+Wamo/Wamo/obj
+Wamo/Wamo/bin
