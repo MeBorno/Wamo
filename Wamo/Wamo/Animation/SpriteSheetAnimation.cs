@@ -36,14 +36,18 @@ public class SpriteSheetAnimation : Animation
         if (isActive)
         {
             frameCounter += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-            if(frameCounter >= switchFrame)
+            if (frameCounter >= switchFrame)
             {
                 frameCounter = 0;
                 curFrame.X++;
                 if (curFrame.X * FrameWidth >= image.Width) curFrame.X = 0;
             }
         }
-        else frameCounter = 0;
+        else
+        {
+            frameCounter = 0;
+            curFrame.X = 1;
+        }
 
         sourceRect = new Rectangle((int)curFrame.X * FrameWidth, (int)curFrame.Y * FrameHeight, FrameWidth, FrameHeight);
     }

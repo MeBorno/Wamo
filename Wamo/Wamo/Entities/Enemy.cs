@@ -19,9 +19,9 @@ public class Enemy : Entity
         base.UnloadContent();
     }
 
-    public override void Update(GameTime gameTime)
+    public override void Update(GameTime gameTime, InputManager inputManager)
     {
-        base.Update(gameTime);
+        base.Update(gameTime, inputManager);
     }
 
     public override void Draw(SpriteBatch spriteBatch)
