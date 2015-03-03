@@ -20,6 +20,7 @@ public class Animation
     protected Vector2 origin, position;
     protected ContentManager content;
     protected bool isActive;
+    protected Rectangle hitbox;
 
     public virtual void LoadContent(ContentManager content, Texture2D image, string text, Vector2 position)
     {
@@ -37,6 +38,9 @@ public class Animation
         rotation = 0.0f;
         scale = 1.0f;
         alpha = 1.0f;
+        if (text != string.Empty)
+            hitbox = new Rectangle((int)position.X, (int)position.Y, Math.Max(image.Width, (int)font.MeasureString(text).X), Math.Max(image.Height, (int)font.MeasureString(text).Y));
+        else hitbox = new Rectangle((int)position.X, (int)position.Y, 0, 0);
     }
 
     public virtual void UnloadContent()
@@ -46,7 +50,7 @@ public class Animation
 
     public virtual void Update(GameTime gameTime)
     {
-
+        //hitbox = new Rectangle((int)position.X, (int)position.Y, hitbox.Width, hitbox.Height);
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)
@@ -86,5 +90,16 @@ public class Animation
     {
         get { return font; }
         set { font = value; }
+    }
+
+    public Color Color
+    {
+        get { return color; }
+        set { color = value; }
+    }
+
+    public Rectangle Hitbox
+    {
+        get { return hitbox; }
     }
 }

@@ -26,7 +26,7 @@ class Program
 
         NetIncomingMessage inc;
         DateTime time = DateTime.Now;
-        TimeSpan timetopass = new TimeSpan(0, 0, 0, 0, 30);
+        TimeSpan timetopass = new TimeSpan(0, 0, 0, 5, 0);
         Console.WriteLine("Waiting for new connections and updateing world state to current ones");
 
         // Main loop
@@ -44,7 +44,7 @@ class Program
                                 inc.SenderConnection.Approve();
 
                                 Random r = new Random();
-                                GameWorldState.Add(new Character(inc.ReadString(), r.Next(1, 40), r.Next(1, 20), inc.SenderConnection));
+                                GameWorldState.Add(new Character(inc.ReadString(), State.Lobby, inc.SenderConnection));
 
                                 NetOutgoingMessage outmsg = Server.CreateMessage();
                                 outmsg.Write((byte)PacketTypes.WORLDSTATE);
@@ -66,19 +66,10 @@ class Program
                             {
                                 foreach (Character ch in GameWorldState)
                                 {
-                                    if (ch.Connection != inc.SenderConnection)
+                                    if (ch.connection != inc.SenderConnection)
                                         continue;
 
                                     byte b = inc.ReadByte();
-
-                                    if ((byte)MoveDirection.UP == b)
-                                        ch.Y--;
-                                    if ((byte)MoveDirection.DOWN == b)
-                                        ch.Y++;
-                                    if ((byte)MoveDirection.LEFT == b)
-                                        ch.X--;
-                                    if ((byte)MoveDirection.RIGHT == b)
-                                        ch.X++;
 
                                     NetOutgoingMessage outmsg = Server.CreateMessage();
 
@@ -104,7 +95,7 @@ class Program
                             {
                                 foreach (Character cha in GameWorldState)
                                 {
-                                    if (cha.Connection == inc.SenderConnection)
+                                    if (cha.connection == inc.SenderConnection)
                                     {
                                         GameWorldState.Remove(cha);
                                         break;
@@ -145,17 +136,19 @@ class Program
 
     class Character
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public string Name { get; set; }
-        public NetConnection Connection { get; set; }
+        public string name;
+        public State role;
+        public NetConnection connection;
 
-        public Character(string name, int x, int y, NetConnection conn)
+        public Character(string name, State role, NetConnection conn)
         {
-            Name = name;
-            X = x;
-            Y = y;
-            Connection = conn;
+            this.name = name;
+            this.role = role;
+            this.connection = conn;
+        }
+
+        public Character()
+        {
         }
     }
 
@@ -165,13 +158,13 @@ class Program
         MOVE,
         WORLDSTATE
     }
-
-    enum MoveDirection
+    enum State
     {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        NONE
+        None,
+        Lobby,
+        Waiting,
+        Robot,
+        System,
+        Doctor
     }
 }

@@ -14,24 +14,30 @@ public class ScreenManager
 
     private static ScreenManager instance;
     private InputManager inputManager;
+    private Game game;
 
     Dictionary<string, GameScreen> screens = new Dictionary<string, GameScreen>();
     Stack<GameScreen> screenStack = new Stack<GameScreen>();
     GameScreen currentScreen, newScreen;
     ContentManager content;
-    Vector2 dimensions;
+    Vector2 dimensions, baseScreenSize;
 
     bool transition;
     FadeAnimation fade;
     Texture2D fadeTexture;
+    Texture2D pixel;
     Texture2D nullImage;
 
     #endregion
 
     #region Main Methods
 
-    public void Initialize() 
+    public void Initialize(Game game) 
     {
+        this.game = game;
+
+        baseScreenSize = new Vector2(800, 600);
+
         currentScreen = new SplashScreen();
         fade = new FadeAnimation();
         inputManager = new InputManager();
@@ -46,6 +52,8 @@ public class ScreenManager
         fade.LoadContent(content, fadeTexture, "", Vector2.Zero);
         fade.Scale = Math.Max(dimensions.X, dimensions.Y);
 
+
+        pixel = content.Load<Texture2D>("GUI/pixel");
         nullImage = content.Load<Texture2D>("GUI/null");
     }
 
@@ -68,6 +76,14 @@ public class ScreenManager
     #endregion
 
     #region Special Methods
+
+    public void DrawRectangle(SpriteBatch spriteBatch, Rectangle rect, Color col)
+    {
+        spriteBatch.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, 1), col);
+        spriteBatch.Draw(pixel, new Rectangle(rect.X, rect.Y + rect.Height, rect.Width, 1), col);
+        spriteBatch.Draw(pixel, new Rectangle(rect.X, rect.Y, 1, rect.Height), col);
+        spriteBatch.Draw(pixel, new Rectangle(rect.X + rect.Width, rect.Y, 1, rect.Height), col);
+    }
 
     public void AddScreen(GameScreen screen, InputManager inputManager)
     {
@@ -114,6 +130,15 @@ public class ScreenManager
         }
     }
 
+    public Matrix DrawScale()
+    {
+        Vector3 screenScalingFactor;
+        float horScaling = (float)game.GraphicsDevice.PresentationParameters.BackBufferWidth / baseScreenSize.X;
+        float verScaling = (float)game.GraphicsDevice.PresentationParameters.BackBufferHeight / baseScreenSize.Y;
+        screenScalingFactor = new Vector3(horScaling, verScaling, 1);
+        return Matrix.CreateScale(screenScalingFactor);
+    }
+
     #endregion
 
     #region Properties
@@ -126,10 +151,20 @@ public class ScreenManager
         }
     }
 
+    public Game Game
+    {
+        get { return game; }
+    }
+
     public Vector2 Dimensions
     {
         get { return dimensions; }
         set { dimensions = value; }
+    }
+
+    public Vector2 BaseDimensions
+    {
+        get { return baseScreenSize; }
     }
 
     public Texture2D NullImage

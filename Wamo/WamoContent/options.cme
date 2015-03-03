@@ -1,0 +1,9 @@
+# Wamo Options File
+# General Options
+name=Wamo
+screenWidth=[int]1920
+screenHeight=[int]1080
+fullScreen=[bool]true
+
+# Network Options
+defaultIP=127.0.0.1

@@ -23,11 +23,15 @@ public class Wamo : Microsoft.Xna.Framework.Game
 
     protected override void Initialize()
     {
-
-        ScreenManager.Instance.Initialize();
-        ScreenManager.Instance.Dimensions = new Vector2(800, 600);
+        Options.LoadOptions(Content.RootDirectory+"\\options.cme");
+        NetworkManager.Instance.Initialize();
+        ScreenManager.Instance.Initialize(this);
+        ScreenManager.Instance.Dimensions = new Vector2(Options.GetValue<int>("screenWidth"), Options.GetValue<int>("screenHeight"));
         graphics.PreferredBackBufferWidth = (int)ScreenManager.Instance.Dimensions.X;
-        graphics.PreferredBackBufferWidth = (int)ScreenManager.Instance.Dimensions.Y;
+        graphics.PreferredBackBufferHeight = (int)ScreenManager.Instance.Dimensions.Y;
+        graphics.ApplyChanges();
+
+        this.IsMouseVisible = true;
 
         base.Initialize();
     }
@@ -45,9 +49,16 @@ public class Wamo : Microsoft.Xna.Framework.Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape) || Options.GetValue<bool>("shutDown"))
             this.Exit();
 
+        if (Options.GetValue<bool>("fullScreen") != graphics.IsFullScreen)
+        {
+            graphics.IsFullScreen = Options.GetValue<bool>("fullScreen");
+            graphics.ApplyChanges();
+        }
+
+        NetworkManager.Instance.Update();
         ScreenManager.Instance.Update(gameTime);
 
         base.Update(gameTime);
@@ -55,10 +66,10 @@ public class Wamo : Microsoft.Xna.Framework.Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Clear(Color.DarkGray);
 
-        spriteBatch.Begin();
-        ScreenManager.Instance.Draw(spriteBatch);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, ScreenManager.Instance.DrawScale());
+            ScreenManager.Instance.Draw(spriteBatch);
         spriteBatch.End();
 
         base.Draw(gameTime);

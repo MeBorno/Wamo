@@ -113,14 +113,8 @@ public class MenuManager
             else if(inputManager.KeyPressed(Keys.Up, Keys.W)) itemNumber--;
         }
 
-        if(inputManager.KeyPressed(Keys.Enter))
-        {
-            if (linkType[itemNumber] == "Screen")
-            {
-                Type newClass = getTypeByName(linkID[itemNumber])[0];
-                ScreenManager.Instance.AddScreen((GameScreen)Activator.CreateInstance(newClass), inputManager);
-            }
-        }
+        if(inputManager.KeyPressed(Keys.Enter)) PerformAction(linkType[itemNumber], inputManager);
+        
 
         //itemNumber = (itemNumber < 0) ? 0 : ((itemNumber > menuItems.Count - 1) ? menuItems.Count - 1 : itemNumber); //Normal
         itemNumber = (itemNumber < 0) ? menuItems.Count - 1 : ((itemNumber > menuItems.Count - 1) ? 0 : itemNumber); //Carousell
@@ -128,9 +122,17 @@ public class MenuManager
         for (int i = 0; i < animation.Count; i++)
             for (int j = 0; j < animation[i].Count; j++)
             {
+                if (animation[i][j].Hitbox.Contains((int)inputManager.MousePos().X, (int)inputManager.MousePos().Y))
+                {
+                    itemNumber = i;
+                    if (inputManager.MouseLeftButtonPressed()) PerformAction(linkType[itemNumber], inputManager);
+                }
+
                 if (itemNumber == i) animation[i][j].IsActive = true;
                 else animation[i][j].IsActive = false;
 
+                if (animation[i][j].IsActive) animation[i][j].Color = Color.White;
+                else animation[i][j].Color = new Color(0.2f, 0.2f, 0.2f);
                 animation[i][j].Update(gameTime);
             }
     }
@@ -139,7 +141,25 @@ public class MenuManager
     {
         for (int i = 0; i < animation.Count; i++)
             for (int j = 0; j < animation[i].Count; j++)
+            {
                 animation[i][j].Draw(spriteBatch);
+                //ScreenManager.Instance.DrawRectangle(spriteBatch, animation[i][j].Hitbox, Color.Red);
+            }
+    }
+
+    private void PerformAction(string action, InputManager inputManager)
+    {
+        switch (action)
+        {
+            case "Screen":
+                {
+                    Type newClass = getTypeByName(linkID[itemNumber])[0];
+                    ScreenManager.Instance.AddScreen((GameScreen)Activator.CreateInstance(newClass), inputManager);
+                } break;
+            case "Action":
+                if (linkID[itemNumber] == "Exit") Options.SetValue("shutDown", true);
+                break;
+        }
     }
 
     private void SetMenuItems()
@@ -166,8 +186,8 @@ public class MenuManager
                 dimensions.Y += font.MeasureString(menuItems[i]).Y + menuImages[i].Height;
             }
 
-            if (axis == 1) pos.X = (ScreenManager.Instance.Dimensions.X - dimensions.X) / 2;
-            else pos.Y = (ScreenManager.Instance.Dimensions.Y - dimensions.Y) / 2;
+            if (axis == 1) pos.X = (ScreenManager.Instance.BaseDimensions.X - dimensions.X) / 2;
+            else pos.Y = (ScreenManager.Instance.BaseDimensions.Y - dimensions.Y) / 2;
             
         }
         else pos = position;
@@ -176,17 +196,18 @@ public class MenuManager
         {
             dimensions = new Vector2(font.MeasureString(menuItems[i]).X + menuImages[i].Width, font.MeasureString(menuItems[i]).Y + menuImages[i].Height);
 
-            if (axis == 1) pos.Y = (ScreenManager.Instance.Dimensions.Y - dimensions.Y) / 2;
-            else pos.X = (ScreenManager.Instance.Dimensions.X - dimensions.X) / 2;
+            if (axis == 1) pos.Y = (ScreenManager.Instance.BaseDimensions.Y - dimensions.Y) / 2;
+            else pos.X = (ScreenManager.Instance.BaseDimensions.X - dimensions.X) / 2;
 
             for (int j = 0; j < animationTypes.Count; j++)
             {
                 switch (animationTypes[j])
                 {
                     case "Fade": 
-                        tmpAnimation.Add(new FadeAnimation());
+                        tmpAnimation.Add(new Animation());
                         tmpAnimation[tmpAnimation.Count - 1].LoadContent(content, menuImages[i], menuItems[i], pos);
                         tmpAnimation[tmpAnimation.Count - 1].Font = font;
+                        tmpAnimation[tmpAnimation.Count - 1].Color = new Color(0.2f, 0.2f, 0.2f);
                         break;
                 }
             }
