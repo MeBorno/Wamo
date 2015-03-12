@@ -11,9 +11,13 @@ using Microsoft.Xna.Framework.Input;
 public class Player : Entity
 {
     private InputManager inputManager;
+    SpriteFont font;
+    Vector2 velocity;
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
+        velocity = Vector2.Zero;
+        font = content.Load<SpriteFont>("GUI/Fonts/debug");
         base.LoadContent(content, inputManager);
 
         fileManager = new FileManager();
@@ -58,16 +62,87 @@ public class Player : Entity
     {
         moveAnimation.IsActive = true;
 
-        if (inputManager.KeyDown(Keys.Right, Keys.D)) moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 2);
-        else if (inputManager.KeyDown(Keys.Left, Keys.A)) moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 1);
+        if (inputManager.KeyDown(Keys.Right, Keys.D))
+        {
+            if (inputManager.KeyDown(Keys.Down, Keys.S))
+            {
+                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 4);
+                velocity.X += 7.07f;
+                velocity.Y += 7.07f;
+            }
+            else if (inputManager.KeyDown(Keys.Up, Keys.W))
+            {
+                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 5);
+                velocity.X += 7.07f;
+                velocity.Y -= 7.07f;
+            }
+            else
+            {
+                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 2);
+                velocity.X += 10;
+            }
+        }
+        else if (inputManager.KeyDown(Keys.Left, Keys.A))
+        {
+            if (inputManager.KeyDown(Keys.Down, Keys.S))
+            {
+                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 6);
+                velocity.X -= 7.07f;
+                velocity.Y += 7.07f;
+            }
+            else if (inputManager.KeyDown(Keys.Up, Keys.W))
+            {
+                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 7);
+                velocity.X -= 7.07f;
+                velocity.Y -= 7.07f;
+            }
+            else
+            {
+                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 1);
+                velocity.X -= 10;
+            }
+        }
+        else if (inputManager.KeyDown(Keys.Up, Keys.W))
+        {
+            moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 3);
+            velocity.Y -= 10;
+        }
+        else if (inputManager.KeyDown(Keys.Down, Keys.S))
+        {
+            moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 0);
+            velocity.Y += 10;
+        }
         else moveAnimation.IsActive = false;
-
+       
         moveAnimation.Update(gameTime);
+        Movement();
 
+    }
+
+    public void Movement()
+    {
+        if (velocity != Vector2.Zero)
+        {
+            moveAnimation.GlobalPos += velocity/10;
+            if (velocity.X < 0.2f && velocity.X > -0.2f) velocity.X = 0;
+            else { velocity.X = velocity.X / 1.50f; }
+            if (velocity.Y < 0.01f && velocity.Y > -0.01f) velocity.Y = 0;
+            else { velocity.Y = velocity.Y / 1.50f; }
+            
+        }
+       
     }
 
     public override void Draw(SpriteBatch spriteBatch)
-    {
+    {    
         moveAnimation.Draw(spriteBatch);
+        spriteBatch.DrawString(font, moveAnimation.GlobalPos.X + " , " + moveAnimation.GlobalPos.Y, Camera.CameraPosition + new Vector2(100, 100), Color.Black);
+        spriteBatch.DrawString(font, velocity.X + " , " + velocity.Y, Camera.CameraPosition + new Vector2(100, 140), Color.Black);
+    }
+
+    public Vector2 PlayerPosition
+    {
+        get { return moveAnimation.GlobalPos + new Vector2(moveAnimation.FrameWidth/2,moveAnimation.FrameHeight/2); }
     }
 }
+

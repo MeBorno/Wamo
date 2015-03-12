@@ -78,4 +78,10 @@ public class SpriteSheetAnimation : Animation
         get { return image.Height / (int)frames.Y; }
     }
 
+    public Vector2 GlobalPos
+    {
+        get { return base.position; }
+        set { base.position = value; }
+    }
+
 }

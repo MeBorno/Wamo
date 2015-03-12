@@ -58,13 +58,13 @@ public class Animation
         if (image != null)
         {
             origin = new Vector2(sourceRect.Width / 2, sourceRect.Height / 2);
-            spriteBatch.Draw(image, (position + origin * scale), sourceRect, Color.White * alpha, rotation, origin, scale, SpriteEffects.None, 0.0f);
+            spriteBatch.Draw(image, (Camera.CameraPosition + position + origin * scale), sourceRect, Color.White * alpha, rotation, origin, scale, SpriteEffects.None, 0.0f);
         }
 
         if (text != string.Empty)
         {
             origin = font.MeasureString(text) / 2;
-            spriteBatch.DrawString(font, text, position + origin * scale, color * alpha, rotation, origin, scale, SpriteEffects.None, 0.0f);
+            spriteBatch.DrawString(font, text, Camera.CameraPosition + position + origin * scale, color * alpha, rotation, origin, scale, SpriteEffects.None, 0.0f);
         }
     }
 

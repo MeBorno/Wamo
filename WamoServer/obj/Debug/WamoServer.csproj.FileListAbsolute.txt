@@ -4,3 +4,9 @@ C:\Users\Jorn\Documents\GitHub\Wamo\WamoServer\bin\Debug\Lidgren.Network.dll
 C:\Users\Jorn\Documents\GitHub\Wamo\WamoServer\obj\Debug\WamoServer.csprojResolveAssemblyReference.cache
 C:\Users\Jorn\Documents\GitHub\Wamo\WamoServer\obj\Debug\WamoServer.exe
 C:\Users\Jorn\Documents\GitHub\Wamo\WamoServer\obj\Debug\WamoServer.pdb
+C:\Users\Sander\Documents\GitHub\Wamo\WamoServer\bin\Debug\WamoServer.exe
+C:\Users\Sander\Documents\GitHub\Wamo\WamoServer\bin\Debug\WamoServer.pdb
+C:\Users\Sander\Documents\GitHub\Wamo\WamoServer\bin\Debug\Lidgren.Network.dll
+C:\Users\Sander\Documents\GitHub\Wamo\WamoServer\obj\Debug\WamoServer.exe
+C:\Users\Sander\Documents\GitHub\Wamo\WamoServer\obj\Debug\WamoServer.pdb
+C:\Users\Sander\Documents\GitHub\Wamo\WamoServer\obj\Debug\WamoServer.csprojResolveAssemblyReference.cache

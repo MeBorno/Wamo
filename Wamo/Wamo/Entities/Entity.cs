@@ -31,7 +31,7 @@ public class Entity
 
     public virtual void Update(GameTime gameTime, InputManager inputManager)
     {
-
+        
     }
 
     public virtual void Draw(SpriteBatch spriteBatch)

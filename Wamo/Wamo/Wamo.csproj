@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Animation\Animation.cs" />
     <Compile Include="Animation\FadeAnimation.cs" />
+    <Compile Include="Camera.cs" />
     <Compile Include="Entities\Enemy.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
@@ -95,6 +96,15 @@
     <Compile Include="Screens\SplashScreen.cs" />
     <Compile Include="Animation\SpriteSheetAnimation.cs" />
     <Compile Include="Screens\TitleScreen.cs" />
+    <Compile Include="Shadows\EndPoint.cs" />
+    <Compile Include="Shadows\EndPointComparer.cs" />
+    <Compile Include="Shadows\PointLight.cs" />
+    <Compile Include="Shadows\Pose2D.cs" />
+    <Compile Include="Shadows\Quad.cs" />
+    <Compile Include="Shadows\Segment.cs" />
+    <Compile Include="Shadows\VectorMath.cs" />
+    <Compile Include="Shadows\VisibilityComputer.cs" />
+    <Compile Include="Shadows\Visual.cs" />
     <Compile Include="Wamo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +141,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--

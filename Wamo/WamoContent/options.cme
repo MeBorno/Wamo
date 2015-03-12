@@ -3,7 +3,7 @@
 name=Wamo
 screenWidth=[int]1920
 screenHeight=[int]1080
-fullScreen=[bool]true
+fullScreen=[bool]false
 
 # Network Options
 defaultIP=127.0.0.1
