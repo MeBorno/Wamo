@@ -67,6 +67,11 @@ public class ScreenManager
         else Transition(gameTime);
     }
 
+    public void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
+    {
+        currentScreen.PreDraw(GraphicsDevice, spriteBatch);
+    }
+
     public void Draw(SpriteBatch spriteBatch) 
     {
         currentScreen.Draw(spriteBatch);
@@ -121,6 +126,7 @@ public class ScreenManager
             screenStack.Push(newScreen);
             currentScreen.UnloadContent();
             currentScreen = newScreen;
+            Options.SetValue("lightEngine", false);
             currentScreen.LoadContent(content, this.inputManager);
         }
         else if (fade.Alpha == 0.0f)

@@ -12,6 +12,7 @@ public class Options
     {
         options = new Dictionary<string, object>();
         options.Add("shutDown", false);
+        options.Add("lightEngine", false);
 
         if (File.Exists(fname))
         {
@@ -29,7 +30,8 @@ public class Options
                     string[] tmp = line.Split('=');
 
                     object val = null;
-
+                    if (tmp[1].ToLower() == "shutdown") continue;
+                    else if (tmp[1].ToLower() == "lightengine") continue;
                     if (tmp[1].StartsWith("["))
                     {
                         switch (tmp[1].Substring(1, tmp[1].IndexOf("]") - 1).ToLower())

@@ -28,5 +28,6 @@ public class GameScreen
         contents.Clear();
     }
     public virtual void Update(GameTime gameTime) { }
+    public virtual void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch) { }
     public virtual void Draw(SpriteBatch spriteBatch) { }
 }
