@@ -7,3 +7,6 @@ fullScreen=[bool]false
 
 # Network Options
 defaultIP=127.0.0.1
+
+# Debug Options
+debugDrawHitbox=[bool]true
