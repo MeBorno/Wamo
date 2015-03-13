@@ -42,8 +42,17 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Gamespecific files
+*.suo
+*.cache
+
 # Bin files
-bin/
-obj/
-Wamo/Wamo/obj/
-Wamo/Wamo/bin/
+/bin
+/obj
+Wamo/Wamo/obj
+Wamo/Wamo/bin
+Wamo/WamoContent/obj
+Wamo/WamoContent/bin
+WamoServer/obj
+WamoServer/bin
+Wamo/Wamo/Wamo.csproj.Debug.cachefile
