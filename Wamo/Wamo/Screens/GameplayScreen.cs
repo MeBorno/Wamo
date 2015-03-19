@@ -25,6 +25,7 @@ public class GameplayScreen : GameScreen
     SpriteFont font;
     Vector2 oldCameraPosition;
 
+    TextBox[] abilityExpl;
     ProgressBar[] abilityProgress;
     Button[] abilityButton;
     
@@ -91,9 +92,10 @@ public class GameplayScreen : GameScreen
 
         Options.SetValue("lightEngine", true);
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 20; i++)
         {
-            testBlock = new Visual(blockTexture, new Vector2(250 + (100 * i), 150), 0f, blockGlow);
+            Pose2D newPose = new Pose2D(new Vector2(250 + (25 * i), 100), 0f, 0.10f);
+            testBlock = new Visual(blockTexture, newPose);
             blocks.Add(testBlock);
         }
 
@@ -102,10 +104,15 @@ public class GameplayScreen : GameScreen
         button.SetPosition(30, 30);
         button.Text = "hoi";
         Wamo.manager.Add(button);
+
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
+        abilityExpl = new TextBox[5];
         CreateHud();
-       
+
+        //lights.Add(new PointLight(lightEffect,new Vector2(300,300), 300, Color.Red));
+       // lights.Add(new PointLight(lightEffect, new Vector2(150, 450), 300, Color.Green));
+       // lights.Add(new PointLight(lightEffect, new Vector2(450, 450), 300, Color.Blue));
     }
 
     public override void UnloadContent()
@@ -178,6 +185,8 @@ public class GameplayScreen : GameScreen
             for (int i = 0; i < 5; i++)
             {
                     abilityButton[i].MousePress += b_clicked;
+                    abilityButton[i].MouseOver += b_over;
+                    abilityButton[i].MouseOut += b_out;
             }
       
         
@@ -185,6 +194,8 @@ public class GameplayScreen : GameScreen
 
     void b_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
     {
+        Color[] colorRange;
+        colorRange = new Color[5]{Color.Blue, Color.Red, Color.Yellow, Color.Purple, Color.Green};
         Button b = (Button)sender;
         for(int i = 0; i < 5; i++)
             if (b.Name == abilityProgress[i].Name + i)
@@ -193,7 +204,33 @@ public class GameplayScreen : GameScreen
                 {
                     abilityProgress[i].Value = 0;
                     b.Color = Color.White;
+                    lights[0].Color = colorRange[i];
+                    lights[0].Radius = i * 100;
                 }
+                break;
+            }
+        e.Handled = true;
+    }
+
+    void b_over(object sender, TomShane.Neoforce.Controls.EventArgs e)
+    {
+        Button b = (Button)sender;
+        for (int i = 0; i < 5; i++)
+            if (b.Name == abilityExpl[i].Name + i)
+            {
+                abilityExpl[i].Show();
+                break;
+            }
+        e.Handled = true;
+    }
+
+    void b_out(object sender, TomShane.Neoforce.Controls.EventArgs e)
+    {
+        Button b = (Button)sender;
+        for (int i = 0; i < 5; i++)
+            if (b.Name == abilityExpl[i].Name + i)
+            {
+                abilityExpl[i].Hide();
                 break;
             }
         e.Handled = true;
@@ -213,19 +250,24 @@ public class GameplayScreen : GameScreen
     public void CreateHud()
     {
         string[] abilityNames;
+        string[] abilityDiscription;
         int[] abilityCooldowns;
         abilityNames = new string[5];
         abilityCooldowns = new int[5];
+        abilityDiscription = new string[5];
         switch (isRoll)
         {
             case roll.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
+                abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
             case roll.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
+                abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
             case roll.System: abilityNames = new string[5] { "libraries", "helpen", "wel", "though", "hehe" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
+                abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
         }
 
@@ -264,7 +306,22 @@ public class GameplayScreen : GameScreen
             abilityProgress[i].Parent = abilityBar;
             abilityProgress[i].Anchor = Anchors.None;
         }
-        Wamo.manager.Add(abilityBar);
+
+         for (int i = 0; i < 5; i++ )
+        {
+            abilityExpl[i] = new TextBox(Wamo.manager);
+            abilityExpl[i].Init();
+            abilityExpl[i].SetPosition(Options.GetValue<int>("screenWidth") / 2 - 180, Options.GetValue<int>("screenHeight") - 205);
+            abilityExpl[i].SetSize(360,40);
+            abilityExpl[i].Name = "a";
+            abilityExpl[i].Resizable = false;
+            abilityExpl[i].ReadOnly = true;
+            abilityExpl[i].Text = abilityDiscription[i];
+            abilityExpl[i].Hide();
+            Wamo.manager.Add(abilityExpl[i]);
+            
+         }
+            Wamo.manager.Add(abilityBar);
         #endregion abilityBar
 
     }
