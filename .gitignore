@@ -56,3 +56,7 @@ Wamo/WamoContent/bin
 WamoServer/obj
 WamoServer/bin
 Wamo/Wamo/Wamo.csproj.Debug.cachefile
+Wamo/Wamo/obj/x86/Debug/ContentPipeline-{684C5C29-79BD-4665-903D-0DFBEE151194}.xml
+Wamo/Wamo/obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+Wamo/Wamo/obj/x86/Debug/Wamo.csprojResolveAssemblyReference.cache
+Wamo/Wamo/obj/x86/Debug/Wamo.pdb

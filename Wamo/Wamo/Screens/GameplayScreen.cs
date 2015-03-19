@@ -7,14 +7,17 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
+using Microsoft.Xna.Framework.Audio;
+using TomShane.Neoforce.Controls;
 
 public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
-
+    Button button; 
     Player player;
-    bool isPlayer = true;
+    int timer = 0;
+    roll isRoll = roll.Robot;
+    SoundEffect beep;
     Texture2D testTile;
     PointLight playerFOV;
     Visual testBlock;
@@ -22,7 +25,9 @@ public class GameplayScreen : GameScreen
     SpriteFont font;
     Vector2 oldCameraPosition;
 
-
+    ProgressBar[] abilityProgress;
+    Button[] abilityButton;
+    
     List<Visual> blocks;
     List<PointLight> lights;
 
@@ -43,6 +48,7 @@ public class GameplayScreen : GameScreen
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
         Texture2D blockTexture = Content.Load<Texture2D>("Block");
         Texture2D blockGlow = Content.Load<Texture2D>("BlockGlow");
+        beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
 
         int windowWidth = Options.GetValue<int>("screenWidth");
@@ -55,7 +61,7 @@ public class GameplayScreen : GameScreen
         combineEffect = Content.Load<Effect>("Combine");
         lightEffect = Content.Load<Effect>("Light");
         blurEffect = Content.Load<Effect>("Blur");
-
+        
         quad = new Quad();
 
         blocks = new List<Visual>();
@@ -66,13 +72,40 @@ public class GameplayScreen : GameScreen
         player.LoadContent(content, inputManager);
         testTile = content.Load<Texture2D>("Sprites/tile1");
         lights.Clear();
-        playerFOV = new PointLight(lightEffect, Vector2.Zero, 500, Color.White, 1.0f);
-        testBlock = new Visual(blockTexture, new Vector2(250,150),45f,blockGlow);
-        lights.Add(playerFOV);
-        blocks.Add(testBlock);
+        if (isRoll == roll.System)
+        {
+            playerFOV = new PointLight(lightEffect, Vector2.Zero, 500, Color.White, 1.0f);
+            lights.Add(playerFOV);
+            
+        }
+        else if(isRoll == roll.Robot)
+        {
+            playerFOV = new PointLight(lightEffect, Vector2.Zero, 100, Color.White, 1.0f);
+            lights.Add(playerFOV);
+            
+        }
+        else
+        {
+            
+        }
 
         Options.SetValue("lightEngine", true);
-        
+
+        for (int i = 0; i < 10; i++)
+        {
+            testBlock = new Visual(blockTexture, new Vector2(250 + (100 * i), 150), 0f, blockGlow);
+            blocks.Add(testBlock);
+        }
+
+        button = new Button(Wamo.manager);
+        button.Init();
+        button.SetPosition(30, 30);
+        button.Text = "hoi";
+        Wamo.manager.Add(button);
+        abilityProgress = new ProgressBar[5];
+        abilityButton = new Button[5];
+        CreateHud();
+       
     }
 
     public override void UnloadContent()
@@ -81,40 +114,172 @@ public class GameplayScreen : GameScreen
         player.UnloadContent();
     }
 
+    public void PlaySound(int soundID)
+    {
+        switch (soundID)
+        {
+            case 1: beep.Play(1.0f, -0.5f, 0.0f); break;
+            case 2: beep.Play(1.0f, 0.0f, 0.0f); break;
+            case 3: beep.Play(1.0f, 0.5f, 0.0f); break;
+            case 4: beep.Play(1.0f, 0.0f, -1.0f); break;
+            case 5: beep.Play(1.0f, 0.0f, 1.0f); break;
+
+        }
+    }
+
     public override void Update(GameTime gameTime)
     {
             inputManager.Update();
+            if(isRoll == roll.Robot || isRoll == roll.System)
             playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
             if (oldCameraPosition != Camera.CameraPosition)
             {
-                testBlock.Pose.Position = testBlock.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
+                foreach (Visual v in blocks)
+                    v.Pose.Position = v.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
                 oldCameraPosition = Camera.CameraPosition;
             }
 
-        if(isPlayer)
+        if(isRoll == roll.Robot || isRoll == roll.System) //TODO:: uiteindelijk alleen robot???
         player.Update(gameTime, inputManager);
        //  else
        // {
-            if (inputManager.KeyDown(Keys.Down,Keys.H))
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
-            if (inputManager.KeyDown(Keys.Up, Keys.Y))
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
-            if (inputManager.KeyDown(Keys.Left, Keys.G))
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
-            if (inputManager.KeyDown(Keys.Right, Keys.J))
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
+        if (inputManager.KeyDown(Keys.Down, Keys.H))
+        {
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10); PlaySound(1);
+        }
+        if (inputManager.KeyDown(Keys.Up, Keys.Y))
+        {
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10); PlaySound(2);
+        }
+        if (inputManager.KeyDown(Keys.Left, Keys.G))
+        {
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y); PlaySound(3);
+        }
+        if (inputManager.KeyDown(Keys.Right, Keys.J))
+        {
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y); PlaySound(4);
+        }
       //  }
-
+        timer += gameTime.ElapsedGameTime.Milliseconds;
+        
+            for (int i = 0; i < 5; i++) {
+                if (abilityProgress[i].Value < abilityProgress[i].Range)
+                    abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
+                else
+                {
+                    abilityButton[i].Color = Color.Red;
+                }
             
+        }
+
+            button.MousePress += button_MousePress;
+
+            for (int i = 0; i < 5; i++)
+            {
+                    abilityButton[i].MousePress += b_clicked;
+            }
+      
+        
+    }
+
+    void b_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
+    {
+        Button b = (Button)sender;
+        for(int i = 0; i < 5; i++)
+            if (b.Name == abilityProgress[i].Name + i)
+            {
+                if (abilityProgress[i].Value >= abilityProgress[i].Range)
+                {
+                    abilityProgress[i].Value = 0;
+                    b.Color = Color.White;
+                }
+                break;
+            }
+        e.Handled = true;
+    }
+
+    void button_MousePress(object sender, TomShane.Neoforce.Controls.EventArgs e)
+    {
+        if (!button.Pushed)
+        {
+            //hier kan iets komen?
+            button.Pushed = true;
+        }
+        
+        e.Handled = true;
+    }
+
+    public void CreateHud()
+    {
+        string[] abilityNames;
+        int[] abilityCooldowns;
+        abilityNames = new string[5];
+        abilityCooldowns = new int[5];
+        switch (isRoll)
+        {
+            case roll.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
+                abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
+                break;
+            case roll.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
+                abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
+                break;
+            case roll.System: abilityNames = new string[5] { "libraries", "helpen", "wel", "though", "hehe" }; //namen van de abilities
+                abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
+                break;
+        }
+
+        #region abilityBar
+        Window abilityBar = new Window(Wamo.manager);
+        abilityBar.Init();
+        abilityBar.SetPosition(Options.GetValue<int>("screenWidth")/2 - 180, Options.GetValue<int>("screenHeight") - 160);
+        abilityBar.SetSize(360, 80);
+        abilityBar.Suspended = true; //geen events
+        abilityBar.Visible = true;
+        abilityBar.Resizable = false;
+        abilityBar.Passive = true; //geen user input
+        abilityBar.BorderVisible = false;
+
+        for (int i = 0; i < 5; i++)
+        {
+            abilityButton[i] = new Button(Wamo.manager);
+            abilityButton[i].Init();
+            abilityButton[i].Name = "a" + i;
+            abilityButton[i].SetPosition(10 + (70 * i), 10);
+            abilityButton[i].SetSize(60, 60);
+            abilityButton[i].Text = abilityNames[i];
+            abilityButton[i].Parent = abilityBar;
+            abilityButton[i].Anchor = Anchors.None;
+        }
+
+        for (int i = 0; i < 5; i++)
+        {
+            abilityProgress[i] = new ProgressBar(Wamo.manager);
+            abilityProgress[i].Init();
+            abilityProgress[i].SetPosition(10 + (70 * i), 72);
+            abilityProgress[i].SetSize(60, 6);
+            abilityProgress[i].Range = abilityCooldowns[i];
+            abilityProgress[i].Name = "a";
+            abilityProgress[i].Value = 0;
+            abilityProgress[i].Parent = abilityBar;
+            abilityProgress[i].Anchor = Anchors.None;
+        }
+        Wamo.manager.Add(abilityBar);
+        #endregion abilityBar
+
     }
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        DrawColorMap(GraphicsDevice, spriteBatch); // Draw the colors
-        DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
-        BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
-        CombineAndDraw(GraphicsDevice); // Combine
+        DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
+    
+        if (isRoll != roll.Doctor)
+        {
+            
+            DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
+            BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
+            CombineAndDraw(GraphicsDevice); // Combine
+        }
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -123,6 +288,7 @@ public class GameplayScreen : GameScreen
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
 
+        if(isRoll == roll.Robot || isRoll == roll.System)
         spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
     }
 
@@ -197,7 +363,7 @@ public class GameplayScreen : GameScreen
             if(v.Glow != null)
             {
                 Vector2 origin = new Vector2(v.Glow.Width / 2.0f, v.Glow.Height / 2.0f);
-                spriteBatch.Draw(v.Glow, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0);
+                spriteBatch.Draw(v.Glow, v.Pose.Position + Camera.CameraPosition, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0);
             }
         }
 
@@ -221,8 +387,9 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
+        if(isRoll != roll.Doctor)
         GraphicsDevice.SetRenderTarget(colorMap);
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Color.White);
 
         spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null,ScreenManager.Instance.DrawScale());
 
@@ -234,5 +401,9 @@ public class GameplayScreen : GameScreen
         }
 
         spriteBatch.End();
-    }       
+    }
+
+
+
+    enum roll { Robot, Doctor, System };
 }

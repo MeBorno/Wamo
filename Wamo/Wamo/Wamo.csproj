@@ -73,6 +73,9 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Net" />
+    <Reference Include="TomShane.Neoforce.Controls">
+      <HintPath>..\..\..\..\..\Desktop\buttons\Neoforce Binary\TomShane.Neoforce.Controls.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation\Animation.cs" />
@@ -141,7 +144,16 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Skins\Blue.skin" />
+    <None Include="Skins\Default.skin" />
+    <None Include="Skins\Green.skin" />
+    <None Include="Skins\Magenta.skin" />
+    <None Include="Skins\Purple.skin" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Skins\360\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--

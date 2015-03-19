@@ -9,11 +9,13 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Lidgren.Network;
+using TomShane.Neoforce.Controls;
 
 public class Wamo : Microsoft.Xna.Framework.Game
 {
     GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
+    public static Manager manager;
     
     public Wamo()
     {
@@ -32,8 +34,21 @@ public class Wamo : Microsoft.Xna.Framework.Game
         graphics.ApplyChanges();
 
         this.IsMouseVisible = true;
-
+     
         base.Initialize();
+
+        manager = new Manager(this, graphics, "Blue");
+        manager.Initialize();
+        
+        Window window = new Window(manager);
+        window.Init();
+        window.Text = "My First Neoforce Window";
+        window.Top = 150; // this is in pixels, top-left is the origin
+        window.Left = 250;
+        window.Width = 350;
+        window.Height = 350;
+        manager.Add(window);
+        
     }
 
     protected override void LoadContent()
@@ -63,10 +78,13 @@ public class Wamo : Microsoft.Xna.Framework.Game
         ScreenManager.Instance.Update(gameTime);
 
         base.Update(gameTime);
+        manager.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
+        manager.Draw(gameTime);
+        manager.BeginDraw(gameTime);
         GraphicsDevice.Clear(Color.DarkGray);
 
         ScreenManager.Instance.PreDraw(GraphicsDevice, spriteBatch);
@@ -76,6 +94,7 @@ public class Wamo : Microsoft.Xna.Framework.Game
         spriteBatch.End();
 
         base.Draw(gameTime);
+        manager.EndDraw();
     }
 
     class Character
