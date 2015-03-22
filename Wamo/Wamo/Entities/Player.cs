@@ -136,8 +136,8 @@ public class Player : Entity
     public override void Draw(SpriteBatch spriteBatch)
     {    
         moveAnimation.Draw(spriteBatch);
-        spriteBatch.DrawString(font, moveAnimation.GlobalPos.X + " , " + moveAnimation.GlobalPos.Y, Camera.CameraPosition + new Vector2(100, 100), Color.Black);
-        spriteBatch.DrawString(font, velocity.X + " , " + velocity.Y, Camera.CameraPosition + new Vector2(100, 140), Color.Black);
+       // spriteBatch.DrawString(font, moveAnimation.GlobalPos.X + " , " + moveAnimation.GlobalPos.Y, Camera.CameraPosition + new Vector2(100, 100), Color.Black);
+       // spriteBatch.DrawString(font, velocity.X + " , " + velocity.Y, Camera.CameraPosition + new Vector2(100, 140), Color.Black);
     }
 
     public Vector2 PlayerPosition

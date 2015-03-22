@@ -86,13 +86,15 @@ public class Wamo : Microsoft.Xna.Framework.Game
         manager.Draw(gameTime);
         manager.BeginDraw(gameTime);
         GraphicsDevice.Clear(Color.DarkGray);
-
         ScreenManager.Instance.PreDraw(GraphicsDevice, spriteBatch);
+       
 
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, ScreenManager.Instance.DrawScale());
             ScreenManager.Instance.Draw(spriteBatch);
         spriteBatch.End();
 
+        
+        
         base.Draw(gameTime);
         manager.EndDraw();
     }

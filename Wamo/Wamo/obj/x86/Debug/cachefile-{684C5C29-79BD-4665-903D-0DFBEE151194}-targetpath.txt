@@ -11,6 +11,10 @@ Content\BlockGlow.xnb
 Content\Blur.xnb
 Content\Combine.xnb
 Content\Light.xnb
+Content\beep.xnb
+Content\Blocktest.xnb
+Content\Sprites\floortile.xnb
+Content\Block - Copy.xnb
 Content\Load\menu.cme
 Content\Load\player.cme
 Content\Load\splash.cme

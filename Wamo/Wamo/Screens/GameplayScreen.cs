@@ -13,12 +13,11 @@ using TomShane.Neoforce.Controls;
 public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
-    Button button; 
     Player player;
     int timer = 0;
-    roll isRoll = roll.Robot;
+    roll isRoll = roll.System;
     SoundEffect beep;
-    Texture2D testTile;
+    Texture2D tile;
     PointLight playerFOV;
     Visual testBlock;
     //InputManager inputManager;
@@ -27,7 +26,9 @@ public class GameplayScreen : GameScreen
 
     TextBox[] abilityExpl;
     ProgressBar[] abilityProgress;
+    ProgressBar healhBar;
     Button[] abilityButton;
+    Button[] soundButton;
     
     List<Visual> blocks;
     List<PointLight> lights;
@@ -71,7 +72,7 @@ public class GameplayScreen : GameScreen
 
         player = new Player();
         player.LoadContent(content, inputManager);
-        testTile = content.Load<Texture2D>("Sprites/tile1");
+        tile = content.Load<Texture2D>("Sprites/floortile");
         lights.Clear();
         if (isRoll == roll.System)
         {
@@ -94,20 +95,23 @@ public class GameplayScreen : GameScreen
 
         for (int i = 0; i < 20; i++)
         {
-            Pose2D newPose = new Pose2D(new Vector2(250 + (25 * i), 100), 0f, 0.10f);
+            Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 128), 0f, 0.5f);
             testBlock = new Visual(blockTexture, newPose);
             blocks.Add(testBlock);
         }
 
-        button = new Button(Wamo.manager);
-        button.Init();
-        button.SetPosition(30, 30);
-        button.Text = "hoi";
-        Wamo.manager.Add(button);
+        for (int i = 0; i < 20; i++)
+        {
+            Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 256 + (16 * i)), 0f, 0.25f);
+            testBlock = new Visual(blockTexture, newPose);
+            blocks.Add(testBlock);
+        }
+        
 
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
         abilityExpl = new TextBox[5];
+        soundButton = new Button[5];
         CreateHud();
 
         //lights.Add(new PointLight(lightEffect,new Vector2(300,300), 300, Color.Red));
@@ -125,11 +129,11 @@ public class GameplayScreen : GameScreen
     {
         switch (soundID)
         {
-            case 1: beep.Play(1.0f, -0.5f, 0.0f); break;
-            case 2: beep.Play(1.0f, 0.0f, 0.0f); break;
-            case 3: beep.Play(1.0f, 0.5f, 0.0f); break;
-            case 4: beep.Play(1.0f, 0.0f, -1.0f); break;
-            case 5: beep.Play(1.0f, 0.0f, 1.0f); break;
+            case 0: beep.Play(1.0f, -1.0f, 0.0f); break;
+            case 1: beep.Play(1.0f, 0.0f, 0.0f); break;
+            case 2: beep.Play(1.0f, 1.0f, 0.0f); break;
+            case 3: beep.Play(1.0f, 0.0f, -1.0f); break;
+            case 4: beep.Play(1.0f, 0.0f, 1.0f); break;
 
         }
     }
@@ -153,19 +157,19 @@ public class GameplayScreen : GameScreen
        // {
         if (inputManager.KeyDown(Keys.Down, Keys.H))
         {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10); PlaySound(1);
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
         }
         if (inputManager.KeyDown(Keys.Up, Keys.Y))
         {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10); PlaySound(2);
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
         }
         if (inputManager.KeyDown(Keys.Left, Keys.G))
         {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y); PlaySound(3);
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
         }
         if (inputManager.KeyDown(Keys.Right, Keys.J))
         {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y); PlaySound(4);
+            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
         }
       //  }
         timer += gameTime.ElapsedGameTime.Milliseconds;
@@ -180,13 +184,15 @@ public class GameplayScreen : GameScreen
             
         }
 
-            button.MousePress += button_MousePress;
+           
 
             for (int i = 0; i < 5; i++)
             {
                     abilityButton[i].MousePress += b_clicked;
                     abilityButton[i].MouseOver += b_over;
                     abilityButton[i].MouseOut += b_out;
+                if(isRoll == roll.System)
+                    soundButton[i].MousePress += s_clicked;
             }
       
         
@@ -236,16 +242,19 @@ public class GameplayScreen : GameScreen
         e.Handled = true;
     }
 
-    void button_MousePress(object sender, TomShane.Neoforce.Controls.EventArgs e)
+    void s_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
     {
-        if (!button.Pushed)
-        {
-            //hier kan iets komen?
-            button.Pushed = true;
-        }
         
+        Button b = (Button)sender;
+        if (!b.Pushed)
+        {
+            PlaySound(int.Parse(b.Name));
+            b.Pushed = true;
+        }
         e.Handled = true;
     }
+
+   
 
     public void CreateHud()
     {
@@ -268,8 +277,44 @@ public class GameplayScreen : GameScreen
             case roll.System: abilityNames = new string[5] { "libraries", "helpen", "wel", "though", "hehe" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
-                break;
+                #region Soundbar
+                int[] soundButtonPositions;
+                soundButtonPositions = new int[10] { 10, 90, 170, 10, 170, 10, 90, 10, 170, 170 };
+                Window soundBar = new Window(Wamo.manager);
+                soundBar.Init();
+                soundBar.SetPosition(Options.GetValue<int>("screenWidth")  - 260, Options.GetValue<int>("screenHeight") - 260);
+                soundBar.SetSize(240, 240);
+                soundBar.Suspended = true; //geen events
+                soundBar.Visible = true;
+                soundBar.Resizable = false;
+                soundBar.Passive = true; //geen user input
+                soundBar.BorderVisible = false;
+
+                for (int i = 0; i < 5; i++)
+                {
+                    soundButton[i] = new Button(Wamo.manager);
+                    soundButton[i].Init();
+                    soundButton[i].Name = i.ToString();
+                    soundButton[i].SetPosition(soundButtonPositions[i], soundButtonPositions[i + 5]);
+                    soundButton[i].SetSize(60, 60);
+                    soundButton[i].Text = "sound";
+                    soundButton[i].Parent = soundBar;
+                    soundButton[i].Anchor = Anchors.None;
+                }
+                Wamo.manager.Add(soundBar);
+#endregion
+                    break;
         }
+
+        healhBar = new ProgressBar(Wamo.manager);
+        healhBar.Init();
+        healhBar.Color = Color.Blue;
+        healhBar.SetPosition(30, 30);
+        healhBar.SetSize(200,20);
+        healhBar.Value = 50;
+        healhBar.Range = 100;
+        healhBar.Text = "50/100";
+        Wamo.manager.Add(healhBar);
 
         #region abilityBar
         Window abilityBar = new Window(Wamo.manager);
@@ -341,12 +386,16 @@ public class GameplayScreen : GameScreen
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        //spriteBatch.Draw(testTile, new Vector2(Camera.CameraPosition.X + 20, Camera.CameraPosition.Y + 20), Color.White);
+      
+
+         
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
 
-        if(isRoll == roll.Robot || isRoll == roll.System)
-        spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
+        //if(isRoll == roll.Robot || isRoll == roll.System)
+        //spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
+
+       
     }
 
 
@@ -420,7 +469,7 @@ public class GameplayScreen : GameScreen
             if(v.Glow != null)
             {
                 Vector2 origin = new Vector2(v.Glow.Width / 2.0f, v.Glow.Height / 2.0f);
-                spriteBatch.Draw(v.Glow, v.Pose.Position + Camera.CameraPosition, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0);
+                spriteBatch.Draw(v.Glow, v.Pose.Position + Camera.CameraPosition, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
             }
         }
 
@@ -454,8 +503,12 @@ public class GameplayScreen : GameScreen
         {
             Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
 
-            spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0);
+            spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
         }
+
+        for (int i = -10; i < 10; i++)
+            for (int j = -10; j < 10; j++)
+                spriteBatch.Draw(tile, new Vector2(i * 128, j * 128) + Camera.CameraPosition, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1.0f);
 
         spriteBatch.End();
     }

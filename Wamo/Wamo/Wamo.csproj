@@ -115,6 +115,8 @@
     <Content Include="GameThumbnail.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </Content>
+    <Content Include="TomShane.Neoforce.Controls.dll" />
+    <Content Include="TomShane.Neoforce.Importers.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WamoContent\WamoContent.contentproj">

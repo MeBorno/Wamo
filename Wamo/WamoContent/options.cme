@@ -1,8 +1,8 @@
 # Wamo Options File
 # General Options
 name=Wamo
-screenWidth=[int]1920
-screenHeight=[int]1080
+screenWidth=[int]1400
+screenHeight=[int]900
 fullScreen=[bool]false
 
 # Network Options

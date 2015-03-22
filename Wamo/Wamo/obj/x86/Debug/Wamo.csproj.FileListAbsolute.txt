@@ -36,3 +36,8 @@ C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\BlockGlow.
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Blur.xnb
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Combine.xnb
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Light.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\beep.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\TomShane.Neoforce.Controls.dll
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Blocktest.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\floortile.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Block - Copy.xnb
