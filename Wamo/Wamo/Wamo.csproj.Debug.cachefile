@@ -8,13 +8,13 @@ Content\GUI\pixel.xnb
 Content\Sprites\tile1.xnb
 Content\Block.xnb
 Content\BlockGlow.xnb
+Content\Blocktest.xnb
+Content\Sprites\floortile.xnb
+Content\Block - Copy.xnb
 Content\Blur.xnb
 Content\Combine.xnb
 Content\Light.xnb
 Content\beep.xnb
-Content\Blocktest.xnb
-Content\Sprites\floortile.xnb
-Content\Block - Copy.xnb
 Content\Load\menu.cme
 Content\Load\player.cme
 Content\Load\splash.cme

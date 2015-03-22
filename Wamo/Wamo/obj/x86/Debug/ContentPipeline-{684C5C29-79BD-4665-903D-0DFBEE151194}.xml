@@ -92,6 +92,33 @@
       <Time>2015-03-12T20:37:56.8964239+01:00</Time>
     </Item>
     <Item>
+      <Source>Blocktest.png</Source>
+      <Name>Blocktest</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Blocktest.xnb</Output>
+      <Time>2015-03-19T14:20:00.5955541+01:00</Time>
+    </Item>
+    <Item>
+      <Source>Sprites\floortile.png</Source>
+      <Name>Sprites\floortile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\floortile.xnb</Output>
+      <Time>2015-03-19T22:46:41.6339145+01:00</Time>
+    </Item>
+    <Item>
+      <Source>Block - Copy.png</Source>
+      <Name>Block - Copy</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Block - Copy.xnb</Output>
+      <Time>2015-03-19T22:47:59.814677+01:00</Time>
+    </Item>
+    <Item>
       <Source>Blur.fx</Source>
       <Name>Blur</Name>
       <Importer>EffectImporter</Importer>
@@ -126,33 +153,6 @@
       <Options>None</Options>
       <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\beep.xnb</Output>
       <Time>2015-03-18T23:59:08.8903704+01:00</Time>
-    </Item>
-    <Item>
-      <Source>Blocktest.png</Source>
-      <Name>Blocktest</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-      <Options>None</Options>
-      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Blocktest.xnb</Output>
-      <Time>2015-03-19T14:20:00.5955541+01:00</Time>
-    </Item>
-    <Item>
-      <Source>Sprites\floortile.png</Source>
-      <Name>Sprites\floortile</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-      <Options>None</Options>
-      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\floortile.xnb</Output>
-      <Time>2015-03-19T22:46:41.6339145+01:00</Time>
-    </Item>
-    <Item>
-      <Source>Block - Copy.png</Source>
-      <Name>Block - Copy</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-      <Options>None</Options>
-      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Block - Copy.xnb</Output>
-      <Time>2015-03-19T22:47:59.814677+01:00</Time>
     </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>
