@@ -28,6 +28,7 @@ class Program
         DateTime time = DateTime.Now;
         TimeSpan timetopass = new TimeSpan(0, 0, 0, 5, 0);
         Console.WriteLine("Waiting for new connections and updateing world state to current ones");
+        Random r = new Random();
 
         // Main loop
         while (true)
@@ -43,8 +44,7 @@ class Program
                                 Console.WriteLine("Incoming LOGIN");
                                 inc.SenderConnection.Approve();
 
-                                Random r = new Random();
-                                GameWorldState.Add(new Character(inc.ReadString(), State.Lobby, inc.SenderConnection));
+                                GameWorldState.Add(new Character(inc.ReadString(), State.Waiting, inc.SenderConnection));
 
                                 NetOutgoingMessage outmsg = Server.CreateMessage();
                                 outmsg.Write((byte)PacketTypes.WORLDSTATE);
@@ -62,7 +62,8 @@ class Program
 
                     case NetIncomingMessageType.Data:
                         {
-                            if (inc.ReadByte() == (byte)PacketTypes.MOVE)
+                            PacketTypes type = (PacketTypes)inc.ReadByte();
+                            if (type == PacketTypes.MOVE)
                             {
                                 foreach (Character ch in GameWorldState)
                                 {
@@ -83,7 +84,19 @@ class Program
                                     Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
                                     break;
                                 }
+                            }
+                            else if(type == PacketTypes.STATEUPDATE)
+                            {
+                                foreach (Character ch in GameWorldState)
+                                {
+                                    if (ch.connection != inc.SenderConnection)
+                                        continue;
 
+                                    byte b = inc.ReadByte();
+                                    ch.role = (State)b;
+                                    Console.WriteLine("Dr is een cunt geupdate");
+                                    break;
+                                }
                             }
                             break;
                         }
@@ -117,10 +130,43 @@ class Program
             {
                 if (Server.ConnectionsCount != 0)
                 {
+
+                    if(Server.ConnectionsCount >= 3)
+                    {
+                        List<Character> tmpList = new List<Character>();
+                        foreach (Character c in GameWorldState)
+                        {
+                            if (tmpList.Count >= 3) break;
+                            else if (c.role == State.Lobby) tmpList.Add(c);
+                        }
+
+                        if (tmpList.Count == 3)
+                        {
+                            int x, y, z;
+                            x = y = z = 0;
+                            x = r.Next(0, 3);
+                            while (y == x) y = r.Next(0, 3);
+                            while (z == y || z == x) z = r.Next(0, 3);
+
+                            tmpList[0].role = (State)(x + 3);
+                            tmpList[1].role = (State)(y + 3);
+                            tmpList[2].role = (State)(z + 3);
+
+                            foreach (Character c in tmpList)
+                            {
+                                NetOutgoingMessage tmpmsg = Server.CreateMessage();
+                                tmpmsg.Write((byte)PacketTypes.ROLESELECT);
+                                tmpmsg.Write((byte)c.role);
+                                Server.SendMessage(tmpmsg, c.connection, NetDeliveryMethod.ReliableOrdered, 0);
+                            }
+                            Console.WriteLine("Matchmaking finished with " + x + " " + y + " " + z);
+                        }
+                    }
+
                     NetOutgoingMessage outmsg = Server.CreateMessage();
                     outmsg.Write((byte)PacketTypes.WORLDSTATE);
-
-                    outmsg.Write(GameWorldState.Count);
+                    
+                    outmsg.Write((byte)Server.ConnectionsCount);
 
                     foreach (Character ch2 in GameWorldState)
                         outmsg.WriteAllProperties(ch2);
@@ -156,7 +202,9 @@ class Program
     {
         LOGIN,
         MOVE,
-        WORLDSTATE
+        WORLDSTATE,
+        ROLESELECT,
+        STATEUPDATE
     }
     enum State
     {

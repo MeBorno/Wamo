@@ -37,7 +37,7 @@ public class Wamo : Microsoft.Xna.Framework.Game
      
         base.Initialize();
 
-        manager = new Manager(this, graphics, "Blue");
+        manager = new Manager(this, graphics, "Default");
         manager.Initialize();
         
         Window window = new Window(manager);
@@ -47,7 +47,7 @@ public class Wamo : Microsoft.Xna.Framework.Game
         window.Left = 250;
         window.Width = 350;
         window.Height = 350;
-        manager.Add(window);
+        //manager.Add(window);
         
     }
 

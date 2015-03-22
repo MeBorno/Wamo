@@ -47,7 +47,7 @@ public class NetworkManager
         if (!isRunning) WaitForStartingInfo();
         else
         {
-
+            if (client.ServerConnection == null) isRunning = false;
         }
         //GetInputAndSendItToServer();
     }
@@ -93,69 +93,32 @@ public class NetworkManager
 
         while ((inc = client.ReadMessage()) != null)
         {
+            NetIncomingMessage ret = inc;
             if (inc.MessageType == NetIncomingMessageType.Data)
             {
-                if (inc.ReadByte() == (byte)PacketTypes.WORLDSTATE)
+                ScreenManager.Instance.CurrentScreen.NetworkMessage(ret);
+                PacketTypes type = (PacketTypes)inc.ReadByte();
+                if (type == PacketTypes.WORLDSTATE)
                 {
                     Console.WriteLine("World State update");
+                } else if (type == PacketTypes.ROLESELECT)
+                {
+                    
                 }
             }
         }
     }
 
-
-    /* Get input from player and send it to server
-    private void GetInputAndSendItToServer()
+    public void SendMessage(NetOutgoingMessage message)
     {
+        client.SendMessage(message, NetDeliveryMethod.ReliableOrdered);
+    }
 
-        // Enum object
-        MoveDirection MoveDir = new MoveDirection();
+    public NetOutgoingMessage CreateMessage()
+    {
+        return client.CreateMessage();
+    }
 
-        // Default movement is none
-        MoveDir = MoveDirection.NONE;
-
-        // Readkey ( NOTE: This normally stops the code flow. Thats why we have timer running, that gets updates)
-        // ( Timers run in different threads, so that can be run, even thou we sit here and wait for input )
-        ConsoleKeyInfo kinfo = Console.ReadKey();
-
-        // This is wsad controlling system
-        if (kinfo.KeyChar == 'w')
-            MoveDir = MoveDirection.UP;
-        if (kinfo.KeyChar == 's')
-            MoveDir = MoveDirection.DOWN;
-        if (kinfo.KeyChar == 'a')
-            MoveDir = MoveDirection.LEFT;
-        if (kinfo.KeyChar == 'd')
-            MoveDir = MoveDirection.RIGHT;
-
-        if (kinfo.KeyChar == 'q')
-        {
-
-            // Disconnect and give the reason
-            client.Disconnect("bye bye");
-
-        }
-
-        // If button was pressed and it was some of those movement keys
-        if (MoveDir != MoveDirection.NONE)
-        {
-            // Create new message
-            NetOutgoingMessage outmsg = Client.CreateMessage();
-
-            // Write byte = Set "MOVE" as packet type
-            outmsg.Write((byte)PacketTypes.MOVE);
-
-            // Write byte = move direction
-            outmsg.Write((byte)MoveDir);
-
-            // Send it to server
-            Client.SendMessage(outmsg, NetDeliveryMethod.ReliableOrdered);
-
-            // Reset movedir
-            MoveDir = MoveDirection.NONE;
-        }
-
-    }*/
     #endregion
 
     #region Properties
@@ -192,13 +155,15 @@ public class NetworkManager
         }
     }
 
-    enum PacketTypes
+    public enum PacketTypes
     {
         LOGIN,
         MOVE,
-        WORLDSTATE
+        WORLDSTATE,
+        ROLESELECT,
+        STATEUPDATE
     }
-    enum State
+    public enum State
     {
         None,
         Lobby,

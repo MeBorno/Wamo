@@ -28,6 +28,7 @@ public class GameScreen
         contents.Clear();
     }
     public virtual void Update(GameTime gameTime) { }
+    public virtual void NetworkMessage(Lidgren.Network.NetIncomingMessage message) { }
     public virtual void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch) { }
     public virtual void Draw(SpriteBatch spriteBatch) { }
 }

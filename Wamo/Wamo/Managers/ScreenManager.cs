@@ -177,5 +177,10 @@ public class ScreenManager
     {
         get { return nullImage; }
     }
+
+    public GameScreen CurrentScreen
+    {
+        get { return currentScreen; }
+    }
     #endregion
 }
