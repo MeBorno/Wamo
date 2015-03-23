@@ -11,6 +11,10 @@ Content\BlockGlow.xnb
 Content\Blocktest.xnb
 Content\Sprites\floortile.xnb
 Content\Block - Copy.xnb
+Content\Sprites\floortilesmall.xnb
+Content\Sprites\tiles.xnb
+Content\fire.xnb
+Content\smoke.xnb
 Content\Blur.xnb
 Content\Combine.xnb
 Content\Light.xnb
@@ -19,3 +23,8 @@ Content\Load\menu.cme
 Content\Load\player.cme
 Content\Load\splash.cme
 Content\options.cme
+Content\Skins\Blue.skin
+Content\Skins\Default.skin
+Content\Skins\Green.skin
+Content\Skins\Magenta.skin
+Content\Skins\Purple.skin

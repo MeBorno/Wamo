@@ -41,3 +41,12 @@ C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\TomShane.Neoforce.
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Blocktest.xnb
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\floortile.xnb
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Block - Copy.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Skins\Blue.skin
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Skins\Default.skin
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Skins\Green.skin
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Skins\Magenta.skin
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Skins\Purple.skin
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\floortilesmall.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\tiles.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\fire.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\smoke.xnb

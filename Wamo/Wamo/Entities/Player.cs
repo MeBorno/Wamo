@@ -121,6 +121,15 @@ public class Player : Entity
 
     public void Movement()
     {
+        Rectangle playercollider = new Rectangle((int)PlayerPosition.X, (int)PlayerPosition.Y, 32, 32);
+        foreach (Visual v in GameplayScreen.allBlocks)
+        {
+            if (playercollider.Intersects(new Rectangle((int)(v.Pose.Position.X / ScreenManager.Instance.DrawScale().M11), (int)(v.Pose.Position.Y / ScreenManager.Instance.DrawScale().M22), 32, 32)))
+            {
+                velocity = -velocity;
+            }
+        }
+
         if (velocity != Vector2.Zero)
         {
             moveAnimation.GlobalPos += velocity/10;

@@ -119,6 +119,42 @@
       <Time>2015-03-19T22:47:59.814677+01:00</Time>
     </Item>
     <Item>
+      <Source>Sprites\floortilesmall.png</Source>
+      <Name>Sprites\floortilesmall</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\floortilesmall.xnb</Output>
+      <Time>2015-03-23T17:33:36.1305799+01:00</Time>
+    </Item>
+    <Item>
+      <Source>Sprites\tiles.png</Source>
+      <Name>Sprites\tiles</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\tiles.xnb</Output>
+      <Time>2015-03-23T18:50:51.2679776+01:00</Time>
+    </Item>
+    <Item>
+      <Source>fire.png</Source>
+      <Name>fire</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\fire.xnb</Output>
+      <Time>2015-03-23T20:42:07.2407648+01:00</Time>
+    </Item>
+    <Item>
+      <Source>smoke.png</Source>
+      <Name>smoke</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\smoke.xnb</Output>
+      <Time>2015-03-23T20:44:57.1885877+01:00</Time>
+    </Item>
+    <Item>
       <Source>Blur.fx</Source>
       <Name>Blur</Name>
       <Importer>EffectImporter</Importer>

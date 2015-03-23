@@ -16,7 +16,15 @@ public class Camera
     public static Vector2 CameraPosition
     {
         get { return cameraPosition; }
-        set { cameraPosition = value; }
+        set
+        {
+            if (value.X > 0 || value.Y > 0 || value.X < -1240 || value.Y < -1240)
+                return;
+            else
+            {
+                cameraPosition = value;
+            }
+        }
     }
 
 

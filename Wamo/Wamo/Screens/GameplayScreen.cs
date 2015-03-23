@@ -13,13 +13,17 @@ using TomShane.Neoforce.Controls;
 public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
+    ParticleSystem ps;
     Player player;
     int timer = 0;
     roll isRoll = roll.System;
     SoundEffect beep;
+    Tile[,] textureGrid;
     Texture2D tile;
+    Texture2D blockTexture;
+
     PointLight playerFOV;
-    Visual testBlock;
+    Visual newBlock;
     //InputManager inputManager;
     SpriteFont font;
     Vector2 oldCameraPosition;
@@ -30,7 +34,7 @@ public class GameplayScreen : GameScreen
     Button[] abilityButton;
     Button[] soundButton;
     
-    List<Visual> blocks;
+    static List<Visual> blocks;
     List<PointLight> lights;
 
     RenderTarget2D colorMap;
@@ -42,13 +46,16 @@ public class GameplayScreen : GameScreen
     Effect blurEffect;
 
     Quad quad;
+
+    Boolean usingAbility = false;
+    int currentAbility = 9999;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
         base.LoadContent(Content, inputManager);
         GraphicsDevice = Options.GetValue<GraphicsDevice>("GraphicsDevice");
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
-        Texture2D blockTexture = Content.Load<Texture2D>("Block");
+        blockTexture = Content.Load<Texture2D>("Block");
         Texture2D blockGlow = Content.Load<Texture2D>("BlockGlow");
         beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
@@ -72,11 +79,11 @@ public class GameplayScreen : GameScreen
 
         player = new Player();
         player.LoadContent(content, inputManager);
-        tile = content.Load<Texture2D>("Sprites/floortile");
+       
         lights.Clear();
         if (isRoll == roll.System)
         {
-            playerFOV = new PointLight(lightEffect, Vector2.Zero, 500, Color.White, 1.0f);
+            playerFOV = new PointLight(lightEffect, Vector2.Zero, 1500, Color.White, 1.0f);
             lights.Add(playerFOV);
             
         }
@@ -92,19 +99,19 @@ public class GameplayScreen : GameScreen
         }
 
         Options.SetValue("lightEngine", true);
-
+        
         for (int i = 0; i < 20; i++)
         {
             Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 128), 0f, 0.5f);
-            testBlock = new Visual(blockTexture, newPose);
-            blocks.Add(testBlock);
+            newBlock = new Visual(blockTexture, newPose);
+            blocks.Add(newBlock);
         }
 
         for (int i = 0; i < 20; i++)
         {
             Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 256 + (16 * i)), 0f, 0.25f);
-            testBlock = new Visual(blockTexture, newPose);
-            blocks.Add(testBlock);
+            newBlock = new Visual(blockTexture, newPose);
+            blocks.Add(newBlock);
         }
         
 
@@ -113,16 +120,30 @@ public class GameplayScreen : GameScreen
         abilityExpl = new TextBox[5];
         soundButton = new Button[5];
         CreateHud();
-
+        LoadMap();
         //lights.Add(new PointLight(lightEffect,new Vector2(300,300), 300, Color.Red));
        // lights.Add(new PointLight(lightEffect, new Vector2(150, 450), 300, Color.Green));
        // lights.Add(new PointLight(lightEffect, new Vector2(450, 450), 300, Color.Blue));
+
+        ps = new ParticleSystem();
     }
 
     public override void UnloadContent()
     {
         base.UnloadContent();
         player.UnloadContent();
+    }
+
+    public void LoadMap()
+    {
+        tile = content.Load<Texture2D>("Sprites/tiles");
+        textureGrid = new Tile[90, 90];
+        for (int i = 0; i < 90; i++) //TODO:: load from file
+            for (int j = 0; j < 90; j++)
+                    textureGrid[i, j] = new Tile(tile, i % 3);
+
+        
+            
     }
 
     public void PlaySound(int soundID)
@@ -158,6 +179,7 @@ public class GameplayScreen : GameScreen
         if (inputManager.KeyDown(Keys.Down, Keys.H))
         {
             Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
+            
         }
         if (inputManager.KeyDown(Keys.Up, Keys.Y))
         {
@@ -188,13 +210,42 @@ public class GameplayScreen : GameScreen
 
             for (int i = 0; i < 5; i++)
             {
-                    abilityButton[i].MousePress += b_clicked;
+                    abilityButton[i].MouseUp += b_clicked;
                     abilityButton[i].MouseOver += b_over;
                     abilityButton[i].MouseOut += b_out;
                 if(isRoll == roll.System)
                     soundButton[i].MousePress += s_clicked;
             }
-      
+
+            ps.update(gameTime);
+
+            if (usingAbility)
+                if (isRoll == roll.System)
+                    switch (currentAbility)
+                    {
+                        case 0: SysAbZero(); break;
+                        case 1: SysAbOne(); break;
+                        case 2: SysAbTwo(); break;
+                        case 3: SysAbThree(); break;
+                        case 4: SysAbFour(); break;
+                    }
+
+
+
+            foreach (PointLight l in lights)
+            {
+                if (l.Radius == 110)
+                {
+                    l.Power -= 0.0025f;
+                    if (l.Power < 0.10f)
+                    {
+                        lights.Remove(l);
+                        break;
+                    }
+                    
+                }
+            }
+                
         
     }
 
@@ -204,16 +255,15 @@ public class GameplayScreen : GameScreen
         colorRange = new Color[5]{Color.Blue, Color.Red, Color.Yellow, Color.Purple, Color.Green};
         Button b = (Button)sender;
         for(int i = 0; i < 5; i++)
-            if (b.Name == abilityProgress[i].Name + i)
+            if (b.Name == abilityProgress[i].Name + i) //zoek id die overeenkomt met aangeklikte button
             {
-                if (abilityProgress[i].Value >= abilityProgress[i].Range)
+                if (abilityProgress[i].Value >= abilityProgress[i].Range) //als ability gebruikt mag worden
                 {
-                    abilityProgress[i].Value = 0;
-                    b.Color = Color.White;
-                    lights[0].Color = colorRange[i];
-                    lights[0].Radius = i * 100;
+                    abilityProgress[i].Value = 0; //button cooldown start
+                    b.Color = Color.White; //button weer white
                 }
-                break;
+                usingAbility = true;
+                currentAbility = i;
             }
         e.Handled = true;
     }
@@ -249,12 +299,39 @@ public class GameplayScreen : GameScreen
         if (!b.Pushed)
         {
             PlaySound(int.Parse(b.Name));
+            //TODO:: stuur command naar robot zodat die geluid te horen krijgt.
             b.Pushed = true;
         }
         e.Handled = true;
     }
+    #region System Abilities
+    public void SysAbZero() //creating light
+    {
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            lights.Add(new PointLight(lightEffect,new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
+            usingAbility = false;
+           
+        }
+    }
 
-   
+    public void SysAbOne() //creating light at robot
+    {
+        //TODO:: stuur command zodat er licht komt bij de speler die robot is.
+    }
+    public void SysAbTwo() 
+    {
+
+    }
+    public void SysAbThree() 
+    {
+
+    }
+    public void SysAbFour() 
+    {
+
+    }
+    #endregion
 
     public void CreateHud()
     {
@@ -274,9 +351,9 @@ public class GameplayScreen : GameScreen
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case roll.System: abilityNames = new string[5] { "libraries", "helpen", "wel", "though", "hehe" }; //namen van de abilities
+            case roll.System: abilityNames = new string[5] { "Add light", "helpen", "wel", "though", "hehe" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
+                abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse to view inside of rooms.", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 #region Soundbar
                 int[] soundButtonPositions;
                 soundButtonPositions = new int[10] { 10, 90, 170, 10, 170, 10, 90, 10, 170, 170 };
@@ -373,6 +450,7 @@ public class GameplayScreen : GameScreen
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
+      
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
     
         if (isRoll != roll.Doctor)
@@ -386,9 +464,6 @@ public class GameplayScreen : GameScreen
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-      
-
-         
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
 
@@ -481,8 +556,11 @@ public class GameplayScreen : GameScreen
         GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
         if (Mouse.GetState().RightButton == ButtonState.Pressed)
+        {
             lights[0].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-        
+            ps.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
+           
+        }
             
         foreach (PointLight l in lights)
             l.Render(GraphicsDevice, blocks);
@@ -501,19 +579,29 @@ public class GameplayScreen : GameScreen
 
         foreach (Visual v in blocks)
         {
-            Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
+           // Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
 
-            spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
+            spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, Vector2.Zero, v.Pose.Scale, SpriteEffects.None, 0.1f);
         }
+        int size = 32;
+        int minX = -(int)(Camera.CameraPosition.X/size);
+        int minY = -(int)(Camera.CameraPosition.Y/size);
+        int maxX = 2 + minX + 800 / size; //TODO: change to correct length
+        int maxY = 2 + minY + 600 / size;
+        for (int i = minX; i < maxX; i++)
+            for (int j = minY; j < maxY; j++)
+               if(textureGrid[i,j] != null)
+                textureGrid[i, j].Draw(spriteBatch, new Vector2(i * size, j * size));
 
-        for (int i = -10; i < 10; i++)
-            for (int j = -10; j < 10; j++)
-                spriteBatch.Draw(tile, new Vector2(i * 128, j * 128) + Camera.CameraPosition, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 1.0f);
+        ps.draw(spriteBatch);
 
         spriteBatch.End();
     }
 
-
+    public static List<Visual> allBlocks
+    {
+        get { return blocks; }
+    }
 
     enum roll { Robot, Doctor, System };
 }
