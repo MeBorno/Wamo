@@ -21,6 +21,8 @@ Content\Blur.xnb
 Content\Combine.xnb
 Content\Light.xnb
 Content\beep.xnb
+Content\cellTexture.xnb
+Content\Trap1.xnb
 Content\Load\menu.cme
 Content\Load\player.cme
 Content\Load\splash.cme

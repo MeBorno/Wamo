@@ -53,6 +53,7 @@ public class GameplayScreen : GameScreen
     int currentAbility = 9999;
 
     EnergyCell[] energyCells;
+    List<Trap> traps;
     public static int cellCount = 0;
 
     Vector2 paintStartPos = Vector2.Zero;
@@ -93,7 +94,7 @@ public class GameplayScreen : GameScreen
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.System);
+            Options.SetValue("role", NetworkManager.State.Doctor);
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -147,6 +148,7 @@ public class GameplayScreen : GameScreen
             new EnergyCell(new Vector2(300,300)), new EnergyCell(new Vector2(400,400)), new EnergyCell(new Vector2(500,500)),
             new EnergyCell(new Vector2(600,500)), new EnergyCell(new Vector2(500,600)), new EnergyCell(new Vector2(400,700))
         };
+        traps = new List<Trap>();
     }
 
     public override void UnloadContent()
@@ -169,7 +171,7 @@ public class GameplayScreen : GameScreen
     {
         inputManager.Update();
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System) //HIER DE ROL IN DE GAME MANUEEL VERANDEREN HIER HIER HIER HIER
         playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
         if (oldCameraPosition != Camera.CameraPosition)
@@ -232,6 +234,7 @@ public class GameplayScreen : GameScreen
         ps.update(gameTime);
 
         if (usingAbility)
+        {
             if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
                 switch (currentAbility)
                 {
@@ -241,7 +244,27 @@ public class GameplayScreen : GameScreen
                     case 3: SysAbThree(); break;
                     case 4: SysAbFour(); break;
                 }
+            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+                switch (currentAbility)
+                {
+                    case 0: RobAbZero(); break;
+                    case 1: RobAbOne(); break;
+                    case 2: RobAbTwo(); break;
+                    case 3: RobAbThree(); break;
+                    case 4: RobAbFour(); break;
+                }
+            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor)
+                switch (currentAbility)
+                {
+                    case 0: DocAbZero(); break;
+                    case 1: DocAbOne(); break;
+                    case 2: DocAbTwo(); break;
+                    case 3: DocAbThree(); break;
+                    case 4: DocAbFour(); break;
+                }
 
+
+        }
         foreach (PointLight l in lights)
         {
             if (l.Radius == 110)
@@ -264,6 +287,15 @@ public class GameplayScreen : GameScreen
         {
             ev.Update(gameTime, inputManager);
             ev.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32));
+        }
+        foreach (Trap t in traps)
+        {
+            t.Update(gameTime, inputManager);
+            if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
+            {
+                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.05f, 500f);
+            }
+            //TODO:: global stat voor health van de robot
         }
 
         if (cellCount >= 3)
@@ -312,6 +344,10 @@ public class GameplayScreen : GameScreen
         {
             ec.Draw(spriteBatch);
         }
+        foreach (Trap t in traps)
+        {
+            t.Draw(spriteBatch);
+        }
 
     }
 
@@ -323,9 +359,9 @@ public class GameplayScreen : GameScreen
             for (int j = 0; j < 90; j++)
             {
                 textureGrid[i, j] = new Tile(tile, i % 3);
-                if (i % 10 == 0 || j % 10 == 0)
+                if (i % 10 == 0 || j % 10 == 0 && j%15 == 5)
                 {
-                    Pose2D newPose = new Pose2D(new Vector2((32 * i),(32 * j)), 0f, 0.25f);
+                    Pose2D newPose = new Pose2D(new Vector2((32 * i),(32 * j)), 0f, 0.5f);
                     newBlock = new Visual(blockTexture, newPose);
                     blocks.Add(newBlock);
                 }
@@ -421,7 +457,7 @@ public class GameplayScreen : GameScreen
                     cellCount -= 3;
                     upgradeButton[i].Color = Color.Gray;
                     upgradeButton[i].Enabled = false;
-                    upgradeButton[i].Text = "Purchased";
+                    upgradeButton[i].Text = "Bought";
                     break;
                 }
         }
@@ -429,7 +465,9 @@ public class GameplayScreen : GameScreen
         
     }
 
-    #region System Abilities
+    #region Abilities
+
+        #region system abilities
     public void SysAbZero() //creating light
     {
         if (inputManager.MouseLeftButtonReleased())
@@ -476,6 +514,66 @@ public class GameplayScreen : GameScreen
     {
         //TODO:: think of something
     }
+    #endregion
+        #region doctor abilities
+    private void DocAbFour()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DocAbThree()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DocAbTwo()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DocAbOne()
+    {
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            Trap tmp = new Trap(new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            traps.Add(tmp);
+            usingAbility = false;
+        }
+    }
+
+    private void DocAbZero()
+    {
+        throw new NotImplementedException();
+    }
+        #endregion
+        #region robot abilities
+    private void RobAbFour()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RobAbThree()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RobAbTwo()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RobAbOne()
+    {
+        
+
+    }
+
+    private void RobAbZero()
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
+
     #endregion
 
     public void CreateHud()
@@ -700,10 +798,10 @@ public class GameplayScreen : GameScreen
         List<Visual> inrange = new List<Visual>();
         foreach (Visual v in blocks)
         {
-            if (v.Pose.Position.Y >= -Camera.CameraPosition.Y &&
-                v.Pose.Position.Y <= -Camera.CameraPosition.Y + 600 &&
-                v.Pose.Position.X >= -Camera.CameraPosition.X &&
-                v.Pose.Position.X <= -Camera.CameraPosition.X + 800)
+            if (v.Pose.Position.Y>= Camera.CameraPosition.Y &&
+                v.Pose.Position.Y<= Camera.CameraPosition.Y  + 900&&
+                v.Pose.Position.X>= Camera.CameraPosition.X &&
+                v.Pose.Position.X<= Camera.CameraPosition.X + 1400)
                 inrange.Add(v);
         }
 

@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-public class EnergyCell : Entity
+public class Trap : Entity
 {
     private InputManager inputManager;
     SpriteFont font;
@@ -16,12 +16,14 @@ public class EnergyCell : Entity
     Rectangle placement;
     Vector2 position;
     Boolean visible = true;
+    ParticleSystem ps;
    
-    public EnergyCell(Vector2 position)
+    public Trap(Vector2 position)
     {
-        cellTexture = Wamo.manager.Content.Load<Texture2D>("content/cellTexture");
+        cellTexture = Wamo.manager.Content.Load<Texture2D>("content/Trap1");
         placement = new Rectangle((int)position.X, (int)position.Y, cellTexture.Width, cellTexture.Height);
         this.position = position;
+        ps = new ParticleSystem();
     }
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
@@ -43,13 +45,17 @@ public class EnergyCell : Entity
         placement = new Rectangle((int)this.position.X + (int)Camera.CameraPosition.X, (int)this.position.Y + (int)Camera.CameraPosition.Y, cellTexture.Width, cellTexture.Height);
     }
 
-    public void CheckCollision(Rectangle player)
+    public Boolean CheckCollision(Rectangle player)
     {
         Rectangle tmp = new Rectangle(player.X + (int)Camera.CameraPosition.X, player.Y + (int)Camera.CameraPosition.Y, player.Width, player.Height);
         if (this.visible && this.placement.Intersects(tmp))
         {
             this.visible = false;
-            GameplayScreen.CellCount += 1;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 

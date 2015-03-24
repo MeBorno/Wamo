@@ -208,6 +208,24 @@
       <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\beep.xnb</Output>
       <Time>2015-03-18T23:59:08.8903704+01:00</Time>
     </Item>
+    <Item>
+      <Source>cellTexture.png</Source>
+      <Name>cellTexture</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\cellTexture.xnb</Output>
+      <Time>2015-03-24T22:25:49.0501116+01:00</Time>
+    </Item>
+    <Item>
+      <Source>Trap1.png</Source>
+      <Name>Trap1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Trap1.xnb</Output>
+      <Time>2015-03-24T22:34:51.3836126+01:00</Time>
+    </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>
       <ContentProjectGUID>{684C5C29-79BD-4665-903D-0DFBEE151194}</ContentProjectGUID>

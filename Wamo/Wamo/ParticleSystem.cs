@@ -86,7 +86,7 @@ public class ParticleSystem
 
             Color color = averageColor * (float)(r.Next(1,20) / 20.0);
             
-          //  CreateParticle(pixelParticle, position, ttl, 1f, angle, scale, color, fade, opacity_change);
+            CreateParticle(pixelParticle, position, ttl, 1f, angle, scale, color,color, fade, opacity_change);
         }
     }
 
