@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
+using Lidgren.Network;
 using TomShane.Neoforce.Controls;
 
 public class GameplayScreen : GameScreen
@@ -16,7 +17,6 @@ public class GameplayScreen : GameScreen
     ParticleSystem ps;
     Player player;
     int timer = 0;
-    roll isRoll = roll.System;
     SoundEffect beep;
     Tile[,] textureGrid;
     Texture2D tile;
@@ -81,17 +81,21 @@ public class GameplayScreen : GameScreen
         player.LoadContent(content, inputManager);
        
         lights.Clear();
-        if (isRoll == roll.System)
+
+
+        if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
+            Options.SetValue("role", NetworkManager.State.System);
+
+        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
             playerFOV = new PointLight(lightEffect, Vector2.Zero, 1500, Color.White, 1.0f);
             lights.Add(playerFOV);
             
         }
-        else if(isRoll == roll.Robot)
+        else if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
         {
             playerFOV = new PointLight(lightEffect, Vector2.Zero, 100, Color.White, 1.0f);
             lights.Add(playerFOV);
-            
         }
         else
         {
@@ -134,45 +138,32 @@ public class GameplayScreen : GameScreen
         player.UnloadContent();
     }
 
-    public void LoadMap()
+    public override void NetworkMessage(NetIncomingMessage message)
     {
-        tile = content.Load<Texture2D>("Sprites/tiles");
-        textureGrid = new Tile[90, 90];
-        for (int i = 0; i < 90; i++) //TODO:: load from file
-            for (int j = 0; j < 90; j++)
-                    textureGrid[i, j] = new Tile(tile, i % 3);
-
-        
-            
-    }
-
-    public void PlaySound(int soundID)
-    {
-        switch (soundID)
+        message.Position = 0;
+        NetworkManager.PacketTypes type = (NetworkManager.PacketTypes)message.ReadByte();
+        if (type == NetworkManager.PacketTypes.SOUNDEFFECT)
         {
-            case 0: beep.Play(1.0f, -1.0f, 0.0f); break;
-            case 1: beep.Play(1.0f, 0.0f, 0.0f); break;
-            case 2: beep.Play(1.0f, 1.0f, 0.0f); break;
-            case 3: beep.Play(1.0f, 0.0f, -1.0f); break;
-            case 4: beep.Play(1.0f, 0.0f, 1.0f); break;
-
+            PlaySound((int)message.ReadByte());
         }
     }
 
     public override void Update(GameTime gameTime)
     {
-            inputManager.Update();
-            if(isRoll == roll.Robot || isRoll == roll.System)
-            playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
+        inputManager.Update();
+        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+        playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
-            if (oldCameraPosition != Camera.CameraPosition)
-            {
-                foreach (Visual v in blocks)
-                    v.Pose.Position = v.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
-                oldCameraPosition = Camera.CameraPosition;
-            }
+        if (oldCameraPosition != Camera.CameraPosition)
+        {
+            foreach (Visual v in blocks)
+                v.Pose.Position = v.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
+            oldCameraPosition = Camera.CameraPosition;
+        }
 
-        if(isRoll == roll.Robot || isRoll == roll.System) //TODO:: uiteindelijk alleen robot???
+        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot) //TODO:: uiteindelijk alleen robot???
         player.Update(gameTime, inputManager);
        //  else
        // {
@@ -196,57 +187,101 @@ public class GameplayScreen : GameScreen
       //  }
         timer += gameTime.ElapsedGameTime.Milliseconds;
         
-            for (int i = 0; i < 5; i++) {
-                if (abilityProgress[i].Value < abilityProgress[i].Range)
-                    abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
-                else
-                {
-                    abilityButton[i].Color = Color.Red;
-                }
+        for (int i = 0; i < 5; i++) 
+        {
+            if (abilityProgress[i].Value < abilityProgress[i].Range)
+                abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
+            else
+            {
+                abilityButton[i].Color = Color.Red;
+            }
             
         }
 
-           
-
-            for (int i = 0; i < 5; i++)
-            {
-                    abilityButton[i].MouseUp += b_clicked;
-                    abilityButton[i].MouseOver += b_over;
-                    abilityButton[i].MouseOut += b_out;
-                if(isRoll == roll.System)
+        for (int i = 0; i < 5; i++)
+        {
+                abilityButton[i].MouseUp += b_clicked;
+                abilityButton[i].MouseOver += b_over;
+                abilityButton[i].MouseOut += b_out;
+                if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
                     soundButton[i].MousePress += s_clicked;
-            }
+        }
 
-            ps.update(gameTime);
+        ps.update(gameTime);
 
-            if (usingAbility)
-                if (isRoll == roll.System)
-                    switch (currentAbility)
-                    {
-                        case 0: SysAbZero(); break;
-                        case 1: SysAbOne(); break;
-                        case 2: SysAbTwo(); break;
-                        case 3: SysAbThree(); break;
-                        case 4: SysAbFour(); break;
-                    }
-
-
-
-            foreach (PointLight l in lights)
-            {
-                if (l.Radius == 110)
+        if (usingAbility)
+            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
+                switch (currentAbility)
                 {
-                    l.Power -= 0.0025f;
-                    if (l.Power < 0.10f)
-                    {
-                        lights.Remove(l);
-                        break;
-                    }
-                    
+                    case 0: SysAbZero(); break;
+                    case 1: SysAbOne(); break;
+                    case 2: SysAbTwo(); break;
+                    case 3: SysAbThree(); break;
+                    case 4: SysAbFour(); break;
+                }
+
+        foreach (PointLight l in lights)
+        {
+            if (l.Radius == 110)
+            {
+                l.Power -= 0.0025f;
+                if (l.Power < 0.10f)
+                {
+                    lights.Remove(l);
+                    break;
                 }
             }
-                
-        
+        }    
+    }
+
+    public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
+    {
+
+        DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
+
+        if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
+        {
+
+            DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
+            BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
+            CombineAndDraw(GraphicsDevice); // Combine
+        }
+    }
+
+    public override void Draw(SpriteBatch spriteBatch)
+    {
+        base.Draw(spriteBatch);
+        player.Draw(spriteBatch);
+
+        //if(isRoll == roll.Robot || isRoll == roll.System)
+        //spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
+
+
+    }
+
+    public void LoadMap()
+    {
+        tile = content.Load<Texture2D>("Sprites/tiles");
+        textureGrid = new Tile[90, 90];
+        for (int i = 0; i < 90; i++) //TODO:: load from file
+            for (int j = 0; j < 90; j++)
+                textureGrid[i, j] = new Tile(tile, i % 3);
+
+
+
+    }
+
+    public void PlaySound(int soundID)
+    {
+        switch (soundID)
+        {
+            case 0: beep.Play(1.0f, -1.0f, 0.0f); break;
+            case 1: beep.Play(1.0f, 0.0f, 0.0f); break;
+            case 2: beep.Play(1.0f, 1.0f, 0.0f); break;
+            case 3: beep.Play(1.0f, 0.0f, -1.0f); break;
+            case 4: beep.Play(1.0f, 0.0f, 1.0f); break;
+
+        }
     }
 
     void b_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
@@ -298,12 +333,18 @@ public class GameplayScreen : GameScreen
         Button b = (Button)sender;
         if (!b.Pushed)
         {
-            PlaySound(int.Parse(b.Name));
+            //PlaySound(int.Parse(b.Name));
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)NetworkManager.PacketTypes.SOUNDEFFECT);
+            msg.Write((byte)int.Parse(b.Name));
+            NetworkManager.Instance.SendMessage(msg);
             //TODO:: stuur command naar robot zodat die geluid te horen krijgt.
             b.Pushed = true;
         }
         e.Handled = true;
     }
+
     #region System Abilities
     public void SysAbZero() //creating light
     {
@@ -341,17 +382,17 @@ public class GameplayScreen : GameScreen
         abilityNames = new string[5];
         abilityCooldowns = new int[5];
         abilityDiscription = new string[5];
-        switch (isRoll)
+        switch (Options.GetValue<NetworkManager.State>("role"))
         {
-            case roll.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
+            case NetworkManager.State.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case roll.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
+            case NetworkManager.State.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case roll.System: abilityNames = new string[5] { "Add light", "helpen", "wel", "though", "hehe" }; //namen van de abilities
+            case NetworkManager.State.System: abilityNames = new string[5] { "Add light", "helpen", "wel", "though", "hehe" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse to view inside of rooms.", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 #region Soundbar
@@ -447,33 +488,6 @@ public class GameplayScreen : GameScreen
         #endregion abilityBar
 
     }
-
-    public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
-    {
-      
-        DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
-    
-        if (isRoll != roll.Doctor)
-        {
-            
-            DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
-            BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
-            CombineAndDraw(GraphicsDevice); // Combine
-        }
-    }
-
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        base.Draw(spriteBatch);
-        player.Draw(spriteBatch);
-
-        //if(isRoll == roll.Robot || isRoll == roll.System)
-        //spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
-
-       
-    }
-
-
 
     private void CombineAndDraw(GraphicsDevice GraphicsDevice)
     {
@@ -571,7 +585,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if(isRoll != roll.Doctor)
+        if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 
@@ -602,6 +616,4 @@ public class GameplayScreen : GameScreen
     {
         get { return blocks; }
     }
-
-    enum roll { Robot, Doctor, System };
 }

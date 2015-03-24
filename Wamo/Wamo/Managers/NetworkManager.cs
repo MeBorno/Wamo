@@ -97,6 +97,7 @@ public class NetworkManager
             if (inc.MessageType == NetIncomingMessageType.Data)
             {
                 ScreenManager.Instance.CurrentScreen.NetworkMessage(ret);
+                inc.Position = 0;
                 PacketTypes type = (PacketTypes)inc.ReadByte();
                 if (type == PacketTypes.WORLDSTATE)
                 {
@@ -161,7 +162,8 @@ public class NetworkManager
         MOVE,
         WORLDSTATE,
         ROLESELECT,
-        STATEUPDATE
+        STATEUPDATE,
+        SOUNDEFFECT
     }
     public enum State
     {

@@ -13,6 +13,7 @@ public class LobbyScreen : GameScreen
     SpriteFont font;
     string text;
     bool gotRole = false;
+    float delay = 0.0f;
 
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -38,6 +39,11 @@ public class LobbyScreen : GameScreen
         if (!NetworkManager.Instance.IsRunning)
             text = "You are not connected to the server... Trying to connect...";
         else if(!gotRole) text = "Waiting for other players to join...";
+        if(gotRole)
+        {
+            if (delay < 5000f) delay += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            else ScreenManager.Instance.AddScreen(new GameplayScreen(), inputManager);
+        }
     }
 
     public override void NetworkMessage(NetIncomingMessage message) 
@@ -46,7 +52,9 @@ public class LobbyScreen : GameScreen
         NetworkManager.PacketTypes type = (NetworkManager.PacketTypes)message.ReadByte();
         if(type == NetworkManager.PacketTypes.ROLESELECT)
         {
-            text = "Your new role is " + ((NetworkManager.State)message.ReadByte()).ToString();
+            NetworkManager.State role = (NetworkManager.State)message.ReadByte();
+            text = "Your new role is " + role.ToString();
+            Options.SetValue("role", role);
             gotRole = true;
         }
     }
