@@ -126,7 +126,7 @@ public class Player : Entity
         {
             if (playercollider.Intersects(new Rectangle((int)(v.Pose.Position.X / ScreenManager.Instance.DrawScale().M11), (int)(v.Pose.Position.Y / ScreenManager.Instance.DrawScale().M22), 32, 32)))
             {
-                velocity = -velocity;
+              //  velocity = -velocity;
             }
         }
 
