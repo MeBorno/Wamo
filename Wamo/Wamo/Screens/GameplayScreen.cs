@@ -10,12 +10,14 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using Lidgren.Network;
 using TomShane.Neoforce.Controls;
+using Microsoft.Xna.Framework.Media;
 
 public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
     ParticleSystem ps;
     Player player;
+    Robot1 robot1;
     int timer = 0;
     SoundEffect beep;
     Tile[,] textureGrid;
@@ -49,6 +51,9 @@ public class GameplayScreen : GameScreen
 
     Boolean usingAbility = false;
     int currentAbility = 9999;
+
+    bool playingSoundEffect = false;
+    TimeSpan soundEffectTimer;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -79,6 +84,9 @@ public class GameplayScreen : GameScreen
 
         player = new Player();
         player.LoadContent(content, inputManager);
+
+        robot1 = new Robot1();
+        robot1.LoadContent(content, inputManager);
        
         lights.Clear();
 
@@ -231,7 +239,18 @@ public class GameplayScreen : GameScreen
                     break;
                 }
             }
-        }    
+        }
+    
+        if(soundEffectTimer.TotalMilliseconds > 20)
+        {
+            soundEffectTimer.Subtract(gameTime.ElapsedGameTime);
+            MediaPlayer.Volume = 0.1f;
+        }
+        else
+        {
+            soundEffectTimer = TimeSpan.Zero;
+            MediaPlayer.Volume = 1.0f;
+        }
     }
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
@@ -273,6 +292,9 @@ public class GameplayScreen : GameScreen
 
     public void PlaySound(int soundID)
     {
+        playingSoundEffect = true;
+        soundEffectTimer = beep.Duration;
+
         switch (soundID)
         {
             case 0: beep.Play(1.0f, -1.0f, 0.0f); break;
@@ -280,7 +302,7 @@ public class GameplayScreen : GameScreen
             case 2: beep.Play(1.0f, 1.0f, 0.0f); break;
             case 3: beep.Play(1.0f, 0.0f, -1.0f); break;
             case 4: beep.Play(1.0f, 0.0f, 1.0f); break;
-
+                
         }
     }
 

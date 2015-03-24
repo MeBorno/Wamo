@@ -1,2 +1,3 @@
 C:\Users\Jorn\Documents\GitHub\Wamo\Wamo\WamoContent\obj\x86\Debug\WamoContent.contentprojResolveAssemblyReference.cache
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\WamoContent\obj\x86\Debug\WamoContent.contentprojResolveAssemblyReference.cache
+E:\Github\Wamo\Wamo\WamoContent\obj\x86\Debug\WamoContent.contentprojResolveAssemblyReference.cache

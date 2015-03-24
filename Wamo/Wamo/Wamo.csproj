@@ -83,6 +83,7 @@
     <Compile Include="Camera.cs" />
     <Compile Include="Entities\Enemy.cs" />
     <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Entities\Robot1.cs" />
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="ParticleSystem.cs" />
