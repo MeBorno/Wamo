@@ -10,12 +10,14 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using Lidgren.Network;
 using TomShane.Neoforce.Controls;
+using Microsoft.Xna.Framework.Media;
 
 public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
     ParticleSystem ps;
     Player player;
+    Robot1 robot1;
     int timer = 0;
     SoundEffect beep;
     Tile[,] textureGrid;
@@ -52,8 +54,12 @@ public class GameplayScreen : GameScreen
     Boolean usingAbility = false;
     int currentAbility = 9999;
 
+    bool playingSoundEffect = false;
+    TimeSpan soundEffectTimer;
+
     EnergyCell[] energyCells;
     List<Trap> traps;
+    List<Projectile> projectiles;
     public static int cellCount = 0;
 
     Vector2 paintStartPos = Vector2.Zero;
@@ -88,12 +94,16 @@ public class GameplayScreen : GameScreen
 
         player = new Player();
         player.LoadContent(content, inputManager);
+
+        robot1 = new Robot1();
+        robot1.LoadContent(content, inputManager);
        
         lights.Clear();
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
             Options.SetValue("role", NetworkManager.State.System);
+
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -263,6 +273,17 @@ public class GameplayScreen : GameScreen
                 }
             }
         }
+    
+        if(soundEffectTimer.TotalMilliseconds > 20)
+        {
+            soundEffectTimer.Subtract(gameTime.ElapsedGameTime);
+            MediaPlayer.Volume = 0.1f;
+        }
+        else
+        {
+            soundEffectTimer = TimeSpan.Zero;
+            MediaPlayer.Volume = 1.0f;
+        }
 
         foreach (EnergyCell ev in energyCells)
         {
@@ -355,6 +376,9 @@ public class GameplayScreen : GameScreen
 
     public void PlaySound(int soundID)
     {
+        playingSoundEffect = true;
+        soundEffectTimer = beep.Duration;
+
         switch (soundID)
         {
             case 0: beep.Play(1.0f, -1.0f, 0.0f); break;
@@ -362,7 +386,7 @@ public class GameplayScreen : GameScreen
             case 2: beep.Play(1.0f, 1.0f, 0.0f); break;
             case 3: beep.Play(1.0f, 0.0f, -1.0f); break;
             case 4: beep.Play(1.0f, 0.0f, 1.0f); break;
-
+                
         }
     }
 
@@ -548,13 +572,18 @@ public class GameplayScreen : GameScreen
 
     private void RobAbOne()
     {
-        
+        throw new NotImplementedException();
 
     }
 
     private void RobAbZero()
     {
-        throw new NotImplementedException();
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            projectiles.Add(rocket);
+            usingAbility = false;
+        }
     }
     #endregion
 

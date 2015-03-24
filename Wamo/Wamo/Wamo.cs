@@ -10,12 +10,14 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Lidgren.Network;
 using TomShane.Neoforce.Controls;
+using System.Media;
 
 public class Wamo : Microsoft.Xna.Framework.Game
 {
     GraphicsDeviceManager graphics;
     SpriteBatch spriteBatch;
     public static Manager manager;
+    Song music;
     
     public Wamo()
     {
@@ -49,6 +51,9 @@ public class Wamo : Microsoft.Xna.Framework.Game
         window.Height = 350;
         //manager.Add(window);
         
+        music = Content.Load<Song>("Music/BlastProcess");
+        MediaPlayer.Play(music);
+        MediaPlayer.IsRepeating = true;                
     }
 
     protected override void LoadContent()

@@ -209,6 +209,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Music\BlastProcess.mp3">
+      <Name>BlastProcess</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Circle.png">
       <Name>Circle</Name>
       <Importer>TextureImporter</Importer>

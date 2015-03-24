@@ -62,3 +62,6 @@ Wamo/Wamo/obj/x86/Debug/Wamo.csprojResolveAssemblyReference.cache
 Wamo/Wamo/obj/x86/Debug/Wamo.pdb
 Wamo/WamoContent/obj/x86/Debug/WamoContent.contentproj.FileListAbsolute.txt
 Wamo/WamoContent/obj/x86/Debug/WamoContent.contentproj.FileListAbsolute.txt
+Wamo.v12.suo
+*.cache
+Wamo/Wamo/obj/x86/Debug/Wamo.csprojResolveAssemblyReference.cache
