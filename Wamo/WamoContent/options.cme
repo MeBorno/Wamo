@@ -6,7 +6,7 @@ screenHeight=[int]900
 fullScreen=[bool]false
 
 # Network Options
-defaultIP=127.0.0.1
+defaultIP=192.168.1.1
 
 # Debug Options
 debugDrawHitbox=[bool]true

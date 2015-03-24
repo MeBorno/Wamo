@@ -22,7 +22,7 @@ public class GameplayScreen : GameScreen
     SoundEffect beep;
     Tile[,] textureGrid;
     Texture2D tile;
-    Texture2D blockTexture;
+    Texture2D blockTexture, longBlockTexture;
 
     PointLight playerFOV;
     Visual newBlock;
@@ -35,7 +35,9 @@ public class GameplayScreen : GameScreen
     ProgressBar healhBar;
     Button[] abilityButton;
     Button[] soundButton;
-    
+    Button[] upgradeButton;
+    Boolean[] isUpgraded;
+
     static List<Visual> blocks;
     List<PointLight> lights;
 
@@ -54,6 +56,14 @@ public class GameplayScreen : GameScreen
 
     bool playingSoundEffect = false;
     TimeSpan soundEffectTimer;
+
+    EnergyCell[] energyCells;
+    List<Trap> traps;
+    List<Projectile> projectiles;
+    public static int cellCount = 0;
+
+    Vector2 paintStartPos = Vector2.Zero;
+    Vector2 paintEndPos = Vector2.Zero;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -61,7 +71,8 @@ public class GameplayScreen : GameScreen
         GraphicsDevice = Options.GetValue<GraphicsDevice>("GraphicsDevice");
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
         blockTexture = Content.Load<Texture2D>("Block");
-        Texture2D blockGlow = Content.Load<Texture2D>("BlockGlow");
+        longBlockTexture = Content.Load<Texture2D>("LongBlock");
+        //Texture2D blockGlow = Content.Load<Texture2D>("BlockGlow");
         beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
 
@@ -92,7 +103,7 @@ public class GameplayScreen : GameScreen
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.System);
+            Options.SetValue("role", NetworkManager.State.Robot);
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -110,34 +121,43 @@ public class GameplayScreen : GameScreen
             
         }
 
+       
+
         Options.SetValue("lightEngine", true);
-        
+        /*
+        //dit is tijdelijk DIT IS TIJDELIJK, IK ZEG JE DUDE WTF MAN DIT IS TIJDELIJK
         for (int i = 0; i < 20; i++)
         {
             Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 128), 0f, 0.5f);
+            
             newBlock = new Visual(blockTexture, newPose);
+            
             blocks.Add(newBlock);
         }
-
+        
         for (int i = 0; i < 20; i++)
         {
             Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 256 + (16 * i)), 0f, 0.25f);
             newBlock = new Visual(blockTexture, newPose);
             blocks.Add(newBlock);
         }
-        
+        */
 
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
+        upgradeButton = new Button[5];
+        isUpgraded = new bool[5] { false, false, false, false, false };
         abilityExpl = new TextBox[5];
         soundButton = new Button[5];
         CreateHud();
         LoadMap();
-        //lights.Add(new PointLight(lightEffect,new Vector2(300,300), 300, Color.Red));
-       // lights.Add(new PointLight(lightEffect, new Vector2(150, 450), 300, Color.Green));
-       // lights.Add(new PointLight(lightEffect, new Vector2(450, 450), 300, Color.Blue));
-
+       
         ps = new ParticleSystem();
+        energyCells = new EnergyCell[6]{
+            new EnergyCell(new Vector2(300,300)), new EnergyCell(new Vector2(400,400)), new EnergyCell(new Vector2(500,500)),
+            new EnergyCell(new Vector2(600,500)), new EnergyCell(new Vector2(500,600)), new EnergyCell(new Vector2(400,700))
+        };
+        traps = new List<Trap>();
     }
 
     public override void UnloadContent()
@@ -160,7 +180,7 @@ public class GameplayScreen : GameScreen
     {
         inputManager.Update();
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System) //HIER DE ROL IN DE GAME MANUEEL VERANDEREN HIER HIER HIER HIER
         playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
         if (oldCameraPosition != Camera.CameraPosition)
@@ -198,10 +218,14 @@ public class GameplayScreen : GameScreen
         for (int i = 0; i < 5; i++) 
         {
             if (abilityProgress[i].Value < abilityProgress[i].Range)
+            {
                 abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
+                abilityButton[i].Color = Color.Gray;
+            }
             else
             {
                 abilityButton[i].Color = Color.Red;
+                
             }
             
         }
@@ -211,6 +235,7 @@ public class GameplayScreen : GameScreen
                 abilityButton[i].MouseUp += b_clicked;
                 abilityButton[i].MouseOver += b_over;
                 abilityButton[i].MouseOut += b_out;
+                upgradeButton[i].MouseUp += u_clicked;
                 if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
                     soundButton[i].MousePress += s_clicked;
         }
@@ -218,6 +243,7 @@ public class GameplayScreen : GameScreen
         ps.update(gameTime);
 
         if (usingAbility)
+        {
             if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
                 switch (currentAbility)
                 {
@@ -227,7 +253,27 @@ public class GameplayScreen : GameScreen
                     case 3: SysAbThree(); break;
                     case 4: SysAbFour(); break;
                 }
+            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+                switch (currentAbility)
+                {
+                    case 0: RobAbZero(); break;
+                    case 1: RobAbOne(); break;
+                    case 2: RobAbTwo(); break;
+                    case 3: RobAbThree(); break;
+                    case 4: RobAbFour(); break;
+                }
+            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor)
+                switch (currentAbility)
+                {
+                    case 0: DocAbZero(); break;
+                    case 1: DocAbOne(); break;
+                    case 2: DocAbTwo(); break;
+                    case 3: DocAbThree(); break;
+                    case 4: DocAbFour(); break;
+                }
 
+
+        }
         foreach (PointLight l in lights)
         {
             if (l.Radius == 110)
@@ -237,6 +283,11 @@ public class GameplayScreen : GameScreen
                 {
                     lights.Remove(l);
                     break;
+                }
+
+                if (isUpgraded[0])
+                {
+                    lights[1].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
                 }
             }
         }
@@ -250,6 +301,41 @@ public class GameplayScreen : GameScreen
         {
             soundEffectTimer = TimeSpan.Zero;
             MediaPlayer.Volume = 1.0f;
+        }
+
+        foreach (EnergyCell ev in energyCells)
+        {
+            ev.Update(gameTime, inputManager);
+            ev.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32));
+        }
+        foreach (Trap t in traps)
+        {
+            t.Update(gameTime, inputManager);
+            if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
+            {
+                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.05f, 500f);
+            }
+            //TODO:: global stat voor health van de robot
+        }
+
+        if (cellCount >= 3)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (upgradeButton[i].Text == "Upgrade")
+                {
+                    upgradeButton[i].Color = Color.White;
+                    upgradeButton[i].Enabled = true;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                upgradeButton[i].Color = Color.Gray;
+                upgradeButton[i].Enabled = false;
+            }
         }
     }
 
@@ -274,7 +360,14 @@ public class GameplayScreen : GameScreen
 
         //if(isRoll == roll.Robot || isRoll == roll.System)
         //spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
-
+        foreach (EnergyCell ec in energyCells)
+        {
+            ec.Draw(spriteBatch);
+        }
+        foreach (Trap t in traps)
+        {
+            t.Draw(spriteBatch);
+        }
 
     }
 
@@ -284,9 +377,16 @@ public class GameplayScreen : GameScreen
         textureGrid = new Tile[90, 90];
         for (int i = 0; i < 90; i++) //TODO:: load from file
             for (int j = 0; j < 90; j++)
+            {
                 textureGrid[i, j] = new Tile(tile, i % 3);
-
-
+                if (i % 10 == 0 || j % 10 == 0 && j%15 == 5)
+                {
+                    Pose2D newPose = new Pose2D(new Vector2((32 * i),(32 * j)), 0f, 0.5f);
+                    newBlock = new Visual(blockTexture, newPose);
+                    blocks.Add(newBlock);
+                }
+            }
+        
 
     }
 
@@ -367,7 +467,30 @@ public class GameplayScreen : GameScreen
         e.Handled = true;
     }
 
-    #region System Abilities
+    void u_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
+    {
+        if (cellCount >= 3)
+        {
+            Button b = (Button)sender;
+            for (int i = 0; i < 5; i++)
+                if (b.Name == "u" + i && isUpgraded[i] == false) //zoek id die overeenkomt met aangeklikte upgade button
+                {
+                    //TODO:: check/reset etcetera
+                    isUpgraded[i] = true;
+                    cellCount -= 3;
+                    upgradeButton[i].Color = Color.Gray;
+                    upgradeButton[i].Enabled = false;
+                    upgradeButton[i].Text = "Bought";
+                    break;
+                }
+        }
+        e.Handled = false;
+        
+    }
+
+    #region Abilities
+
+        #region system abilities
     public void SysAbZero() //creating light
     {
         if (inputManager.MouseLeftButtonReleased())
@@ -376,34 +499,121 @@ public class GameplayScreen : GameScreen
             usingAbility = false;
            
         }
+        //upgrade, light follows mouse
     }
 
     public void SysAbOne() //creating light at robot
     {
         //TODO:: stuur command zodat er licht komt bij de speler die robot is.
+        //upgrade, meer zicht
     }
     public void SysAbTwo() 
     {
-
+        //TODO:: remove trap.
+        //upgrade, remove ook enemies
     }
     public void SysAbThree() 
     {
+        
+        //upgrade, meer paint
+        if (inputManager.MouseLeftButtonDown() && paintStartPos == Vector2.Zero)
+        {
+            paintStartPos = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
+        }
+        if(inputManager.MouseLeftButtonReleased())
+        {
+            paintEndPos = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
+        }
+        if (paintStartPos != Vector2.Zero && paintEndPos != Vector2.Zero)
+        {
+            ps.CreateTrail(100, paintStartPos, paintEndPos, Color.Red, false);
+            //TODO stuur hier info naar robot if possible ;]]]]]
+            paintStartPos = Vector2.Zero;
+            paintEndPos = Vector2.Zero;
+        }
 
     }
     public void SysAbFour() 
     {
+        //TODO:: think of something
+    }
+    #endregion
+        #region doctor abilities
+    private void DocAbFour()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DocAbThree()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DocAbTwo()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void DocAbOne()
+    {
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            Trap tmp = new Trap(new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            traps.Add(tmp);
+            usingAbility = false;
+        }
+    }
+
+    private void DocAbZero()
+    {
+        throw new NotImplementedException();
+    }
+        #endregion
+        #region robot abilities
+    private void RobAbFour()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RobAbThree()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RobAbTwo()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RobAbOne()
+    {
+        throw new NotImplementedException();
 
     }
+
+    private void RobAbZero()
+    {
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            projectiles.Add(rocket);
+            usingAbility = false;
+        }
+    }
+    #endregion
+
     #endregion
 
     public void CreateHud()
     {
         string[] abilityNames;
         string[] abilityDiscription;
+        string[] abilityUpgradeName;
         int[] abilityCooldowns;
         abilityNames = new string[5];
         abilityCooldowns = new int[5];
         abilityDiscription = new string[5];
+        abilityUpgradeName = new string[5];
         switch (Options.GetValue<NetworkManager.State>("role"))
         {
             case NetworkManager.State.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
@@ -414,9 +624,10 @@ public class GameplayScreen : GameScreen
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case NetworkManager.State.System: abilityNames = new string[5] { "Add light", "helpen", "wel", "though", "hehe" }; //namen van de abilities
-                abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse to view inside of rooms.", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
+            case NetworkManager.State.System: abilityNames = new string[5] { "Add light", "Vision Surge", "Destroy", "Paint", "hehe" }; //namen van de abilities
+                abilityCooldowns = new int[5] { 5000, 10000, 20000, 4000, 80000 }; //cooldown van de abilities
+                abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse.", "Restore minimal vision for the Robot", "Destroy stuff from Doctor", "Paint at mouse for Robot", "kijk mij nou random shit bedenken." };
+                abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
                 #region Soundbar
                 int[] soundButtonPositions;
                 soundButtonPositions = new int[10] { 10, 90, 170, 10, 170, 10, 90, 10, 170, 170 };
@@ -460,7 +671,7 @@ public class GameplayScreen : GameScreen
         Window abilityBar = new Window(Wamo.manager);
         abilityBar.Init();
         abilityBar.SetPosition(Options.GetValue<int>("screenWidth")/2 - 180, Options.GetValue<int>("screenHeight") - 160);
-        abilityBar.SetSize(360, 80);
+        abilityBar.SetSize(380, 110);
         abilityBar.Suspended = true; //geen events
         abilityBar.Visible = true;
         abilityBar.Resizable = false;
@@ -491,21 +702,36 @@ public class GameplayScreen : GameScreen
             abilityProgress[i].Parent = abilityBar;
             abilityProgress[i].Anchor = Anchors.None;
         }
-
-         for (int i = 0; i < 5; i++ )
+        
+        for (int i = 0; i < 5; i++)
         {
-            abilityExpl[i] = new TextBox(Wamo.manager);
-            abilityExpl[i].Init();
-            abilityExpl[i].SetPosition(Options.GetValue<int>("screenWidth") / 2 - 180, Options.GetValue<int>("screenHeight") - 205);
-            abilityExpl[i].SetSize(360,40);
-            abilityExpl[i].Name = "a";
-            abilityExpl[i].Resizable = false;
-            abilityExpl[i].ReadOnly = true;
-            abilityExpl[i].Text = abilityDiscription[i];
-            abilityExpl[i].Hide();
-            Wamo.manager.Add(abilityExpl[i]);
-            
-         }
+            upgradeButton[i] = new Button(Wamo.manager);
+            upgradeButton[i].Init();
+            upgradeButton[i].Name = "u" + i;
+            upgradeButton[i].SetPosition(10 + (70 * i), 83);
+            upgradeButton[i].SetSize(60, 20);
+            upgradeButton[i].Text = abilityUpgradeName[i];
+            upgradeButton[i].Color = Color.Gray;
+            upgradeButton[i].Enabled = false;
+            upgradeButton[i].Parent = abilityBar;
+            upgradeButton[i].Anchor = Anchors.None;
+
+        }
+        
+            for (int i = 0; i < 5; i++)
+            {
+                abilityExpl[i] = new TextBox(Wamo.manager);
+                abilityExpl[i].Init();
+                abilityExpl[i].SetPosition(Options.GetValue<int>("screenWidth") / 2 - 180, Options.GetValue<int>("screenHeight") - 205);
+                abilityExpl[i].SetSize(360, 40);
+                abilityExpl[i].Name = "a";
+                abilityExpl[i].Resizable = false;
+                abilityExpl[i].ReadOnly = true;
+                abilityExpl[i].Text = abilityDiscription[i];
+                abilityExpl[i].Hide();
+                Wamo.manager.Add(abilityExpl[i]);
+
+            }
             Wamo.manager.Add(abilityBar);
         #endregion abilityBar
 
@@ -593,13 +819,25 @@ public class GameplayScreen : GameScreen
 
         if (Mouse.GetState().RightButton == ButtonState.Pressed)
         {
-            lights[0].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
+            //lights[0].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
             ps.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
            
         }
-            
+        List<Visual> inrange = new List<Visual>();
+        foreach (Visual v in blocks)
+        {
+            if (v.Pose.Position.Y>= Camera.CameraPosition.Y &&
+                v.Pose.Position.Y<= Camera.CameraPosition.Y  + 900&&
+                v.Pose.Position.X>= Camera.CameraPosition.X &&
+                v.Pose.Position.X<= Camera.CameraPosition.X + 1400)
+                inrange.Add(v);
+        }
+
         foreach (PointLight l in lights)
-            l.Render(GraphicsDevice, blocks);
+        {
+            l.Render(GraphicsDevice, inrange);
+        }
+        inrange.Clear();
     }
 
     /// <summary>
@@ -613,12 +851,7 @@ public class GameplayScreen : GameScreen
 
         spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null,ScreenManager.Instance.DrawScale());
 
-        foreach (Visual v in blocks)
-        {
-           // Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
-
-            spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, Vector2.Zero, v.Pose.Scale, SpriteEffects.None, 0.1f);
-        }
+        
         int size = 32;
         int minX = -(int)(Camera.CameraPosition.X/size);
         int minY = -(int)(Camera.CameraPosition.Y/size);
@@ -628,6 +861,13 @@ public class GameplayScreen : GameScreen
             for (int j = minY; j < maxY; j++)
                if(textureGrid[i,j] != null)
                 textureGrid[i, j].Draw(spriteBatch, new Vector2(i * size, j * size));
+        
+        foreach (Visual v in blocks)
+        {
+            Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
+
+            spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
+        }
 
         ps.draw(spriteBatch);
 
@@ -637,5 +877,11 @@ public class GameplayScreen : GameScreen
     public static List<Visual> allBlocks
     {
         get { return blocks; }
+    }
+
+    public static int CellCount
+    {
+        get { return cellCount; }
+        set { cellCount = value; }
     }
 }
