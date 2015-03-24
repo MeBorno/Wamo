@@ -54,6 +54,7 @@ public class GameplayScreen : GameScreen
 
     EnergyCell[] energyCells;
     List<Trap> traps;
+    List<Projectile> projectiles;
     public static int cellCount = 0;
 
     Vector2 paintStartPos = Vector2.Zero;
@@ -94,7 +95,7 @@ public class GameplayScreen : GameScreen
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.Doctor);
+            Options.SetValue("role", NetworkManager.State.Robot);
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -564,13 +565,18 @@ public class GameplayScreen : GameScreen
 
     private void RobAbOne()
     {
-        
+        throw new NotImplementedException();
 
     }
 
     private void RobAbZero()
     {
-        throw new NotImplementedException();
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            projectiles.Add(rocket);
+            usingAbility = false;
+        }
     }
     #endregion
 
