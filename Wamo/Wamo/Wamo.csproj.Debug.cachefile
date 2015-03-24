@@ -15,10 +15,16 @@ Content\Sprites\floortilesmall.xnb
 Content\Sprites\tiles.xnb
 Content\fire.xnb
 Content\smoke.xnb
+Content\Circle.xnb
+Content\LongBlock.xnb
+Content\cellTexture.xnb
+Content\Trap1.xnb
 Content\Blur.xnb
 Content\Combine.xnb
 Content\Light.xnb
 Content\beep.xnb
+Content\Music\BlastProcess.xnb
+Content\Music\BlastProcess.wma
 Content\Load\menu.cme
 Content\Load\player.cme
 Content\Load\splash.cme
