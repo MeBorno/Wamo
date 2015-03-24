@@ -50,3 +50,5 @@ C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\fl
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Sprites\tiles.xnb
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\fire.xnb
 C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\smoke.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\Circle.xnb
+C:\Users\Sander\Documents\GitHub\Wamo\Wamo\Wamo\bin\x86\Debug\Content\LongBlock.xnb

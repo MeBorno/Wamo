@@ -121,12 +121,12 @@ public class Player : Entity
 
     public void Movement()
     {
-        Rectangle playercollider = new Rectangle((int)PlayerPosition.X, (int)PlayerPosition.Y, 32, 32);
+        Rectangle playercollider = new Rectangle((int)(PlayerPosition.X / ScreenManager.Instance.DrawScale().M11), (int)(PlayerPosition.Y / ScreenManager.Instance.DrawScale().M11), 32, 32);
         foreach (Visual v in GameplayScreen.allBlocks)
         {
             if (playercollider.Intersects(new Rectangle((int)(v.Pose.Position.X / ScreenManager.Instance.DrawScale().M11), (int)(v.Pose.Position.Y / ScreenManager.Instance.DrawScale().M22), 32, 32)))
             {
-              //  velocity = -velocity;
+              // velocity = -velocity;
             }
         }
 

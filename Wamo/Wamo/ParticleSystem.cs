@@ -14,6 +14,7 @@ public class ParticleSystem
     List<Particle> particleList;
     List<Cannon> cannonList;
     Texture2D pixelParticle;
+    Texture2D circleParticle;
     Random r;
 
 
@@ -23,6 +24,7 @@ public class ParticleSystem
     public ParticleSystem()
     {
         pixelParticle = Wamo.manager.Content.Load<Texture2D>("Content/smoke");
+        circleParticle = Wamo.manager.Content.Load<Texture2D>("Content/Circle");
         particleList = new List<Particle>();
         particleList.Clear();
         cannonList = new List<Cannon>();
@@ -106,10 +108,8 @@ public class ParticleSystem
 
         for (int i = 0; i < amount; i++)
         {
-            CreateExplosion(30, startPos + (diff * i), color, true, 0.15f, 200f);
-           
-
-            
+           // CreateExplosion(30, startPos + (diff * i), color, true, 0.15f, 200f);
+            CreateParticle(circleParticle, startPos + (diff * i), 1000, 0f, 0f, 1f, color, color, fade);
         }
     }
 

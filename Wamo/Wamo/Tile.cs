@@ -41,7 +41,7 @@ public class Tile
 
         spriteBatch.Draw(sprite, new Rectangle((int)(position.X + Camera.CameraPosition.X), (int)(position.Y + Camera.CameraPosition.Y), tile_size.X, tile_size.Y),
                                  new Rectangle((int)x, (int)y, tile_size.X, tile_size.Y),
-                                 Color.White, 0.0f, Vector2.Zero, SpriteEffects.None, 0.0f);
+                                 Color.White, 0.0f, Vector2.Zero, SpriteEffects.None, 0.2f);
     }
 
 
