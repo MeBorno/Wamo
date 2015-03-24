@@ -97,6 +97,13 @@ class Program
                                     Console.WriteLine("Dr is een cunt geupdate");
                                     break;
                                 }
+                            } 
+                            else if(type == PacketTypes.SOUNDEFFECT)
+                            {
+                                NetOutgoingMessage outmsg = Server.CreateMessage();
+                                outmsg.Write((byte)PacketTypes.SOUNDEFFECT);
+                                outmsg.Write((byte)inc.ReadByte());
+                                Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
                             }
                             break;
                         }
@@ -163,6 +170,14 @@ class Program
                         }
                     }
 
+
+
+                    /*NetOutgoingMessage test = Server.CreateMessage();
+                    test = Server.CreateMessage();
+                    test.Write((byte)PacketTypes.SOUNDEFFECT);
+                    test.Write((byte)1);
+                    Server.SendMessage(test, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0); */
+
                     NetOutgoingMessage outmsg = Server.CreateMessage();
                     outmsg.Write((byte)PacketTypes.WORLDSTATE);
                     
@@ -204,7 +219,8 @@ class Program
         MOVE,
         WORLDSTATE,
         ROLESELECT,
-        STATEUPDATE
+        STATEUPDATE,
+        SOUNDEFFECT
     }
     enum State
     {

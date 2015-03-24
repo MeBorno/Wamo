@@ -13,6 +13,7 @@ public class Options
         options = new Dictionary<string, object>();
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
+        options.Add("role", NetworkManager.State.None);
 
         if (File.Exists(fname))
         {
@@ -32,6 +33,7 @@ public class Options
                     object val = null;
                     if (tmp[1].ToLower() == "shutdown") continue;
                     else if (tmp[1].ToLower() == "lightengine") continue;
+                    else if (tmp[1].ToLower() == "role") continue;
                     if (tmp[1].StartsWith("["))
                     {
                         switch (tmp[1].Substring(1, tmp[1].IndexOf("]") - 1).ToLower())
