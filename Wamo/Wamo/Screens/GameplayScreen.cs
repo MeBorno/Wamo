@@ -66,7 +66,6 @@ public class GameplayScreen : GameScreen
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
         blockTexture = Content.Load<Texture2D>("Block");
         longBlockTexture = Content.Load<Texture2D>("LongBlock");
-        //Texture2D blockGlow = Content.Load<Texture2D>("BlockGlow");
         beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
 
@@ -94,7 +93,7 @@ public class GameplayScreen : GameScreen
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.Doctor);
+            Options.SetValue("role", NetworkManager.State.System);
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -115,25 +114,7 @@ public class GameplayScreen : GameScreen
        
 
         Options.SetValue("lightEngine", true);
-        /*
-        //dit is tijdelijk DIT IS TIJDELIJK, IK ZEG JE DUDE WTF MAN DIT IS TIJDELIJK
-        for (int i = 0; i < 20; i++)
-        {
-            Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 128), 0f, 0.5f);
-            
-            newBlock = new Visual(blockTexture, newPose);
-            
-            blocks.Add(newBlock);
-        }
-        
-        for (int i = 0; i < 20; i++)
-        {
-            Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 256 + (16 * i)), 0f, 0.25f);
-            newBlock = new Visual(blockTexture, newPose);
-            blocks.Add(newBlock);
-        }
-        */
-
+       
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
         upgradeButton = new Button[5];
@@ -171,7 +152,7 @@ public class GameplayScreen : GameScreen
     {
         inputManager.Update();
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System) //HIER DE ROL IN DE GAME MANUEEL VERANDEREN HIER HIER HIER HIER
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
         if (oldCameraPosition != Camera.CameraPosition)
@@ -182,7 +163,7 @@ public class GameplayScreen : GameScreen
         }
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot) //TODO:: uiteindelijk alleen robot???
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor) //TODO:: uiteindelijk alleen robot???
         player.Update(gameTime, inputManager);
        //  else
        // {
@@ -293,7 +274,9 @@ public class GameplayScreen : GameScreen
             t.Update(gameTime, inputManager);
             if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
             {
-                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.05f, 500f);
+                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.15f, 200f,0.50f,10f);
+                ps.CreateExplosion(30, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Red, true, 0.15f, 300f,0.50f,10f);
+                ps.CreateExplosion(90, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Gray, true, 0.05f, 500f,0.60f,1f);
             }
             //TODO:: global stat voor health van de robot
         }
@@ -533,9 +516,10 @@ public class GameplayScreen : GameScreen
 
     private void DocAbOne()
     {
+        
         if (inputManager.MouseLeftButtonReleased())
         {
-            Trap tmp = new Trap(new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            Trap tmp = new Trap(new Vector2((int)((Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11) / 16) * 16, (int)((Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22) / 16) * 16));
             traps.Add(tmp);
             usingAbility = false;
         }

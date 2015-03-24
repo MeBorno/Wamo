@@ -13,6 +13,8 @@ public class Player : Entity
     private InputManager inputManager;
     SpriteFont font;
     Vector2 velocity;
+    Vector2 globalPos;
+    float angle;
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
@@ -21,7 +23,6 @@ public class Player : Entity
         base.LoadContent(content, inputManager);
 
         fileManager = new FileManager();
-        moveAnimation = new SpriteSheetAnimation();
         fileManager.LoadContent("Load/Player.cme", attributes, contents);
 
         Vector2 tmpFrames = Vector2.Zero;
@@ -39,16 +40,11 @@ public class Player : Entity
                         position = new Vector2(int.Parse(pos[0]), int.Parse(pos[1]));
                         break;
                     }
-                    case "Frames":
-                    {
-                        string[] frames = contents[i][j].Split(' ');
-                        tmpFrames = new Vector2(int.Parse(frames[0]), int.Parse(frames[1]));
-                        break;
-                    }
+
                 }
             }
+        globalPos = position;
         
-        moveAnimation.LoadContent(content, image, "", position);
 
     }
 
@@ -60,25 +56,25 @@ public class Player : Entity
 
     public override void Update(GameTime gameTime, InputManager inputManager)
     {
-        moveAnimation.IsActive = true;
+        
 
         if (inputManager.KeyDown(Keys.Right, Keys.D))
         {
             if (inputManager.KeyDown(Keys.Down, Keys.S))
             {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 4);
+                //moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 4);
                 velocity.X += 7.07f;
                 velocity.Y += 7.07f;
             }
             else if (inputManager.KeyDown(Keys.Up, Keys.W))
             {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 5);
+               // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 5);
                 velocity.X += 7.07f;
                 velocity.Y -= 7.07f;
             }
             else
             {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 2);
+               // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 2);
                 velocity.X += 10;
             }
         }
@@ -86,35 +82,37 @@ public class Player : Entity
         {
             if (inputManager.KeyDown(Keys.Down, Keys.S))
             {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 6);
+               // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 6);
                 velocity.X -= 7.07f;
                 velocity.Y += 7.07f;
             }
             else if (inputManager.KeyDown(Keys.Up, Keys.W))
             {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 7);
+                //moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 7);
                 velocity.X -= 7.07f;
                 velocity.Y -= 7.07f;
             }
             else
             {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 1);
+                //moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 1);
                 velocity.X -= 10;
             }
         }
         else if (inputManager.KeyDown(Keys.Up, Keys.W))
         {
-            moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 3);
+           // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 3);
             velocity.Y -= 10;
         }
         else if (inputManager.KeyDown(Keys.Down, Keys.S))
         {
-            moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 0);
+           // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 0);
             velocity.Y += 10;
         }
-        else moveAnimation.IsActive = false;
-       
-        moveAnimation.Update(gameTime);
+
+
+        double a = inputManager.MousePos().Y - PlayerPosition.Y;
+        double b = inputManager.MousePos().X - PlayerPosition.X;
+        angle = (float)Math.Atan2(a, b);
         Movement();
 
     }
@@ -132,26 +130,29 @@ public class Player : Entity
 
         if (velocity != Vector2.Zero)
         {
-            moveAnimation.GlobalPos += velocity/10;
+            globalPos += velocity/10;
             if (velocity.X < 0.2f && velocity.X > -0.2f) velocity.X = 0;
             else { velocity.X = velocity.X / 1.50f; }
             if (velocity.Y < 0.01f && velocity.Y > -0.01f) velocity.Y = 0;
             else { velocity.Y = velocity.Y / 1.50f; }
             
         }
+
+       
+        
        
     }
 
     public override void Draw(SpriteBatch spriteBatch)
-    {    
-        moveAnimation.Draw(spriteBatch);
+    {
+        spriteBatch.Draw(image, globalPos, null, Color.White,angle, new Vector2(16,16), 1f, SpriteEffects.None, 0.3f);
        // spriteBatch.DrawString(font, moveAnimation.GlobalPos.X + " , " + moveAnimation.GlobalPos.Y, Camera.CameraPosition + new Vector2(100, 100), Color.Black);
        // spriteBatch.DrawString(font, velocity.X + " , " + velocity.Y, Camera.CameraPosition + new Vector2(100, 140), Color.Black);
     }
 
     public Vector2 PlayerPosition
     {
-        get { return moveAnimation.GlobalPos + new Vector2(moveAnimation.FrameWidth/2,moveAnimation.FrameHeight/2); }
+        get { return globalPos + new Vector2(image.Width/2,image.Height/2); }
     }
 }
 

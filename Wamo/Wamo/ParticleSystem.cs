@@ -76,13 +76,14 @@ public class ParticleSystem
     /// <param name="fade"></param>
     /// <param name="opacity_change"></param>
     /// <param name="ttl"></param>
-    public void CreateExplosion(int amount, Vector2 position, Color averageColor, bool fade = false, float opacity_change = 0.05f, float ttl = 400f)
+    public void CreateExplosion(int amount, Vector2 position, Color averageColor, bool fade = false, float opacity_change = 0.05f, float ttl = 400f, float Pscale = 3f, float Pspeed = 1f)
     {
         
         for (int i = 0; i < amount; i++)
         {
             float angle = (float)(r.NextDouble()) * 360f;
-            float scale = (float)(r.Next(3,8));
+            float scale = (float)(r.Next(1,8)) * Pscale;
+            float speed = (float)(r.NextDouble() + 0.5f) * Pspeed;
 
             Color color = averageColor * (float)(r.Next(1,20) / 20.0);
             
