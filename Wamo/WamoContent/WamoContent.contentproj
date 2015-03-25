@@ -68,6 +68,10 @@
       <Name>player</Name>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Load\robot1.cme">
+      <Name>robot1</Name>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Load\splash.cme">
       <Name>splash</Name>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

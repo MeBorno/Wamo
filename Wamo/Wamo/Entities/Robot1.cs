@@ -22,7 +22,7 @@ public class Robot1 : Entity
 
         fileManager = new FileManager();
         moveAnimation = new SpriteSheetAnimation();
-        fileManager.LoadContent("Load/Player.cme", attributes, contents);
+        fileManager.LoadContent("Load/robot1.cme", attributes, contents);
 
         Vector2 tmpFrames = Vector2.Zero;
 
@@ -58,63 +58,12 @@ public class Robot1 : Entity
         moveAnimation.UnloadContent();
     }
 
-    public override void Update(GameTime gameTime, InputManager inputManager)
+    public void Update(GameTime gameTime, InputManager inputManager, Player player, PointLight playerFOV)
     {
         moveAnimation.IsActive = true;
-
-        /*if (inputManager.KeyDown(Keys.Right, Keys.D))
-        {
-            if (inputManager.KeyDown(Keys.Down, Keys.S))
-            {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 4);
-                velocity.X += 7.07f;
-                velocity.Y += 7.07f;
-            }
-            else if (inputManager.KeyDown(Keys.Up, Keys.W))
-            {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 5);
-                velocity.X += 7.07f;
-                velocity.Y -= 7.07f;
-            }
-            else
-            {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 2);
-                velocity.X += 10;
-            }
-        }
-        else if (inputManager.KeyDown(Keys.Left, Keys.A))
-        {
-            if (inputManager.KeyDown(Keys.Down, Keys.S))
-            {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 6);
-                velocity.X -= 7.07f;
-                velocity.Y += 7.07f;
-            }
-            else if (inputManager.KeyDown(Keys.Up, Keys.W))
-            {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 7);
-                velocity.X -= 7.07f;
-                velocity.Y -= 7.07f;
-            }
-            else
-            {
-                moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 1);
-                velocity.X -= 10;
-            }
-        }
-        else if (inputManager.KeyDown(Keys.Up, Keys.W))
-        {
-            moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 3);
-            velocity.Y -= 10;
-        }
-        else if (inputManager.KeyDown(Keys.Down, Keys.S))
-        {
-            moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 0);
-            velocity.Y += 10;
-        }/*
-         * 
-         *                                          if (Insight) walk towards player
-        else*/ moveAnimation.IsActive = false;
+        Vector2 positionDifference = this.position - player.PlayerPosition;
+        
+        
 
         moveAnimation.Update(gameTime);
         Movement();
@@ -123,7 +72,7 @@ public class Robot1 : Entity
 
     public void Movement()
     {
-        Rectangle playercollider = new Rectangle((int)PlayerPosition.X, (int)PlayerPosition.Y, 32, 32);
+        Rectangle playercollider = new Rectangle((int)RobotPosition.X, (int)RobotPosition.Y, 32, 32);
         foreach (Visual v in GameplayScreen.allBlocks)
         {
             if (playercollider.Intersects(new Rectangle((int)(v.Pose.Position.X / ScreenManager.Instance.DrawScale().M11), (int)(v.Pose.Position.Y / ScreenManager.Instance.DrawScale().M22), 32, 32)))
@@ -147,11 +96,9 @@ public class Robot1 : Entity
     public override void Draw(SpriteBatch spriteBatch)
     {
         moveAnimation.Draw(spriteBatch);
-        // spriteBatch.DrawString(font, moveAnimation.GlobalPos.X + " , " + moveAnimation.GlobalPos.Y, Camera.CameraPosition + new Vector2(100, 100), Color.Black);
-        // spriteBatch.DrawString(font, velocity.X + " , " + velocity.Y, Camera.CameraPosition + new Vector2(100, 140), Color.Black);
     }
 
-    public Vector2 PlayerPosition
+    public Vector2 RobotPosition
     {
         get { return moveAnimation.GlobalPos + new Vector2(moveAnimation.FrameWidth / 2, moveAnimation.FrameHeight / 2); }
     }

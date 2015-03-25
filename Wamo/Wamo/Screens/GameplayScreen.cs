@@ -16,7 +16,7 @@ public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
     ParticleSystem ps;
-    Player player;
+    static Player player;
     Robot1 robot1;
     int timer = 0;
     SoundEffect beep;
@@ -24,7 +24,7 @@ public class GameplayScreen : GameScreen
     Texture2D tile;
     Texture2D blockTexture, longBlockTexture;
 
-    PointLight playerFOV;
+    public PointLight playerFOV;
     Visual newBlock;
     //InputManager inputManager;
     SpriteFont font;
@@ -164,6 +164,7 @@ public class GameplayScreen : GameScreen
     {
         base.UnloadContent();
         player.UnloadContent();
+        robot1.UnloadContent();
     }
 
     public override void NetworkMessage(NetIncomingMessage message)
@@ -193,6 +194,7 @@ public class GameplayScreen : GameScreen
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
             Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot) //TODO:: uiteindelijk alleen robot???
         player.Update(gameTime, inputManager);
+        robot1.Update(gameTime, inputManager, player, playerFOV);
        //  else
        // {
         if (inputManager.KeyDown(Keys.Down, Keys.H))
@@ -362,6 +364,7 @@ public class GameplayScreen : GameScreen
     {
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
+        robot1.Draw(spriteBatch);
 
        
         foreach (EnergyCell ec in energyCells)
@@ -888,5 +891,10 @@ public class GameplayScreen : GameScreen
     {
         get { return cellCount; }
         set { cellCount = value; }
+    }
+
+    public static Player Player
+    {
+        get { return player; }
     }
 }
