@@ -193,7 +193,7 @@ public class GameplayScreen : GameScreen
             oldCameraPosition = Camera.CameraPosition;
         }
 
-<<<<<<< HEAD
+
         /*if (Options.GetValue<State>("role") == State.System ||
             Options.GetValue<State>("role") == State.Robot) //TODO:: uiteindelijk alleen robot??? */
         if (Options.GetValue<State>("role") == State.Robot)
@@ -206,13 +206,6 @@ public class GameplayScreen : GameScreen
             NetworkManager.Instance.SendMessage(msg);
         }
 
-        robot1.Update(gameTime, inputManager, player, playerFOV);
-=======
-        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor) //TODO:: uiteindelijk alleen robot???
-                    player.Update(gameTime, inputManager);            
-        robot1.Update(gameTime, inputManager, player, blocks);
->>>>>>> origin/master
        //  else
        // {
         if (inputManager.KeyDown(Keys.Down, Keys.H))
@@ -388,9 +381,9 @@ public class GameplayScreen : GameScreen
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
         robot1.Draw(spriteBatch);
-        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor)
+        if (Options.GetValue<State>("role") == State.Doctor)
             spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 30), Color.Red);
-        if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
+        if (Options.GetValue<State>("role") != State.Doctor)
             spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 30), Color.Blue); //TODO:: mooier font?
 
         psUp.draw(spriteBatch);
@@ -679,11 +672,7 @@ public class GameplayScreen : GameScreen
         abilityUpgradeName = new string[5];
         switch (Options.GetValue<State>("role"))
         {
-<<<<<<< HEAD
-            case State.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
-=======
-            case NetworkManager.State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Unknown", "Scramble" }; //namen van de abilities
->>>>>>> origin/master
+            case State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Unknown", "Scramble" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Unknown", "Create trap at mouse position", "Create monster at mouse position", "unknown", "Scramble the sounds of the system" };
 
