@@ -13,6 +13,10 @@ public class Robot1 : Entity
     private InputManager inputManager;
     SpriteFont font;
     Vector2 velocity;
+    Vector2 globalPos;
+    float angle;
+    Color testColor = Color.Blue;
+    
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
@@ -21,7 +25,6 @@ public class Robot1 : Entity
         base.LoadContent(content, inputManager);
 
         fileManager = new FileManager();
-        moveAnimation = new SpriteSheetAnimation();
         fileManager.LoadContent("Load/robot1.cme", attributes, contents);
 
         Vector2 tmpFrames = Vector2.Zero;
@@ -39,17 +42,9 @@ public class Robot1 : Entity
                             position = new Vector2(int.Parse(pos[0]), int.Parse(pos[1]));
                             break;
                         }
-                    case "Frames":
-                        {
-                            string[] frames = contents[i][j].Split(' ');
-                            tmpFrames = new Vector2(int.Parse(frames[0]), int.Parse(frames[1]));
-                            break;
-                        }
                 }
             }
-
-        moveAnimation.LoadContent(content, image, "", position);
-
+        globalPos = position;
     }
 
     public override void UnloadContent()
@@ -58,14 +53,13 @@ public class Robot1 : Entity
         moveAnimation.UnloadContent();
     }
 
-    public void Update(GameTime gameTime, InputManager inputManager, Player player, PointLight playerFOV)
+    public void Update(GameTime gameTime, InputManager inputManager, Player player, List<Visual> blocks)
     {
-        moveAnimation.IsActive = true;
-        Vector2 positionDifference = this.position - player.PlayerPosition;
-        
-        
+        DoPathFinding(player, blocks);            
 
-        moveAnimation.Update(gameTime);
+        double a = (player.PlayerPosition.Y - Camera.CameraPosition.Y) - globalPos.Y;
+        double b = (player.PlayerPosition.X - Camera.CameraPosition.X) - globalPos.X;
+        angle = (float)Math.Atan2(a, b);
         Movement();
 
     }
@@ -83,7 +77,7 @@ public class Robot1 : Entity
 
         if (velocity != Vector2.Zero)
         {
-            moveAnimation.GlobalPos += velocity / 10;
+            globalPos += velocity / 10;
             if (velocity.X < 0.2f && velocity.X > -0.2f) velocity.X = 0;
             else { velocity.X = velocity.X / 1.50f; }
             if (velocity.Y < 0.01f && velocity.Y > -0.01f) velocity.Y = 0;
@@ -95,12 +89,26 @@ public class Robot1 : Entity
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        moveAnimation.Draw(spriteBatch);
+        spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, testColor, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
+    }
+
+    public void DoPathFinding(Player player, List<Visual> blocks)
+    {
+        Vector2 positionDifference = this.position - player.PlayerPosition;
+        List<Visual> blocksinrange = new List<Visual>();
+        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1600, 1200);
+        foreach (Visual v in blocks)
+        {
+            if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), (int)v.Pose.Scale.X * 64, (int)v.Pose.Scale.Y * 64)))
+                blocksinrange.Add(v);
+        }
+
+
     }
 
     public Vector2 RobotPosition
     {
-        get { return moveAnimation.GlobalPos + new Vector2(moveAnimation.FrameWidth / 2, moveAnimation.FrameHeight / 2); }
+        get { return globalPos; }
     }
 }
 

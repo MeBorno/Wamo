@@ -176,8 +176,8 @@ public class GameplayScreen : GameScreen
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
             Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot) //TODO:: uiteindelijk alleen robot???
-        player.Update(gameTime, inputManager);
-        robot1.Update(gameTime, inputManager, player, playerFOV);
+        player.Update(gameTime, inputManager);            
+        robot1.Update(gameTime, inputManager, player, blocks);
        //  else
        // {
         if (inputManager.KeyDown(Keys.Down, Keys.H))
