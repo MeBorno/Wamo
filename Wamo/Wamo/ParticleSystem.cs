@@ -13,7 +13,8 @@ public class ParticleSystem
      */
     List<Particle> particleList;
     List<Cannon> cannonList;
-    Texture2D pixelParticle;
+    Texture2D smokeParticle;
+    Texture2D fireParticle;
     Texture2D circleParticle;
     Random r;
 
@@ -23,7 +24,8 @@ public class ParticleSystem
      */
     public ParticleSystem()
     {
-        pixelParticle = Wamo.manager.Content.Load<Texture2D>("Content/smoke");
+        smokeParticle = Wamo.manager.Content.Load<Texture2D>("Content/smoke");
+        fireParticle = Wamo.manager.Content.Load<Texture2D>("Content/fire");
         circleParticle = Wamo.manager.Content.Load<Texture2D>("Content/Circle");
         particleList = new List<Particle>();
         particleList.Clear();
@@ -87,7 +89,7 @@ public class ParticleSystem
 
             Color color = averageColor * (float)(r.Next(1,20) / 20.0);
             
-            CreateParticle(pixelParticle, position, ttl, 1f, angle, scale, color,color, fade, opacity_change);
+            CreateParticle(smokeParticle, position, ttl, 1f, angle, scale, color,color, fade, opacity_change);
         }
     }
 
@@ -182,7 +184,7 @@ public class ParticleSystem
         tmp.duration = duration;
         tmp.endPos = endPos;
         if(texture == null)
-        tmp.sprite = pixelParticle;
+        tmp.sprite = fireParticle;
         else
         {
             tmp.sprite = texture;
@@ -234,7 +236,7 @@ public class ParticleSystem
                     Color tmpColor = c.startColor;
                     //angle
                     //dit is voor vuur;
-                    CreateParticle(c.sprite, c.startPos, c.duration, tmpSpeed, c.angle, (float)r.NextDouble(), tmpColor, c.endColor, true);
+                    CreateParticle(c.sprite, c.startPos, c.duration, tmpSpeed, c.angle, 1f, tmpColor, c.endColor, true);
                 }
             }
             else
@@ -253,7 +255,7 @@ public class ParticleSystem
     {
         foreach (Particle p in particleList)
         {
-            sb.Draw(p.sprite, p.position, null,p.currentColor * p.opacity, 0f, new Vector2(p.sprite.Width/2 * p.scale, p.sprite.Height/2 * p.scale), p.scale, SpriteEffects.None, 0.0f);// / GameEnvironment.Camera.Scale.M11);
+            sb.Draw(p.sprite, p.position - new Vector2(p.sprite.Width/2 * p.scale, p.sprite.Height/2 * p.scale), null,p.currentColor * p.opacity, 0f, Vector2.Zero, p.scale, SpriteEffects.None, 0.0f);// / GameEnvironment.Camera.Scale.M11);
         }
     }
 

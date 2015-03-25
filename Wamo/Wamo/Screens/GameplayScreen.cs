@@ -332,9 +332,9 @@ public class GameplayScreen : GameScreen
             t.Update(gameTime, inputManager);
             if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
             {
-                psDown.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
-                psDown.CreateExplosion(30, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
-                psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                psDown.CreateExplosion(40, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                psDown.CreateExplosion(30, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
                 healhBar.Value -= 10;
             }
             
@@ -379,14 +379,15 @@ public class GameplayScreen : GameScreen
     public override void Draw(SpriteBatch spriteBatch)
     {
         base.Draw(spriteBatch);
-        player.Draw(spriteBatch);
         robot1.Draw(spriteBatch);
+        psUp.draw(spriteBatch);
+        player.Draw(spriteBatch);
         if (Options.GetValue<State>("role") == State.Doctor)
             spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 30), Color.Red);
         if (Options.GetValue<State>("role") != State.Doctor)
             spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 30), Color.Blue); //TODO:: mooier font?
 
-        psUp.draw(spriteBatch);
+        
        
 
     }
@@ -418,17 +419,21 @@ public class GameplayScreen : GameScreen
                     case "O": textureGrid[i, count] = new Tile(tile, 0); break;
                     case "1": textureGrid[i, count] = new Tile(tile, 1); break;
                     case "2": textureGrid[i, count] = new Tile(tile, 2); break;
-                    case "3": textureGrid[i, count] = new Tile(tile, 3); break;
+                    case "3": textureGrid[i, count] = new Tile(tile, 3); break;//'NORMAL' TILES
                     case "4": textureGrid[i, count] = new Tile(tile, 4); break;
                     case "5": textureGrid[i, count] = new Tile(tile, 5); break;
+
                     case "6": textureGrid[i, count] = new Tile(tile, 6); break;
-                    case "7": textureGrid[i, count] = new Tile(tile, 7); break;
+                    case "7": textureGrid[i, count] = new Tile(tile, 7); break; //DANGER TILES
+
                     case "-": textureGrid[i, count] = new Tile(tile, 12); break;
                     case "|": textureGrid[i, count] = new Tile(tile, 21); break;
-                    case "X": textureGrid[i, count] = new Tile(tile, 20); break;
+                    case "X": textureGrid[i, count] = new Tile(tile, 20); break;//BLUE LINE TILES
                     case "Z": textureGrid[i, count] = new Tile(tile, 19); break;
                     case "A": textureGrid[i, count] = new Tile(tile, 11); break;
                     case "S": textureGrid[i, count] = new Tile(tile, 13); break;
+
+                    case "Q": textureGrid[i, count] = new Tile(tile, 8); break;
 
                 }
             }
@@ -879,7 +884,8 @@ public class GameplayScreen : GameScreen
         if (Mouse.GetState().RightButton == ButtonState.Pressed)
         {
             //lights[0].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-            psDown.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
+            psUp.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
+            
            
         }
         List<Visual> inrange = new List<Visual>();
