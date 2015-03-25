@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Audio;
 using Lidgren.Network;
 using TomShane.Neoforce.Controls;
 using Microsoft.Xna.Framework.Media;
+using System.IO;
 
 public class GameplayScreen : GameScreen
 {
@@ -19,6 +20,7 @@ public class GameplayScreen : GameScreen
     static Player player;
     Robot1 robot1;
     int timer = 0;
+    double evilPoints = 30;
     SoundEffect beep;
     Tile[,] textureGrid;
     Texture2D tile;
@@ -103,7 +105,7 @@ public class GameplayScreen : GameScreen
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.System);
+            Options.SetValue("role", NetworkManager.State.Doctor);
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -199,6 +201,7 @@ public class GameplayScreen : GameScreen
         }
       //  }
         timer += gameTime.ElapsedGameTime.Milliseconds;
+        evilPoints += 0.010;
         
         for (int i = 0; i < 5; i++) 
         {
@@ -302,7 +305,9 @@ public class GameplayScreen : GameScreen
             t.Update(gameTime, inputManager);
             if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
             {
-                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.05f, 500f);
+                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                ps.CreateExplosion(30, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                ps.CreateExplosion(90, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
             }
             //TODO:: global stat voor health van de robot
         }
@@ -348,11 +353,15 @@ public class GameplayScreen : GameScreen
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
         robot1.Draw(spriteBatch);
-
+        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor)
+            spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 10), Color.Red);
+        if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
+            spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 10), Color.Red);
+        
        
         foreach (EnergyCell ec in energyCells)
         {
-            ec.Draw(spriteBatch);
+            ec.Draw(spriteBatch); //TODO deze moeten achter shadow
         }
         foreach (Trap t in traps)
         {
@@ -365,18 +374,35 @@ public class GameplayScreen : GameScreen
     {
         tile = content.Load<Texture2D>("Sprites/tiles");
         textureGrid = new Tile[90, 90];
-        for (int i = 0; i < 90; i++) //TODO:: load from file
-            for (int j = 0; j < 90; j++)
-            {
-                textureGrid[i, j] = new Tile(tile, i % 3);
-                if (i % 10 == 0 || j % 10 == 0 && j%15 == 5)
-                {
-                    Pose2D newPose = new Pose2D(new Vector2((64 * i),(64 * j)), 0f, 1f);
-                    newBlock = new Visual(blockTexture, newPose);
-                    blocks.Add(newBlock);
+        StreamReader Reader = new StreamReader("Content/Level1.txt");
+        List<string> YLines = new List<string>();
+        string XLines = Reader.ReadLine();
+        int count = 0;
+
+        while (XLines != null)
+        {
+            YLines.Add(XLines);
+            XLines = Reader.ReadLine();
+        }
+
+        foreach (string line in YLines)
+        {
+            string[] lineArray = line.Split(' ');
+            for(int i = 0; i < lineArray.Length;i++){
+                switch(lineArray[i]){
+                    case "H": textureGrid[i, count] = new Tile(tile, 1);
+                             Pose2D newPose = new Pose2D(new Vector2(16 + (32 * i), 16 + (32 * count)), 0f, 1f);
+                             newBlock = new Visual(blockTexture, newPose);
+                             blocks.Add(newBlock); break;
+                    case "O": textureGrid[i, count] = new Tile(tile, 0); break;
+                    case "1": textureGrid[i, count] = new Tile(tile, 1); break;
+                    case "2": textureGrid[i, count] = new Tile(tile, 2); break;
+                    case "3": textureGrid[i, count] = new Tile(tile, 3); break;
+                    case "4": textureGrid[i, count] = new Tile(tile, 4); break;
                 }
             }
-        
+           count++;
+        }
 
     }
 
@@ -549,7 +575,7 @@ public class GameplayScreen : GameScreen
     {
         if (inputManager.MouseLeftButtonReleased())
         {
-            Trap tmp = new Trap(new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            Trap tmp = new Trap(new Vector2((int)(((Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11) - Camera.CameraPosition.X) / 16) * 16, (int)(((Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22) - Camera.CameraPosition.Y) / 16) * 16));
             traps.Add(tmp);
             usingAbility = false;
         }
@@ -607,9 +633,10 @@ public class GameplayScreen : GameScreen
         abilityUpgradeName = new string[5];
         switch (Options.GetValue<NetworkManager.State>("role"))
         {
-            case NetworkManager.State.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
+            case NetworkManager.State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Unknown", "Scramble" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
+                abilityDiscription = new string[5] { "Unknown", "Create trap at mouse position", "Create monster at mouse position", "unknown", "Scramble the sounds of the system" };
+
                 break;
             case NetworkManager.State.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
@@ -816,12 +843,12 @@ public class GameplayScreen : GameScreen
         }
         List<Visual> inrange = new List<Visual>();
 
-        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1600, 1200);
+        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
         foreach (Visual v in blocks)
         {
 
-            
-            if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), (int)v.Pose.Scale.X * 64, (int)v.Pose.Scale.Y * 64)))
+
+            if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
             {
                 inrange.Add(v);
             }

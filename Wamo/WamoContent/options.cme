@@ -1,10 +1,10 @@
 # Wamo Options File
 # General Options
 name=Wamo
-screenWidth=[int]800
-screenHeight=[int]600
+screenWidth=[int]1400
+screenHeight=[int]900
 fullScreen=[bool]false
-musicVolume=[float]0,2
+musicVolume=[float]0,0
 soundVolume=[float]1,0
 
 # Network Options

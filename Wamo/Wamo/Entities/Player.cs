@@ -14,8 +14,10 @@ public class Player : Entity
     SpriteFont font;
     Vector2 velocity;
     Vector2 globalPos;
+    Vector2 oldPos;
     float angle;
     Color testColor = Color.Blue;
+    ParticleSystem ps;
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
@@ -46,6 +48,8 @@ public class Player : Entity
                 }
             }
         globalPos = position;
+
+        ps = new ParticleSystem();
       
 
     }
@@ -58,7 +62,7 @@ public class Player : Entity
 
     public override void Update(GameTime gameTime, InputManager inputManager)
     {
-     
+        ps.update(gameTime);
 
         if (inputManager.KeyDown(Keys.Right, Keys.D))
         {
@@ -121,33 +125,41 @@ public class Player : Entity
 
     public void Movement()
     {
-        //Rectangle playercollider = new Rectangle((int)(PlayerPosition.X / ScreenManager.Instance.DrawScale().M11), (int)(PlayerPosition.Y / ScreenManager.Instance.DrawScale().M22), 32, 32);
-        Rectangle tmp = new Rectangle((int)this.globalPos.X + (int)Camera.CameraPosition.X, (int)this.globalPos.Y + (int)Camera.CameraPosition.Y, 32, 32);
-        foreach (Visual v in GameplayScreen.allBlocks)
-        {
-            if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
-            {
-                testColor = Color.Red;
-                break;
-            }
-            testColor = Color.Blue;
-        }
-
+        oldPos = globalPos;
         if (velocity != Vector2.Zero)
         {
             globalPos += velocity / 10;
+            
             if (velocity.X < 0.2f && velocity.X > -0.2f) velocity.X = 0;
             else { velocity.X = velocity.X / 1.50f; }
             if (velocity.Y < 0.01f && velocity.Y > -0.01f) velocity.Y = 0;
             else { velocity.Y = velocity.Y / 1.50f; }
 
         }
+
+        //Rectangle playercollider = new Rectangle((int)(PlayerPosition.X / ScreenManager.Instance.DrawScale().M11), (int)(PlayerPosition.Y / ScreenManager.Instance.DrawScale().M22), 32, 32);
+        Rectangle tmp = new Rectangle((int)this.globalPos.X + (int)Camera.CameraPosition.X, (int)this.globalPos.Y + (int)Camera.CameraPosition.Y, 32, 32);
+        foreach (Visual v in GameplayScreen.allBlocks)
+        {
+            if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
+            {
+                //testColor = Color.Red;
+                globalPos = oldPos;
+                velocity = -velocity;
+                break;
+            }
+            
+            testColor = Color.Blue;
+        }
+
+        
        //check
     }
 
     public override void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, testColor, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
+        ps.draw(spriteBatch);
     }
 
     public Vector2 PlayerPosition
