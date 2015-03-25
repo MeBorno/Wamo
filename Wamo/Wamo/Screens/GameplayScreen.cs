@@ -16,7 +16,8 @@ using System.IO;
 public class GameplayScreen : GameScreen
 {
     GraphicsDevice GraphicsDevice;
-    ParticleSystem ps;
+    ParticleSystem psUp; //Voor particles die boven shadow liggen
+    ParticleSystem psDown; //Voor particles die onder shadow liggen
     static Player player;
     Robot1 robot1;
     int timer = 0;
@@ -74,7 +75,7 @@ public class GameplayScreen : GameScreen
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
         blockTexture = Content.Load<Texture2D>("Block");
         longBlockTexture = Content.Load<Texture2D>("LongBlock");
-        //Texture2D blockGlow = Content.Load<Texture2D>("BlockGlow");
+        
         beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
 
@@ -121,12 +122,7 @@ public class GameplayScreen : GameScreen
         {
             
         }
-
-       
-
         Options.SetValue("lightEngine", true);
-        
-
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
         upgradeButton = new Button[5];
@@ -136,12 +132,15 @@ public class GameplayScreen : GameScreen
         CreateHud();
         LoadMap();
        
-        ps = new ParticleSystem();
+        psUp = new ParticleSystem();
+        psDown = new ParticleSystem();
+
         energyCells = new EnergyCell[6]{
             new EnergyCell(new Vector2(300,300)), new EnergyCell(new Vector2(400,400)), new EnergyCell(new Vector2(500,500)),
             new EnergyCell(new Vector2(600,500)), new EnergyCell(new Vector2(500,600)), new EnergyCell(new Vector2(400,700))
         };
         traps = new List<Trap>();
+        projectiles = new List<Projectile>();
     }
 
     public override void UnloadContent()
@@ -210,8 +209,8 @@ public class GameplayScreen : GameScreen
         robot1.Update(gameTime, inputManager, player, playerFOV);
 =======
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot) //TODO:: uiteindelijk alleen robot???
-        player.Update(gameTime, inputManager);            
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor) //TODO:: uiteindelijk alleen robot???
+                    player.Update(gameTime, inputManager);            
         robot1.Update(gameTime, inputManager, player, blocks);
 >>>>>>> origin/master
        //  else
@@ -262,7 +261,8 @@ public class GameplayScreen : GameScreen
                     soundButton[i].MousePress += s_clicked;
         }
 
-        ps.update(gameTime);
+        psUp.update(gameTime);
+        psDown.update(gameTime);
 
         if (usingAbility)
         {
@@ -339,11 +339,12 @@ public class GameplayScreen : GameScreen
             t.Update(gameTime, inputManager);
             if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
             {
-                ps.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
-                ps.CreateExplosion(30, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
-                ps.CreateExplosion(90, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                psDown.CreateExplosion(40, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                psDown.CreateExplosion(30, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X, player.PlayerPosition.Y), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                healhBar.Value -= 10;
             }
-            //TODO:: global stat voor health van de robot
+            
         }
 
         if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
@@ -388,19 +389,12 @@ public class GameplayScreen : GameScreen
         player.Draw(spriteBatch);
         robot1.Draw(spriteBatch);
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor)
-            spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 10), Color.Red);
+            spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 30), Color.Red);
         if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
-            spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 10), Color.Red);
-        
+            spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 30), Color.Blue); //TODO:: mooier font?
+
+        psUp.draw(spriteBatch);
        
-        foreach (EnergyCell ec in energyCells)
-        {
-            ec.Draw(spriteBatch); //TODO deze moeten achter shadow
-        }
-        foreach (Trap t in traps)
-        {
-            t.Draw(spriteBatch);
-        }
 
     }
 
@@ -433,6 +427,16 @@ public class GameplayScreen : GameScreen
                     case "2": textureGrid[i, count] = new Tile(tile, 2); break;
                     case "3": textureGrid[i, count] = new Tile(tile, 3); break;
                     case "4": textureGrid[i, count] = new Tile(tile, 4); break;
+                    case "5": textureGrid[i, count] = new Tile(tile, 5); break;
+                    case "6": textureGrid[i, count] = new Tile(tile, 6); break;
+                    case "7": textureGrid[i, count] = new Tile(tile, 7); break;
+                    case "-": textureGrid[i, count] = new Tile(tile, 12); break;
+                    case "|": textureGrid[i, count] = new Tile(tile, 21); break;
+                    case "X": textureGrid[i, count] = new Tile(tile, 20); break;
+                    case "Z": textureGrid[i, count] = new Tile(tile, 19); break;
+                    case "A": textureGrid[i, count] = new Tile(tile, 11); break;
+                    case "S": textureGrid[i, count] = new Tile(tile, 13); break;
+
                 }
             }
            count++;
@@ -456,7 +460,7 @@ public class GameplayScreen : GameScreen
         }
 
     }
-
+    #region events
     void b_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
     {
         Color[] colorRange;
@@ -469,9 +473,10 @@ public class GameplayScreen : GameScreen
                 {
                     abilityProgress[i].Value = 0; //button cooldown start
                     b.Color = Color.White; //button weer white
+                    usingAbility = true;
+                    currentAbility = i;
                 }
-                usingAbility = true;
-                currentAbility = i;
+                
             }
         e.Handled = true;
     }
@@ -536,12 +541,12 @@ public class GameplayScreen : GameScreen
                 }
         }
         e.Handled = false;
-        
     }
+    #endregion
 
     #region Abilities
 
-        #region system abilities
+    #region system abilities
     public void SysAbZero() //creating light
     {
         if (inputManager.MouseLeftButtonReleased())
@@ -584,7 +589,7 @@ public class GameplayScreen : GameScreen
         }
         if (paintStartPos != Vector2.Zero && paintEndPos != Vector2.Zero)
         {
-            ps.CreateTrail(100, paintStartPos, paintEndPos, Color.Red, true,0.05f);
+            psUp.CreateTrail(100, paintStartPos, paintEndPos, Color.Red, true,0.05f);
             //TODO stuur hier info naar robot if possible ;]]]]]
             paintStartPos = Vector2.Zero;
             paintEndPos = Vector2.Zero;
@@ -725,9 +730,11 @@ public class GameplayScreen : GameScreen
         healhBar.Color = Color.Blue;
         healhBar.SetPosition(30, 30);
         healhBar.SetSize(200,20);
-        healhBar.Value = 50;
-        healhBar.Range = 100;
+        healhBar.Value = 100;
+        healhBar.Range = 100; //dit is de health van de speler;
         healhBar.Text = "50/100";
+        healhBar.TextColor = Color.Black;
+        
         Wamo.manager.Add(healhBar);
 
         #region abilityBar
@@ -883,7 +890,7 @@ public class GameplayScreen : GameScreen
         if (Mouse.GetState().RightButton == ButtonState.Pressed)
         {
             //lights[0].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-            ps.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
+            psDown.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
            
         }
         List<Visual> inrange = new List<Visual>();
@@ -937,7 +944,16 @@ public class GameplayScreen : GameScreen
             spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
         }
 
-        ps.draw(spriteBatch);
+        foreach (EnergyCell ec in energyCells)
+        {
+            ec.Draw(spriteBatch); //TODO deze moeten achter shadow
+        }
+        foreach (Trap t in traps)
+        {
+            t.Draw(spriteBatch);
+        }
+
+        psDown.draw(spriteBatch);
 
         spriteBatch.End();
     }

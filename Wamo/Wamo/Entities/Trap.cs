@@ -46,7 +46,7 @@ public class Trap : Entity
 
     public Boolean CheckCollision(Rectangle player)
     {
-        Rectangle tmp = new Rectangle(player.X + (int)Camera.CameraPosition.X, player.Y + (int)Camera.CameraPosition.Y, player.Width, player.Height);
+        Rectangle tmp = new Rectangle(player.X + (int)Camera.CameraPosition.X - 16, player.Y + (int)Camera.CameraPosition.Y - 16, player.Width, player.Height);
         if (this.visible && this.placement.Intersects(tmp))
         {
             this.visible = false;
