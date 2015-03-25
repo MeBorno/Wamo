@@ -102,16 +102,16 @@ public class GameplayScreen : GameScreen
         lights.Clear();
 
 
-        if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.System);
+        if ((Options.GetValue<State>("role") == State.None))
+            Options.SetValue("role", State.System);
 
-        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
+        if (Options.GetValue<State>("role") == State.System)
         {
             playerFOV = new PointLight(lightEffect, Vector2.Zero, 1500, Color.White, 1.0f);
             lights.Add(playerFOV);
             
         }
-        else if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+        else if (Options.GetValue<State>("role") == State.Robot)
         {
             playerFOV = new PointLight(lightEffect, Vector2.Zero, 100, Color.White, 1.0f);
             lights.Add(playerFOV);
@@ -153,19 +153,38 @@ public class GameplayScreen : GameScreen
     public override void NetworkMessage(NetIncomingMessage message)
     {
         message.Position = 0;
-        NetworkManager.PacketTypes type = (NetworkManager.PacketTypes)message.ReadByte();
-        if (type == NetworkManager.PacketTypes.SOUNDEFFECT)
+        PacketTypes type = (PacketTypes)message.ReadByte();
+        if (type == PacketTypes.SOUNDEFFECT) PlaySound((int)message.ReadByte());
+        else if (type == PacketTypes.ABILITIES)
         {
-            PlaySound((int)message.ReadByte());
+            State state = (State)message.ReadByte();
+            if (state == State.System)
+            {
+                int abil = (int)message.ReadByte();
+                if (abil == 0)
+                {
+                    string[] data = message.ReadString().Split(' ');
+                    lights.Add(new PointLight(lightEffect, new Vector2(int.Parse(data[0]) / ScreenManager.Instance.DrawScale().M11, int.Parse(data[1]) / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
+                }
+            }
+        }
+        else if (type == PacketTypes.MOVE)
+        {
+            if(Options.GetValue<State>("role") != State.Robot)
+            {
+                string[] data = message.ReadString().Split(' ');
+                player.PlayerPosition = new Vector2(float.Parse(data[0]), float.Parse(data[1]));
+                player.FacingAngle = float.Parse(data[2]);
+                player.Velocity = new Vector2(float.Parse(data[3]), float.Parse(data[4]));
+            }
         }
     }
 
     public override void Update(GameTime gameTime)
     {
         inputManager.Update();
-        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System) 
-        playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
+        if (Options.GetValue<State>("role") == State.System) 
+            playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
         if (oldCameraPosition != Camera.CameraPosition)
         {
@@ -174,9 +193,18 @@ public class GameplayScreen : GameScreen
             oldCameraPosition = Camera.CameraPosition;
         }
 
-        if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot) //TODO:: uiteindelijk alleen robot???
-        player.Update(gameTime, inputManager);
+        /*if (Options.GetValue<State>("role") == State.System ||
+            Options.GetValue<State>("role") == State.Robot) //TODO:: uiteindelijk alleen robot??? */
+        if (Options.GetValue<State>("role") == State.Robot)
+        {
+            player.Update(gameTime, inputManager);
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.MOVE);
+            msg.Write((string)(player.PlayerPosition.X + " " + player.PlayerPosition.Y + " " + player.FacingAngle + " " + player.Velocity.X + " " + player.Velocity.Y));
+            NetworkManager.Instance.SendMessage(msg);
+        }
+
         robot1.Update(gameTime, inputManager, player, playerFOV);
        //  else
        // {
@@ -221,7 +249,7 @@ public class GameplayScreen : GameScreen
                 abilityButton[i].MouseOver += b_over;
                 abilityButton[i].MouseOut += b_out;
                 upgradeButton[i].MouseUp += u_clicked;
-                if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
+                if (Options.GetValue<State>("role") == State.System)
                     soundButton[i].MousePress += s_clicked;
         }
 
@@ -229,7 +257,7 @@ public class GameplayScreen : GameScreen
 
         if (usingAbility)
         {
-            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
+            if (Options.GetValue<State>("role") == State.System)
                 switch (currentAbility)
                 {
                     case 0: SysAbZero(); break;
@@ -238,7 +266,7 @@ public class GameplayScreen : GameScreen
                     case 3: SysAbThree(); break;
                     case 4: SysAbFour(); break;
                 }
-            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Robot)
+            if (Options.GetValue<State>("role") == State.Robot)
                 switch (currentAbility)
                 {
                     case 0: RobAbZero(); break;
@@ -247,7 +275,7 @@ public class GameplayScreen : GameScreen
                     case 3: RobAbThree(); break;
                     case 4: RobAbFour(); break;
                 }
-            if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.Doctor)
+            if (Options.GetValue<State>("role") == State.Doctor)
                 switch (currentAbility)
                 {
                     case 0: DocAbZero(); break;
@@ -307,7 +335,7 @@ public class GameplayScreen : GameScreen
             //TODO:: global stat voor health van de robot
         }
 
-        if (cellCount >= 3 && Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
+        if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
             //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
         {
             for (int i = 0; i < 5; i++)
@@ -334,7 +362,7 @@ public class GameplayScreen : GameScreen
 
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
+        if (Options.GetValue<State>("role") != State.Doctor)
         {
 
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
@@ -449,7 +477,7 @@ public class GameplayScreen : GameScreen
             //PlaySound(int.Parse(b.Name));
 
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
-            msg.Write((byte)NetworkManager.PacketTypes.SOUNDEFFECT);
+            msg.Write((byte)PacketTypes.SOUNDEFFECT);
             msg.Write((byte)int.Parse(b.Name));
             NetworkManager.Instance.SendMessage(msg);
             //TODO:: stuur command naar robot zodat die geluid te horen krijgt.
@@ -488,6 +516,13 @@ public class GameplayScreen : GameScreen
         {
             lights.Add(new PointLight(lightEffect,new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
             usingAbility = false;
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.ABILITIES);
+            msg.Write((byte)Options.GetValue<State>("role"));
+            msg.Write((byte)0);
+            msg.Write((string)(inputManager.MousePosClean().X + " " + inputManager.MousePosClean().Y));
+            NetworkManager.Instance.SendMessage(msg);
            
         }
         //upgrade, light follows mouse
@@ -605,17 +640,17 @@ public class GameplayScreen : GameScreen
         abilityCooldowns = new int[5];
         abilityDiscription = new string[5];
         abilityUpgradeName = new string[5];
-        switch (Options.GetValue<NetworkManager.State>("role"))
+        switch (Options.GetValue<State>("role"))
         {
-            case NetworkManager.State.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
+            case State.Doctor: abilityNames = new string[5] { "damn", "wij", "zijn", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case NetworkManager.State.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
+            case State.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case NetworkManager.State.System: abilityNames = new string[5] { "Add light", "Vision Surge", "Destroy", "Paint", "hehe" }; //namen van de abilities
+            case State.System: abilityNames = new string[5] { "Add light", "Vision Surge", "Destroy", "Paint", "hehe" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 4000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse.", "Restore minimal vision for the Robot", "Destroy stuff from Doctor", "Paint at mouse for Robot", "kijk mij nou random shit bedenken." };
                 abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
@@ -827,10 +862,12 @@ public class GameplayScreen : GameScreen
             }
         }
 
-        foreach (PointLight l in lights)
+        try
         {
-            l.Render(GraphicsDevice, inrange);
+            foreach (PointLight l in lights) l.Render(GraphicsDevice, inrange);
         }
+        catch (System.InvalidOperationException e) { }
+        
         inrange.Clear();
     }
 
@@ -839,7 +876,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<NetworkManager.State>("role") != NetworkManager.State.Doctor)
+        if (Options.GetValue<State>("role") != State.Doctor)
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 

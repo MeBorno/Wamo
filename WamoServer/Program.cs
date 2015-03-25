@@ -65,25 +65,10 @@ class Program
                             PacketTypes type = (PacketTypes)inc.ReadByte();
                             if (type == PacketTypes.MOVE)
                             {
-                                foreach (Character ch in GameWorldState)
-                                {
-                                    if (ch.connection != inc.SenderConnection)
-                                        continue;
-
-                                    byte b = inc.ReadByte();
-
-                                    NetOutgoingMessage outmsg = Server.CreateMessage();
-
-                                    outmsg.Write((byte)PacketTypes.WORLDSTATE);
-
-                                    outmsg.Write(GameWorldState.Count);
-
-                                    foreach (Character ch2 in GameWorldState)
-                                        outmsg.WriteAllProperties(ch2);
-
-                                    Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
-                                    break;
-                                }
+                                NetOutgoingMessage outmsg = Server.CreateMessage();
+                                outmsg.Write((byte)PacketTypes.MOVE);
+                                outmsg.Write((string)inc.ReadString());
+                                Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
                             }
                             else if(type == PacketTypes.STATEUPDATE)
                             {
@@ -94,7 +79,6 @@ class Program
 
                                     byte b = inc.ReadByte();
                                     ch.role = (State)b;
-                                    Console.WriteLine("Dr is een cunt geupdate");
                                     break;
                                 }
                             } 
@@ -103,6 +87,15 @@ class Program
                                 NetOutgoingMessage outmsg = Server.CreateMessage();
                                 outmsg.Write((byte)PacketTypes.SOUNDEFFECT);
                                 outmsg.Write((byte)inc.ReadByte());
+                                Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                            }
+                            else if (type == PacketTypes.ABILITIES)
+                            {
+                                NetOutgoingMessage outmsg = Server.CreateMessage();
+                                outmsg.Write((byte)PacketTypes.ABILITIES);
+                                outmsg.Write((byte)inc.ReadByte());
+                                outmsg.Write((byte)inc.ReadByte());
+                                outmsg.Write((string)inc.ReadString());
                                 Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
                             }
                             break;
@@ -220,7 +213,8 @@ class Program
         WORLDSTATE,
         ROLESELECT,
         STATEUPDATE,
-        SOUNDEFFECT
+        SOUNDEFFECT,
+        ABILITIES
     }
     enum State
     {

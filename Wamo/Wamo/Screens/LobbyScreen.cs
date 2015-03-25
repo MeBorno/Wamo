@@ -22,8 +22,8 @@ public class LobbyScreen : GameScreen
         text = "";
 
         NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
-        msg.Write((byte)NetworkManager.PacketTypes.STATEUPDATE);
-        msg.Write((byte)NetworkManager.State.Lobby);
+        msg.Write((byte)PacketTypes.STATEUPDATE);
+        msg.Write((byte)State.Lobby);
         NetworkManager.Instance.SendMessage(msg);
     }
 
@@ -49,10 +49,10 @@ public class LobbyScreen : GameScreen
     public override void NetworkMessage(NetIncomingMessage message) 
     {
         message.Position = 0;
-        NetworkManager.PacketTypes type = (NetworkManager.PacketTypes)message.ReadByte();
-        if(type == NetworkManager.PacketTypes.ROLESELECT)
+        PacketTypes type = (PacketTypes)message.ReadByte();
+        if(type == PacketTypes.ROLESELECT)
         {
-            NetworkManager.State role = (NetworkManager.State)message.ReadByte();
+            State role = (State)message.ReadByte();
             text = "Your new role is " + role.ToString();
             Options.SetValue("role", role);
             gotRole = true;

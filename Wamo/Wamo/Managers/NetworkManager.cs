@@ -155,23 +155,24 @@ public class NetworkManager
         {
         }
     }
+}
 
-    public enum PacketTypes
-    {
-        LOGIN,
-        MOVE,
-        WORLDSTATE,
-        ROLESELECT,
-        STATEUPDATE,
-        SOUNDEFFECT
-    }
-    public enum State
-    {
-        None,
-        Lobby,
-        Waiting,
-        Robot,
-        System,
-        Doctor
-    }
+public enum PacketTypes
+{
+    LOGIN,
+    MOVE,
+    WORLDSTATE,
+    ROLESELECT,
+    STATEUPDATE,
+    SOUNDEFFECT,
+    ABILITIES
+}
+public enum State
+{
+    None,
+    Lobby,
+    Waiting,
+    Robot,
+    System,
+    Doctor
 }

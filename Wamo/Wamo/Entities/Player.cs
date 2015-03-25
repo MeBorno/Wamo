@@ -153,6 +153,19 @@ public class Player : Entity
     public Vector2 PlayerPosition
     {
         get { return globalPos; }
+        set { globalPos = value; }
+    }
+
+    public float FacingAngle
+    {
+        get { return angle; }
+        set { angle = value; }
+    }
+
+    public Vector2 Velocity
+    {
+        get { return velocity; }
+        set { velocity = value; }
     }
 }
 

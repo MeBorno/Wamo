@@ -14,7 +14,6 @@ public class Trap : Entity
     SpriteFont font;
     Texture2D cellTexture;
     Rectangle placement;
-    Vector2 position;
     Boolean visible = true;
     ParticleSystem ps;
    
