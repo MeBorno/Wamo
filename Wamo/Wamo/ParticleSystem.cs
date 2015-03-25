@@ -186,7 +186,7 @@ public class ParticleSystem
         {
             tmp.sprite = texture;
         }
-        tmp.startPos = startPos;// +new Vector2(tmp.sprite.Width / 2, tmp.sprite.Height / 2);
+        tmp.startPos = startPos;
         cannonList.Add(tmp);
 
      

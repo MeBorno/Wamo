@@ -57,7 +57,7 @@ public class EnergyCell : Entity
     public override void Draw(SpriteBatch spriteBatch)
     {
         if(visible)
-        spriteBatch.Draw(cellTexture, placement, null, Color.Pink, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+        spriteBatch.Draw(cellTexture, placement, null, Color.Pink, 0f, new Vector2(cellTexture.Width/2,cellTexture.Height/2), SpriteEffects.None, 0f);
     }
 
     

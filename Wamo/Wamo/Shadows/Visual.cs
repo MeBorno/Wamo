@@ -39,5 +39,7 @@ using System.Text;
             this.Pose = pose;
             this.Glow = glow;
         }
+
+       
     }
 

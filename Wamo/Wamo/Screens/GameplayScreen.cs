@@ -124,24 +124,7 @@ public class GameplayScreen : GameScreen
        
 
         Options.SetValue("lightEngine", true);
-        /*
-        //dit is tijdelijk DIT IS TIJDELIJK, IK ZEG JE DUDE WTF MAN DIT IS TIJDELIJK
-        for (int i = 0; i < 20; i++)
-        {
-            Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 128), 0f, 0.5f);
-            
-            newBlock = new Visual(blockTexture, newPose);
-            
-            blocks.Add(newBlock);
-        }
         
-        for (int i = 0; i < 20; i++)
-        {
-            Pose2D newPose = new Pose2D(new Vector2(128 + (32 * i), 256 + (16 * i)), 0f, 0.25f);
-            newBlock = new Visual(blockTexture, newPose);
-            blocks.Add(newBlock);
-        }
-        */
 
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
@@ -181,7 +164,7 @@ public class GameplayScreen : GameScreen
     {
         inputManager.Update();
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System ||
-            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System) //HIER DE ROL IN DE GAME MANUEEL VERANDEREN HIER HIER HIER HIER
+            Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System) 
         playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
         if (oldCameraPosition != Camera.CameraPosition)
@@ -388,7 +371,7 @@ public class GameplayScreen : GameScreen
                 textureGrid[i, j] = new Tile(tile, i % 3);
                 if (i % 10 == 0 || j % 10 == 0 && j%15 == 5)
                 {
-                    Pose2D newPose = new Pose2D(new Vector2((32 * i),(32 * j)), 0f, 0.5f);
+                    Pose2D newPose = new Pose2D(new Vector2((64 * i),(64 * j)), 0f, 1f);
                     newBlock = new Visual(blockTexture, newPose);
                     blocks.Add(newBlock);
                 }
@@ -534,7 +517,7 @@ public class GameplayScreen : GameScreen
         }
         if (paintStartPos != Vector2.Zero && paintEndPos != Vector2.Zero)
         {
-            ps.CreateTrail(100, paintStartPos, paintEndPos, Color.Red, false);
+            ps.CreateTrail(100, paintStartPos, paintEndPos, Color.Red, true,0.05f);
             //TODO stuur hier info naar robot if possible ;]]]]]
             paintStartPos = Vector2.Zero;
             paintEndPos = Vector2.Zero;
@@ -832,13 +815,16 @@ public class GameplayScreen : GameScreen
            
         }
         List<Visual> inrange = new List<Visual>();
+
+        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1600, 1200);
         foreach (Visual v in blocks)
         {
-            if (v.Pose.Position.Y>= Camera.CameraPosition.Y &&
-                v.Pose.Position.Y<= Camera.CameraPosition.Y  + 900&&
-                v.Pose.Position.X>= Camera.CameraPosition.X &&
-                v.Pose.Position.X<= Camera.CameraPosition.X + 1400)
+
+            
+            if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), (int)v.Pose.Scale.X * 64, (int)v.Pose.Scale.Y * 64)))
+            {
                 inrange.Add(v);
+            }
         }
 
         foreach (PointLight l in lights)
