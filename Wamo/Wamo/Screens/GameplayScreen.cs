@@ -55,7 +55,7 @@ public class GameplayScreen : GameScreen
     int currentAbility = 9999;
 
     bool playingSoundEffect = false;
-    TimeSpan soundEffectTimer;
+    float soundEffectTimer;
 
     EnergyCell[] energyCells;
     List<Trap> traps;
@@ -291,16 +291,20 @@ public class GameplayScreen : GameScreen
                 }
             }
         }
-    
-        if(soundEffectTimer.TotalMilliseconds > 20)
+
+        if (playingSoundEffect)
         {
-            soundEffectTimer.Subtract(gameTime.ElapsedGameTime);
-            MediaPlayer.Volume = 0.1f;
-        }
-        else
-        {
-            soundEffectTimer = TimeSpan.Zero;
-            MediaPlayer.Volume = 1.0f;
+            if (soundEffectTimer > 0)
+            {
+                soundEffectTimer -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume")) * 0.1f;
+            }
+            else
+            {
+                soundEffectTimer = 0;
+                MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume"));
+                playingSoundEffect = false;
+            }
         }
 
         foreach (EnergyCell ev in energyCells)
@@ -393,17 +397,18 @@ public class GameplayScreen : GameScreen
     public void PlaySound(int soundID)
     {
         playingSoundEffect = true;
-        soundEffectTimer = beep.Duration;
+        soundEffectTimer = (float)beep.Duration.TotalMilliseconds;
 
         switch (soundID)
         {
-            case 0: beep.Play(1.0f, -1.0f, 0.0f); break;
-            case 1: beep.Play(1.0f, 0.0f, 0.0f); break;
-            case 2: beep.Play(1.0f, 1.0f, 0.0f); break;
-            case 3: beep.Play(1.0f, 0.0f, -1.0f); break;
-            case 4: beep.Play(1.0f, 0.0f, 1.0f); break;
+            case 0: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), -1.0f, 0.0f); break;
+            case 1: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, 0.0f); break;
+            case 2: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 1.0f, 0.0f); break;
+            case 3: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, -1.0f); break;
+            case 4: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, 1.0f); break;
                 
         }
+
     }
 
     void b_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)

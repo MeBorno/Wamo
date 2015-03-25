@@ -53,6 +53,7 @@ public class Wamo : Microsoft.Xna.Framework.Game
         
         music = Content.Load<Song>("Music/BlastProcess");
         MediaPlayer.Play(music);
+        MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume"));
         MediaPlayer.IsRepeating = true;                
     }
 

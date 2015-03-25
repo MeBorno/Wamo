@@ -4,9 +4,11 @@ name=Wamo
 screenWidth=[int]1400
 screenHeight=[int]900
 fullScreen=[bool]false
+musicVolume=[float]0,2
+soundVolume=[float]1,0
 
 # Network Options
-defaultIP=192.168.1.1
+defaultIP=127.0.0.1
 
 # Debug Options
 debugDrawHitbox=[bool]true

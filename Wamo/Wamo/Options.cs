@@ -13,7 +13,7 @@ public class Options
         options = new Dictionary<string, object>();
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
-        options.Add("role", NetworkManager.State.None);
+        options.Add("role", NetworkManager.State.System);
 
         if (File.Exists(fname))
         {
@@ -42,6 +42,8 @@ public class Options
                                 break;
                             case "bool": val = bool.Parse(tmp[1].Substring(tmp[1].IndexOf("]") + 1));
                                 break;
+                            case "float": val = float.Parse(tmp[1].Substring(tmp[1].IndexOf("]") + 1));
+                                break;
                         }
                     }
                     else val = tmp[1];
@@ -55,6 +57,8 @@ public class Options
         {
             options.Add("name", "Wamo"+Guid.NewGuid().ToString().Substring(0,2));
             options.Add("defaultIP", "127.0.0.1");
+            options.Add("musicVolume", 1.00f);
+            options.Add("soundVolume", 1.00f);
         }
         
     }
