@@ -103,7 +103,7 @@ public class GameplayScreen : GameScreen
 
 
         if ((Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.None))
-            Options.SetValue("role", NetworkManager.State.Robot);
+            Options.SetValue("role", NetworkManager.State.System);
 
         if (Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
         {
@@ -318,7 +318,8 @@ public class GameplayScreen : GameScreen
             //TODO:: global stat voor health van de robot
         }
 
-        if (cellCount >= 3)
+        if (cellCount >= 3 && Options.GetValue<NetworkManager.State>("role") == NetworkManager.State.System)
+            //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
         {
             for (int i = 0; i < 5; i++)
             {
@@ -358,8 +359,7 @@ public class GameplayScreen : GameScreen
         base.Draw(spriteBatch);
         player.Draw(spriteBatch);
 
-        //if(isRoll == roll.Robot || isRoll == roll.System)
-        //spriteBatch.DrawString(font, playerFOV.Position.X + "," + playerFOV.Position.Y, Camera.CameraPosition + new Vector2(100, 160), Color.Black);
+       
         foreach (EnergyCell ec in energyCells)
         {
             ec.Draw(spriteBatch);
