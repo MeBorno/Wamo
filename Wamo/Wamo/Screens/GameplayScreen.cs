@@ -221,9 +221,9 @@ public class GameplayScreen : GameScreen
             oldCameraPosition = Camera.CameraPosition;
         }
 
-        if (Options.GetValue<State>("role") == State.System ||
+        if (Options.GetValue<State>("role") == State.System || //TODO:: uiteindelijk alleen robot
             Options.GetValue<State>("role") == State.Robot)
-        //if (Options.GetValue<State>("role") == State.Robot)
+        
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -232,26 +232,26 @@ public class GameplayScreen : GameScreen
             NetworkManager.Instance.SendMessage(msg);
         }
 
-        //  else
-        // {
-        if (inputManager.KeyDown(Keys.Down, Keys.H))
+        if (Options.GetValue<State>("role") == State.Doctor && !Options.GetValue<bool>("paralyze"))
         {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
+            if (inputManager.KeyDown(Keys.Down, Keys.S))
+            {
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
+            }
+            if (inputManager.KeyDown(Keys.Up, Keys.W))
+            {
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
+            }
+            if (inputManager.KeyDown(Keys.Left, Keys.A))
+            {
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
+            }
+            if (inputManager.KeyDown(Keys.Right, Keys.D))
+            {
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
+            }
+        }
 
-        }
-        if (inputManager.KeyDown(Keys.Up, Keys.Y))
-        {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
-        }
-        if (inputManager.KeyDown(Keys.Left, Keys.G))
-        {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
-        }
-        if (inputManager.KeyDown(Keys.Right, Keys.J))
-        {
-            Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
-        }
-        //  }
         timer += gameTime.ElapsedGameTime.Milliseconds;
         evilPoints += 0.010;
 
@@ -436,6 +436,14 @@ public class GameplayScreen : GameScreen
                     Options.SetValue("fog", true);
             }
 
+            if (Options.GetValue<State>("role") == State.Doctor && Options.GetValue<bool>("paralyze"))
+            {
+                for (int i = 0; i < 5; i++)
+                    abilityButton[i].Enabled = false;
+
+
+            }
+            
         }
     
 
@@ -443,7 +451,7 @@ public class GameplayScreen : GameScreen
     {
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Robot) // MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Doctor) // MOET DOCTOR ZIJN
         {
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
@@ -523,6 +531,7 @@ public class GameplayScreen : GameScreen
 
     public void PlaySound(int soundID)
     {
+        //TODO scramble
         playingSoundEffect = true;
         soundEffectTimer = (float)beep.Duration.TotalMilliseconds;
         switch (soundID)
@@ -993,7 +1002,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<State>("role") != State.Robot) //MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Doctor) //MOET DOCTOR ZIJN
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 
