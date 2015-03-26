@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 public class Collision
 {
-    public static Vector2 CalculateIntersectionDepth(Rectangle rectA, Rectangle rectB)
+    private static Vector2 CalculateIntersectionDepth(Rectangle rectA, Rectangle rectB)
     {
         Vector2 minDistance = new Vector2(rectA.Width + rectB.Width,
             rectA.Height + rectB.Height) / 2;
@@ -22,7 +22,7 @@ public class Collision
         return depth;
     }
 
-    public static Rectangle Intersection(Rectangle rect1, Rectangle rect2)
+    private static Rectangle Intersection(Rectangle rect1, Rectangle rect2)
     {
         int xmin = (int)MathHelper.Max(rect1.Left, rect2.Left);
         int xmax = (int)MathHelper.Min(rect1.Right, rect2.Right);
@@ -52,7 +52,7 @@ public class Collision
         return false;
     }
 
-    public static Color GetPixelColor(Texture2D sprite, int x, int y)
+    private static Color GetPixelColor(Texture2D sprite, int x, int y)
     {
         Rectangle sourceRectangle = new Rectangle(x, y, 1, 1);
         Color[] retrievedColor = new Color[1];
