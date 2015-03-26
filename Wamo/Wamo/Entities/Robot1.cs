@@ -14,7 +14,7 @@ public class Robot1 : Entity
     SpriteFont font;
     Vector2 velocity, knockbackVelocity;
     float angle = 0.0f;
-    Color testColor = Color.Blue;
+    Color testColor = Color.White;
     
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
