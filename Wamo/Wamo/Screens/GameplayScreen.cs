@@ -35,7 +35,7 @@ public class GameplayScreen : GameScreen
 
     TextBox[] abilityExpl;
     ProgressBar[] abilityProgress;
-    ProgressBar healhBar;
+    ProgressBar healthBar;
     Button[] abilityButton;
     Button[] soundButton;
     Button[] upgradeButton;
@@ -360,7 +360,7 @@ public class GameplayScreen : GameScreen
                 psDown.CreateExplosion(40, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
                 psDown.CreateExplosion(30, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
                 psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
-                healhBar.Value -= 10;
+                healthBar.Value -= 10;
             }
         }
         foreach (Projectile p in projectiles)
@@ -417,7 +417,7 @@ public class GameplayScreen : GameScreen
                     inrange.Add(v);
                 }
             }
-            robot1.Update(gameTime, inputManager, player, blocks);
+            robot1.Update(gameTime, inputManager, player, blocks, healthBar);
 
         }
     
@@ -805,17 +805,17 @@ public class GameplayScreen : GameScreen
                     break;
         }
 
-        healhBar = new ProgressBar(Wamo.manager);
-        healhBar.Init();
-        healhBar.Color = Color.Blue;
-        healhBar.SetPosition(30, 30);
-        healhBar.SetSize(200,20);
-        healhBar.Value = 100;
-        healhBar.Range = 100; //dit is de health van de speler;
-        healhBar.Text = "50/100";
-        healhBar.TextColor = Color.Black;
+        healthBar = new ProgressBar(Wamo.manager);
+        healthBar.Init();
+        healthBar.Color = Color.Blue;
+        healthBar.SetPosition(30, 30);
+        healthBar.SetSize(200,20);
+        healthBar.Value = 100;
+        healthBar.Range = 100; //dit is de health van de speler;
+        healthBar.Text = "50/100";
+        healthBar.TextColor = Color.Black;
         
-        Wamo.manager.Add(healhBar);
+        Wamo.manager.Add(healthBar);
 
         #region abilityBar
         Window abilityBar = new Window(Wamo.manager);
@@ -1033,5 +1033,10 @@ public class GameplayScreen : GameScreen
     public static Player Player
     {
         get { return player; }
+    }
+
+    public ProgressBar HealthBar
+    {
+        get { return healthBar; }
     }
 }
