@@ -12,7 +12,7 @@ class Program
     static void Main(string[] args)
     {
         Config = new NetPeerConfiguration("game");
-        Config.Port = 14242;
+        Config.Port = 8000;
         Config.MaximumConnections = 20;
 
         Config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);

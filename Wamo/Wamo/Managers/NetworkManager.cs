@@ -30,7 +30,7 @@ public class NetworkManager
 
         outmsg.Write((byte)PacketTypes.LOGIN);
         outmsg.Write(Options.GetValue<string>("name"));
-        client.Connect(Options.GetValue<string>("defaultIP"), 14242, outmsg);
+        client.Connect(Options.GetValue<string>("defaultIP"), 8000, outmsg);
 
 
         Console.WriteLine("Client Started");
