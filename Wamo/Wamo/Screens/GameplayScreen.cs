@@ -15,6 +15,7 @@ using System.IO;
 
 public class GameplayScreen : GameScreen
 {
+    #region dit
     GraphicsDevice GraphicsDevice;
     ParticleSystem psUp; //Voor particles die boven shadow liggen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
@@ -29,7 +30,6 @@ public class GameplayScreen : GameScreen
 
     public PointLight playerFOV;
     Visual newBlock;
-    //InputManager inputManager;
     SpriteFont font;
     Vector2 oldCameraPosition;
 
@@ -73,7 +73,8 @@ public class GameplayScreen : GameScreen
     List<Visual> sonarBlocks;
 
     int[] timer;
-    
+    #endregion
+
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
         base.LoadContent(Content, inputManager);
@@ -198,30 +199,9 @@ public class GameplayScreen : GameScreen
     public override void Update(GameTime gameTime)
     {
         inputManager.Update();
-        if (Options.GetValue<State>("role") == State.System)
-            playerFOV.Position = player.PlayerPosition + Camera.CameraPosition; //wat is dit? TODO
+        CameraMovement(); //alles met camera movement
 
-        if (Options.GetValue<State>("role") != State.Doctor)
-        {
-            Vector2 offset = Vector2.Zero;
-            if (player.PlayerPosition.Y > 300)
-                offset.Y += (player.PlayerPosition.Y - 300);
-            if (player.PlayerPosition.X > 400)
-                offset.X += (player.PlayerPosition.X - 400);
-            if (player.PlayerPosition.Y > 300 || player.PlayerPosition.X > 400)
-                Camera.CameraPosition = -offset;
-        }
-
-        if (oldCameraPosition != Camera.CameraPosition)
-        {
-            foreach (Visual v in blocks)
-                v.Pose.Position = v.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
-            oldCameraPosition = Camera.CameraPosition;
-        }
-
-        if (Options.GetValue<State>("role") == State.System || //TODO:: uiteindelijk alleen robot
-            Options.GetValue<State>("role") == State.Robot)
-        
+        if (Options.GetValue<State>("role") == State.System || Options.GetValue<State>("role") == State.Robot) //TODO eigenlijk alleen robot
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -230,32 +210,156 @@ public class GameplayScreen : GameScreen
             NetworkManager.Instance.SendMessage(msg);
         }
 
-        if (Options.GetValue<State>("role") == State.Doctor && !Options.GetValue<bool>("paralyze"))
+        evilPoints += 0.010;
+        CheckAbilities(gameTime); //checks bij abilities
+        psUp.update(gameTime); //update particlesystem
+        psDown.update(gameTime); //update particlesystem
+        CheckSound(gameTime);
+        CheckItems(gameTime); //check traps,cells,projectiles
+        FindNearbyBlocks(); //checkt alle blocks of ze dichtbij zijn
+
+        robot1.Update(gameTime, inputManager, player, blocks, healthBar);
+
+        if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
         {
-            if (inputManager.KeyDown(Keys.Down, Keys.S))
+          //  psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
+            robot1.TestColor = Color.Pink;
+        }
+        else
+        {
+            robot1.TestColor = Color.Blue;
+        }
+
+            Timers();
+        }
+
+    private static void FindNearbyBlocks()
+    {
+        inrange.Clear();
+        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
+        foreach (Visual v in blocks)
+        {
+
+
+            if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
             {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
+                inrange.Add(v);
             }
-            if (inputManager.KeyDown(Keys.Up, Keys.W))
+        }
+    }
+
+    private void CheckSound(GameTime gameTime)
+    {
+        if (playingSoundEffect)
+        {
+            if (soundEffectTimer > 0)
             {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
+                soundEffectTimer -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume")) * 0.1f;
             }
-            if (inputManager.KeyDown(Keys.Left, Keys.A))
+            else
             {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
+                soundEffectTimer = 0;
+                MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume"));
+                playingSoundEffect = false;
             }
-            if (inputManager.KeyDown(Keys.Right, Keys.D))
+        }
+    }
+
+    private void CheckItems(GameTime gameTime)
+    {
+        foreach (EnergyCell ev in energyCells)
+        {
+            ev.Update(gameTime, inputManager);
+            ev.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32));
+        }
+        foreach (Trap t in traps)
+        {
+            t.Update(gameTime, inputManager);
+            if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
             {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
+                psDown.CreateExplosion(40, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                psDown.CreateExplosion(30, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                healthBar.Value -= 10;
+            }
+        }
+        foreach (Projectile p in projectiles)
+        {
+            p.Update(gameTime, inputManager);
+            //if (p.CheckCollision()) collision met enemies vd
+            if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
+            {
+                Vector2 collpos = TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix);
+                psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                p.UnloadContent();
+            }
+
+        }
+
+        for (int i = 0; i < 6; i++)
+        {
+            robotItems[i].Update(gameTime, inputManager);
+            if (robotItems[i].CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
+            {
+                if (Options.GetValue<State>("role") == State.Robot && i != 6)
+                {
+                    isUpgraded[i] = true;
+                    upgradeButton[i].Text = "Found";
+                    upgradeButton[i].BackColor = Color.Green;
+                }
+                else if (i == 6)
+                {
+
+                }
+            }
+        }
+        if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
+        //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (upgradeButton[i].Text == "Upgrade")
+                {
+                    upgradeButton[i].Color = Color.White;
+                    upgradeButton[i].Enabled = true;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                upgradeButton[i].Color = Color.Gray;
+                upgradeButton[i].Enabled = false;
             }
         }
 
-        
-        evilPoints += 0.010;
+        foreach (PointLight l in lights)
+        {
+            if (l.Radius == 110)
+            {
+                l.Power -= 0.0025f;
+                if (l.Power < 0.10f)
+                {
+                    lights.Remove(l);
+                    break;
+                }
 
+                if (isUpgraded[0])
+                {
+                    lights[1].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
+                }
+            }
+        }
+    }
+
+    private void CheckAbilities(GameTime gameTime)
+    {
         for (int i = 0; i < 5; i++)
         {
-
             if (abilityProgress[i].Value < abilityProgress[i].Range)
             {
                 abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
@@ -264,11 +368,8 @@ public class GameplayScreen : GameScreen
             else
             {
                 abilityButton[i].Color = Color.Red;
-
             }
-
         }
-
         for (int i = 0; i < 5; i++)
         {
             abilityButton[i].MouseUp += b_clicked;
@@ -278,9 +379,6 @@ public class GameplayScreen : GameScreen
             if (Options.GetValue<State>("role") == State.System)
                 soundButton[i].MousePress += s_clicked;
         }
-
-        psUp.update(gameTime);
-        psDown.update(gameTime);
 
         if (usingAbility)
         {
@@ -311,152 +409,60 @@ public class GameplayScreen : GameScreen
                     case 3: DocAbThree(); break;
                     case 4: DocAbFour(); break;
                 }
-
-
         }
-        foreach (PointLight l in lights)
+
+        if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
         {
-            if (l.Radius == 110)
-            {
-                l.Power -= 0.0025f;
-                if (l.Power < 0.10f)
-                {
-                    lights.Remove(l);
-                    break;
-                }
 
-                if (isUpgraded[0])
-                {
-                    lights[1].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-                }
-            }
+            psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200, 200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
+            Options.SetValue("fog", true);
         }
 
-        if (playingSoundEffect)
+        if (Options.GetValue<State>("role") == State.Doctor && Options.GetValue<bool>("paralyze"))
         {
-            if (soundEffectTimer > 0)
-            {
-                soundEffectTimer -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-                MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume")) * 0.1f;
-            }
-            else
-            {
-                soundEffectTimer = 0;
-                MediaPlayer.Volume = Math.Min(1.0f, Options.GetValue<float>("musicVolume"));
-                playingSoundEffect = false;
-            }
+            for (int i = 0; i < 5; i++)
+                abilityButton[i].Enabled = false;
         }
 
-        foreach (EnergyCell ev in energyCells)
+        if (Options.GetValue<bool>("paralyze"))
+            timer[0] += gameTime.ElapsedGameTime.Milliseconds;
+    }
+
+    private void CameraMovement()
+    {
+        if (Options.GetValue<State>("role") == State.System)
+            playerFOV.Position = player.PlayerPosition + Camera.CameraPosition; //wat is dit? TODO
+
+        if (Options.GetValue<State>("role") != State.Doctor)
         {
-            ev.Update(gameTime, inputManager);
-            ev.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32));
-        }
-        foreach (Trap t in traps)
-        {
-            t.Update(gameTime, inputManager);
-            if (t.CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
-            {
-                psDown.CreateExplosion(40, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
-                psDown.CreateExplosion(30, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
-                psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
-                healthBar.Value -= 10;
-            }
-        }
-        foreach (Projectile p in projectiles)
-        {
-            p.Update(gameTime, inputManager);
-            //if (p.CheckCollision()) collision met enemies vd
-            if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1,-1))
-            {
-                Vector2 collpos = TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix);
-                psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f); 
-                psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
-                psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
-                p.UnloadContent();
-            }
-            
+            Vector2 offset = Vector2.Zero;
+            if (player.PlayerPosition.Y > 300)
+                offset.Y += (player.PlayerPosition.Y - 300);
+            if (player.PlayerPosition.X > 400)
+                offset.X += (player.PlayerPosition.X - 400);
+            if (player.PlayerPosition.Y > 300 || player.PlayerPosition.X > 400)
+                Camera.CameraPosition = -offset;
         }
 
-        for (int i = 0; i < 6; i++)
+        if (oldCameraPosition != Camera.CameraPosition)
         {
-            robotItems[i].Update(gameTime, inputManager);
-            if (robotItems[i].CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
-            {
-                if (Options.GetValue<State>("role") == State.Robot && i != 6)
-                {
-                    isUpgraded[i] = true;
-                    upgradeButton[i].Text = "Found";
-                    upgradeButton[i].BackColor = Color.Green;
-                }
-                else if (i == 6){
-                    
-                }
-            }
-        }
-            if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
-            //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    if (upgradeButton[i].Text == "Upgrade")
-                    {
-                        upgradeButton[i].Color = Color.White;
-                        upgradeButton[i].Enabled = true;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    upgradeButton[i].Color = Color.Gray;
-                    upgradeButton[i].Enabled = false;
-                }
-            }
-
-            inrange.Clear();
-            Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
             foreach (Visual v in blocks)
-            {
+                v.Pose.Position = v.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
+            oldCameraPosition = Camera.CameraPosition;
+        }
 
-
-                if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
-                {
-                    inrange.Add(v);
-                }
-            }
-            robot1.Update(gameTime, inputManager, player, blocks, healthBar);
-        if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
+        if (Options.GetValue<State>("role") == State.Doctor && !Options.GetValue<bool>("paralyze"))
         {
-          //  psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
-            robot1.TestColor = Color.Pink;
+            if (inputManager.KeyDown(Keys.Down, Keys.S))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
+            if (inputManager.KeyDown(Keys.Up, Keys.W))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
+            if (inputManager.KeyDown(Keys.Left, Keys.A))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
+            if (inputManager.KeyDown(Keys.Right, Keys.D))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
         }
-        else
-        {
-            robot1.TestColor = Color.Blue;
-        }
-
-
-            
-            if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
-            {
-               
-                    psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200,200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
-                    Options.SetValue("fog", true);
-            }
-
-            if (Options.GetValue<State>("role") == State.Doctor && Options.GetValue<bool>("paralyze"))
-            {
-                for (int i = 0; i < 5; i++)
-                    abilityButton[i].Enabled = false;
-            }
-
-            if(Options.GetValue<bool>("paralyze"))
-                timer[0] += gameTime.ElapsedGameTime.Milliseconds;
-
-            Timers();
-        }
+    }
 
     public void Timers()
     {
