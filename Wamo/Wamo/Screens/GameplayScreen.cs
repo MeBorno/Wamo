@@ -67,6 +67,8 @@ public class GameplayScreen : GameScreen
 
     Vector2 paintStartPos = Vector2.Zero;
     Vector2 paintEndPos = Vector2.Zero;
+
+    RobotItem[] robotItems;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -141,6 +143,10 @@ public class GameplayScreen : GameScreen
         };
         traps = new List<Trap>();
         projectiles = new List<Projectile>();
+        robotItems = new RobotItem[6]{
+            new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(1400,700),2),
+            new RobotItem(new Vector2(1000,1000),3),new RobotItem(new Vector2(512,1000),4),new RobotItem(new Vector2(700,700),5)
+        };
     }
 
     public override void UnloadContent()
@@ -188,7 +194,7 @@ public class GameplayScreen : GameScreen
     public override void Update(GameTime gameTime)
     {
         inputManager.Update();
-        if (Options.GetValue<State>("role") == State.System) 
+        if (Options.GetValue<State>("role") == State.System)
             playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
 
         if (oldCameraPosition != Camera.CameraPosition)
@@ -199,9 +205,9 @@ public class GameplayScreen : GameScreen
         }
 
 
-        /*if (Options.GetValue<State>("role") == State.System ||
-            Options.GetValue<State>("role") == State.Robot) //TODO:: uiteindelijk alleen robot??? */
-        if (Options.GetValue<State>("role") == State.Robot)
+        if (Options.GetValue<State>("role") == State.System ||
+            Options.GetValue<State>("role") == State.Robot)
+        //if (Options.GetValue<State>("role") == State.Robot)
         {
             player.Update(gameTime, inputManager);
 
@@ -211,12 +217,12 @@ public class GameplayScreen : GameScreen
             NetworkManager.Instance.SendMessage(msg);
         }
 
-       //  else
-       // {
+        //  else
+        // {
         if (inputManager.KeyDown(Keys.Down, Keys.H))
         {
             Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
-            
+
         }
         if (inputManager.KeyDown(Keys.Up, Keys.Y))
         {
@@ -230,11 +236,11 @@ public class GameplayScreen : GameScreen
         {
             Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
         }
-      //  }
+        //  }
         timer += gameTime.ElapsedGameTime.Milliseconds;
         evilPoints += 0.010;
-        
-        for (int i = 0; i < 5; i++) 
+
+        for (int i = 0; i < 5; i++)
         {
             if (abilityProgress[i].Value < abilityProgress[i].Range)
             {
@@ -244,19 +250,19 @@ public class GameplayScreen : GameScreen
             else
             {
                 abilityButton[i].Color = Color.Red;
-                
+
             }
-            
+
         }
 
         for (int i = 0; i < 5; i++)
         {
-                abilityButton[i].MouseUp += b_clicked;
-                abilityButton[i].MouseOver += b_over;
-                abilityButton[i].MouseOut += b_out;
-                upgradeButton[i].MouseUp += u_clicked;
-                if (Options.GetValue<State>("role") == State.System)
-                    soundButton[i].MousePress += s_clicked;
+            abilityButton[i].MouseUp += b_clicked;
+            abilityButton[i].MouseOver += b_over;
+            abilityButton[i].MouseOut += b_out;
+            upgradeButton[i].MouseUp += u_clicked;
+            if (Options.GetValue<State>("role") == State.System)
+                soundButton[i].MousePress += s_clicked;
         }
 
         psUp.update(gameTime);
@@ -342,31 +348,47 @@ public class GameplayScreen : GameScreen
                 psDown.CreateExplosion(90, new Vector2(player.PlayerPosition.X - 16, player.PlayerPosition.Y - 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
                 healhBar.Value -= 10;
             }
-            
         }
 
-        if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
-            //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
+        for (int i = 0; i < 6; i++)
         {
-            for (int i = 0; i < 5; i++)
+            robotItems[i].Update(gameTime, inputManager);
+            if (robotItems[i].CheckCollision(new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32)))
             {
-                if (upgradeButton[i].Text == "Upgrade")
+                if (Options.GetValue<State>("role") == State.Robot && i != 6)
                 {
-                    upgradeButton[i].Color = Color.White;
-                    upgradeButton[i].Enabled = true;
+                    isUpgraded[i] = true;
+                    upgradeButton[i].Text = "Found";
+                    upgradeButton[i].BackColor = Color.Green;
+                }
+                else if (i == 6){
+                    
                 }
             }
         }
-        else
-        {
-            for (int i = 0; i < 5; i++)
+            if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
+            //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
             {
-                upgradeButton[i].Color = Color.Gray;
-                upgradeButton[i].Enabled = false;
+                for (int i = 0; i < 5; i++)
+                {
+                    if (upgradeButton[i].Text == "Upgrade")
+                    {
+                        upgradeButton[i].Color = Color.White;
+                        upgradeButton[i].Enabled = true;
+                    }
+                }
             }
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    upgradeButton[i].Color = Color.Gray;
+                    upgradeButton[i].Enabled = false;
+                }
+            }
+            robot1.Update(gameTime, inputManager, player, blocks);
         }
-        robot1.Update(gameTime, inputManager, player, blocks);
-    }
+    
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
@@ -953,14 +975,16 @@ public class GameplayScreen : GameScreen
 
         foreach (EnergyCell ec in energyCells)
         {
-            ec.Draw(spriteBatch); //TODO deze moeten achter shadow
+            ec.Draw(spriteBatch);
         }
         foreach (Trap t in traps)
         {
             t.Draw(spriteBatch);
         }
+        for (int i = 0; i < 5; i++)
+            robotItems[i].Draw(spriteBatch);
 
-        psDown.draw(spriteBatch);
+            psDown.draw(spriteBatch);
 
         spriteBatch.End();
     }

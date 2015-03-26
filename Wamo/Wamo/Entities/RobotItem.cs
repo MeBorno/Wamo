@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-public class Goggles : Entity
+public class RobotItem : Entity
 {
     private InputManager inputManager;
     SpriteFont font;
@@ -16,12 +16,14 @@ public class Goggles : Entity
     Rectangle placement;
     Vector2 position;
     Boolean visible = true;
+    int identifier;
 
-    public Goggles(Vector2 position)
+    public RobotItem(Vector2 position,int id)
     {
         cellTexture = Wamo.manager.Content.Load<Texture2D>("content/goggles_24");
         placement = new Rectangle((int)position.X, (int)position.Y, cellTexture.Width, cellTexture.Height);
         this.position = position;
+        identifier = id;
     }
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
@@ -43,18 +45,17 @@ public class Goggles : Entity
         placement = new Rectangle((int)this.position.X + (int)Camera.CameraPosition.X, (int)this.position.Y + (int)Camera.CameraPosition.Y, cellTexture.Width, cellTexture.Height);
     }
 
-    public void CheckCollision(Rectangle player)
+    public Boolean CheckCollision(Rectangle player)
     {
-        Rectangle tmp = new Rectangle(player.X + (int)Camera.CameraPosition.X, player.Y + (int)Camera.CameraPosition.Y, player.Width, player.Height);
+        Rectangle tmp = new Rectangle(player.X + (int)Camera.CameraPosition.X - 16, player.Y + (int)Camera.CameraPosition.Y - 16, player.Width, player.Height);
         if (this.visible && this.placement.Intersects(tmp))
         {
             this.visible = false;
-
-            // iets gebeurt met goggles.
-            // verander draw van robot naar precies hetzelfde als dat van system
-
-
-            // GameplayScreen.CellCount += 1;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -65,6 +66,9 @@ public class Goggles : Entity
             spriteBatch.Draw(cellTexture, placement, null, Color.Pink, 0f, Vector2.Zero, SpriteEffects.None, 0f);
     }
 
-
+    public int ItemIdentifier
+    {
+        get { return identifier; }
+    }
 }
 
