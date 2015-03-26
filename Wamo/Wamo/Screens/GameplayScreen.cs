@@ -166,6 +166,11 @@ public class GameplayScreen : GameScreen
                     string[] data = message.ReadString().Split(' ');
                     lights.Add(new PointLight(lightEffect, new Vector2(int.Parse(data[0]) / ScreenManager.Instance.DrawScale().M11, int.Parse(data[1]) / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
                 }
+                else if(abil == 3 && Options.GetValue<State>("role") == State.Robot)
+                {
+                    string[] data = message.ReadString().Split(' ');
+                    psUp.CreateTrail(100, new Vector2(float.Parse(data[0]), float.Parse(data[1])), new Vector2(float.Parse(data[2]), float.Parse(data[3])), Color.Red, true, 0.05f);
+                }
             }
         }
         else if (type == PacketTypes.MOVE)
@@ -579,16 +584,22 @@ public class GameplayScreen : GameScreen
         
         //upgrade, meer paint
         if (inputManager.MouseLeftButtonDown() && paintStartPos == Vector2.Zero)
-        {
             paintStartPos = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-        }
+        
         if(inputManager.MouseLeftButtonReleased())
-        {
             paintEndPos = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-        }
+        
         if (paintStartPos != Vector2.Zero && paintEndPos != Vector2.Zero)
         {
             psUp.CreateTrail(100, paintStartPos, paintEndPos, Color.Red, true,0.05f);
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.ABILITIES);
+            msg.Write((byte)Options.GetValue<State>("role"));
+            msg.Write((byte)3);
+            msg.Write((string)(paintStartPos.X + " " + paintStartPos.Y + " " + paintEndPos.X + " " + paintEndPos.Y));
+            NetworkManager.Instance.SendMessage(msg);
+
             //TODO stuur hier info naar robot if possible ;]]]]]
             paintStartPos = Vector2.Zero;
             paintEndPos = Vector2.Zero;

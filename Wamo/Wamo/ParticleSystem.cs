@@ -199,33 +199,37 @@ public class ParticleSystem
     {
         List<Particle> removeParticle = new List<Particle>();
         List<Cannon> removeCannon = new List<Cannon>();
-        foreach(Particle p in particleList)
+        try
         {
-            if (p.fade && p.opacity < 1.0f && p.time_alive == 0)
+            foreach (Particle p in particleList)
             {
-                p.opacity += p.opacity_change;
-            }
-            else
-            {
-                p.time_alive += gameTime.ElapsedGameTime.Milliseconds;
-                if (p.time_alive >= p.time_duration)
+                if (p.fade && p.opacity < 1.0f && p.time_alive == 0)
                 {
-                    if (p.fade && p.opacity > 0.0f)
-                        p.opacity -= p.opacity_change;
-                    else
-                        removeParticle.Add(p);
+                    p.opacity += p.opacity_change;
                 }
+                else
+                {
+                    p.time_alive += gameTime.ElapsedGameTime.Milliseconds;
+                    if (p.time_alive >= p.time_duration)
+                    {
+                        if (p.fade && p.opacity > 0.0f)
+                            p.opacity -= p.opacity_change;
+                        else
+                            removeParticle.Add(p);
+                    }
+                }
+                if (p.currentColor.G < p.endColor.G)
+                    p.currentColor.G += 5;
+
+                p.position += new Vector2((float)(Math.Sin(toRad(p.angle)) * p.speed), (float)(Math.Cos(toRad(p.angle)) * p.speed));
             }
-            if (p.currentColor.G < p.endColor.G)
-                p.currentColor.G += 5;
+        } catch(Exception e) {}
 
-            p.position += new Vector2((float)(Math.Sin(toRad(p.angle)) * p.speed), (float)(Math.Cos(toRad(p.angle)) * p.speed));
-        }
-
-        foreach(Particle p in removeParticle)
+        try
         {
-            particleList.Remove(p);
-        }
+            foreach(Particle p in removeParticle)
+                particleList.Remove(p);
+        } catch(Exception e) {}
 
         foreach (Cannon c in cannonList)
         {
