@@ -20,12 +20,12 @@ public class GameplayScreen : GameScreen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
     static Player player;
     Robot1 robot1;
-    int timer = 0;
     double evilPoints = 30;
     SoundEffect beep;
     Tile[,] textureGrid;
     Texture2D tile;
     Texture2D blockTexture, longBlockTexture;
+    Texture2D paralyze;
 
     public PointLight playerFOV;
     Visual newBlock;
@@ -71,7 +71,8 @@ public class GameplayScreen : GameScreen
     RobotItem[] robotItems;
     static List<Visual> inrange;
     List<Visual> sonarBlocks;
-    bool yes = true;
+
+    int[] timer;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -80,10 +81,10 @@ public class GameplayScreen : GameScreen
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
         blockTexture = Content.Load<Texture2D>("Block");
         longBlockTexture = Content.Load<Texture2D>("LongBlock");
-        
+        paralyze = Content.Load<Texture2D>("paralyse");
         beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
-
+        timer = new int[5] { 0, 0, 0, 0, 0 };
         int windowWidth = Options.GetValue<int>("screenWidth");
         int windowHeight = Options.GetValue<int>("screenHeight");
 
@@ -123,10 +124,7 @@ public class GameplayScreen : GameScreen
             playerFOV = new PointLight(lightEffect, Vector2.Zero, 100, Color.White, 1.0f);
             lights.Add(playerFOV);
         }
-        else
-        {
-            
-        }
+        
         Options.SetValue("lightEngine", true);
         abilityProgress = new ProgressBar[5];
         abilityButton = new Button[5];
@@ -252,11 +250,12 @@ public class GameplayScreen : GameScreen
             }
         }
 
-        timer += gameTime.ElapsedGameTime.Milliseconds;
+        
         evilPoints += 0.010;
 
         for (int i = 0; i < 5; i++)
         {
+
             if (abilityProgress[i].Value < abilityProgress[i].Range)
             {
                 abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
@@ -428,6 +427,17 @@ public class GameplayScreen : GameScreen
                 }
             }
             robot1.Update(gameTime, inputManager, player, blocks);
+        if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
+        {
+          //  psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
+            robot1.TestColor = Color.Pink;
+        }
+        else
+        {
+            robot1.TestColor = Color.Blue;
+        }
+
+
             
             if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
             {
@@ -440,11 +450,23 @@ public class GameplayScreen : GameScreen
             {
                 for (int i = 0; i < 5; i++)
                     abilityButton[i].Enabled = false;
-
-
             }
-            
+
+            if(Options.GetValue<bool>("paralyze"))
+                timer[0] += gameTime.ElapsedGameTime.Milliseconds;
+
+            Timers();
         }
+
+    public void Timers()
+    {
+        if (Options.GetValue<State>("role") == State.Doctor && timer[0] > 5000 && Options.GetValue<bool>("paralyze"))
+        {
+            Options.SetValue("paralyze", false);
+            for (int i = 0; i < 5; i++)
+                abilityButton[i].Enabled = true;
+        }
+    }
     
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
@@ -462,12 +484,19 @@ public class GameplayScreen : GameScreen
     public override void Draw(SpriteBatch spriteBatch)
     {
         base.Draw(spriteBatch);
-        robot1.Draw(spriteBatch);
+        
         player.Draw(spriteBatch);
         psUp.draw(spriteBatch);
-       
-        if (Options.GetValue<State>("role") == State.Doctor)
+        
+        if (Options.GetValue<State>("role") == State.Doctor){
             spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 30), Color.Red);
+            if (Options.GetValue<bool>("paralyze"))
+            {
+                //spriteBatch.Draw(paralyze, new Vector2(Options.GetValue<int>("screenWidth") / 2 - 180, Options.GetValue<int>("screenHeight") - 160), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
+                spriteBatch.Draw(paralyze, new Vector2(210,245), null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
+                
+            }
+        }
         if (Options.GetValue<State>("role") != State.Doctor)
             spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 30), Color.Blue); //TODO:: mooier font?
 
@@ -790,16 +819,16 @@ public class GameplayScreen : GameScreen
         abilityUpgradeName = new string[5];
         switch (Options.GetValue<State>("role"))
         {
-            case State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Unknown", "Scramble" }; //namen van de abilities
+            case State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Fog", "Scramble" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Unknown", "Create trap at mouse position", "Create monster at mouse position", "unknown", "Scramble the sounds of the system" };
 
                 break;
-            case State.Robot: abilityNames = new string[5] { "lol", "nee", "echt", "zo", "fucked" }; //namen van de abilities
+            case State.Robot: abilityNames = new string[5] { "Shoot", "Sonar", "Boost", "Unknown", "Invincible" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
                 break;
-            case State.System: abilityNames = new string[5] { "Add light", "Vision Surge", "Destroy", "Paint", "hehe" }; //namen van de abilities
+            case State.System: abilityNames = new string[5] { "Light", "Vision Surge", "Destroy", "Paint", "Paralyze" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 4000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse.", "Restore minimal vision for the Robot", "Destroy stuff from Doctor", "Paint at mouse for Robot", "kijk mij nou random shit bedenken." };
                 abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
@@ -1025,6 +1054,11 @@ public class GameplayScreen : GameScreen
 
             spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
         }
+       
+
+        for (int i = 0; i < 5; i++)
+            robotItems[i].Draw(spriteBatch);
+
 
         foreach (EnergyCell ec in energyCells)
         {
@@ -1034,13 +1068,14 @@ public class GameplayScreen : GameScreen
         {
             t.Draw(spriteBatch);
         }
+
+        robot1.Draw(spriteBatch);
+
         foreach (Projectile p in projectiles)
         {
             p.Draw(spriteBatch);
         }
-        for (int i = 0; i < 5; i++)
-            robotItems[i].Draw(spriteBatch);
-
+        
             psDown.draw(spriteBatch);
 
         spriteBatch.End();

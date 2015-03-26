@@ -14,6 +14,7 @@ public class Options
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
         options.Add("role", State.Doctor);
+
         options.Add("fog", false);
         options.Add("paralyze", false);
 

@@ -63,7 +63,7 @@ public class Robot1 : Entity
             velocity = positionDifference;
             angle = (float)Math.Atan2(positionDifference.Y, positionDifference.X);
         }
-        Movement();
+        //Movement();
         matrix =
             Matrix.CreateTranslation(16, 16, 0) *
             Matrix.CreateRotationZ(angle) *
@@ -95,13 +95,13 @@ public class Robot1 : Entity
                 break;
             }
 
-            testColor = Color.Blue;
+            //testColor = Color.Blue;
         }
     }
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, testColor, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
+        spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, testColor, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.1f);
     }
 
     public bool DoPathFinding(Player player, List<Visual> blocks)
@@ -136,6 +136,12 @@ public class Robot1 : Entity
     public Vector2 RobotPosition
     {
         get { return globalPos; }
+    }
+
+    public Color TestColor
+    {
+        get { return testColor; }
+        set { testColor = value; }
     }
 }
 
