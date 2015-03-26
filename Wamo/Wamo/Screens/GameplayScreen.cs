@@ -428,6 +428,12 @@ public class GameplayScreen : GameScreen
                 }
             }
             robot1.Update(gameTime, inputManager, player, blocks);
+        if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
+        {
+            psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
+        }
+
+
             
             if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
             {
