@@ -71,6 +71,7 @@ public class GameplayScreen : GameScreen
     RobotItem[] robotItems;
     static List<Visual> inrange;
     List<Visual> sonarBlocks;
+    bool yes = true;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -418,6 +419,13 @@ public class GameplayScreen : GameScreen
                 }
             }
             robot1.Update(gameTime, inputManager, player, blocks);
+            
+            if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
+            {
+               
+                    psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200,200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
+                    Options.SetValue("fog", true);
+            }
 
         }
     
@@ -438,8 +446,9 @@ public class GameplayScreen : GameScreen
     {
         base.Draw(spriteBatch);
         robot1.Draw(spriteBatch);
-        psUp.draw(spriteBatch);
         player.Draw(spriteBatch);
+        psUp.draw(spriteBatch);
+       
         if (Options.GetValue<State>("role") == State.Doctor)
             spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 30), Color.Red);
         if (Options.GetValue<State>("role") != State.Doctor)
@@ -672,7 +681,7 @@ public class GameplayScreen : GameScreen
 
     private void DocAbThree()
     {
-        throw new NotImplementedException();
+        //FOG Hij moet ding sturen 
     }
 
     private void DocAbTwo()
@@ -701,9 +710,9 @@ public class GameplayScreen : GameScreen
         throw new NotImplementedException();
     }
 
-    private void RobAbThree()
+    private void RobAbThree() 
     {
-        throw new NotImplementedException();
+        
     }
 
     private void RobAbTwo()
