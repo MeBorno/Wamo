@@ -47,6 +47,7 @@ public class Player : Entity
                     
                 }
             }
+        pixeldata = TextureTo2DArray(image);
         globalPos = position;
 
         ps = new ParticleSystem();
@@ -120,6 +121,12 @@ public class Player : Entity
         double b = (inputManager.MousePos().X - Camera.CameraPosition.X) - globalPos.X;
         angle = (float)Math.Atan2(a, b);
         Movement();
+        matrix =
+            Matrix.CreateTranslation(16, 16, 0) *
+            Matrix.CreateRotationZ(angle) *
+            Matrix.CreateScale(1f) *
+            Matrix.CreateTranslation(globalPos.X, globalPos.Y, 0);
+
 
     }
 

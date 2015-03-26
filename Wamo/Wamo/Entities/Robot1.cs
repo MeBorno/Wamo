@@ -43,6 +43,7 @@ public class Robot1 : Entity
                         }
                 }
             }
+        pixeldata = TextureTo2DArray(image);
         globalPos = position;
     }
 
@@ -63,6 +64,11 @@ public class Robot1 : Entity
             angle = (float)Math.Atan2(positionDifference.Y, positionDifference.X);
         }
         Movement();
+        matrix =
+            Matrix.CreateTranslation(16, 16, 0) *
+            Matrix.CreateRotationZ(angle) *
+            Matrix.CreateScale(1f) *
+            Matrix.CreateTranslation(globalPos.X, globalPos.Y, 0);
 
     }
 
