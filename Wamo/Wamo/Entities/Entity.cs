@@ -66,5 +66,15 @@ public class Entity
         get { return matrix; }
     }
 
+    public Texture2D Image
+    {
+        get { return image; }
+    }
+
+    public Vector2 Position
+    {
+        get { return position; }
+    }
+
     
 }
