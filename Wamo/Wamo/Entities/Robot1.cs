@@ -154,6 +154,7 @@ public class Robot1 : Entity
         Vector2 positionDifference = player.PlayerPosition - globalPos;
         Rectangle rectRobot = new Rectangle((int)globalPos.X, (int)globalPos.Y, 32, 32);
         Rectangle rectPlayer = new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32);
+        //if( Collision.CollidesWith(this, player))
         if (rectRobot.Intersects(rectPlayer))
         {
             healthBar.Value -= 10;
