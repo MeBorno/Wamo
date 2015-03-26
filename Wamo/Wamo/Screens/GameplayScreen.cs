@@ -722,8 +722,7 @@ public class GameplayScreen : GameScreen
         
         if (inputManager.MouseLeftButtonReleased())
         {
-            Vector2 dir = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-            Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), -player.FacingAngle);
+            Projectile rocket = new Projectile("Sprites/rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), player.FacingAngle);
             projectiles.Add(rocket);
             usingAbility = false;
         }

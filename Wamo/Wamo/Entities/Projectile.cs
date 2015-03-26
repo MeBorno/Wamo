@@ -66,7 +66,7 @@ public class Projectile : Entity
     public override void Draw(SpriteBatch spriteBatch)
     {
         if (visible)
-            spriteBatch.Draw(image, placement, null, Color.White, 0.0f, new Vector2(75f, 12.5f), SpriteEffects.None, 0f);
+            spriteBatch.Draw(image, placement, null, Color.White, angle, new Vector2(0, image.Height/2), SpriteEffects.None, 0f);
     }
 }
 
