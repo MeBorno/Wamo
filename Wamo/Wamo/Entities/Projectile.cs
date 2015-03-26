@@ -14,7 +14,7 @@ public class Projectile : Entity
     SpriteFont font;
     Texture2D image;
     Rectangle placement;
-    Vector2 position, direction, speed;
+    Vector2 direction, speed;
     Boolean visible = true;
     ParticleSystem ps;
     float angle;

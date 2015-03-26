@@ -13,7 +13,6 @@ public class Player : Entity
     private InputManager inputManager;
     SpriteFont font;
     Vector2 velocity;
-    Vector2 globalPos;
     Vector2 oldPos;
     float angle;
     Color testColor = Color.Blue;
@@ -48,7 +47,6 @@ public class Player : Entity
                 }
             }
         pixeldata = TextureTo2DArray(image);
-        globalPos = position;
 
         ps = new ParticleSystem();
       
@@ -117,25 +115,25 @@ public class Player : Entity
         }
         
 
-        double a = (inputManager.MousePos().Y - Camera.CameraPosition.Y) - globalPos.Y;
-        double b = (inputManager.MousePos().X - Camera.CameraPosition.X) - globalPos.X;
+        double a = (inputManager.MousePos().Y - Camera.CameraPosition.Y) - position.Y;
+        double b = (inputManager.MousePos().X - Camera.CameraPosition.X) - position.X;
         angle = (float)Math.Atan2(a, b);
         Movement();
         matrix =
             Matrix.CreateTranslation(16, 16, 0) *
             Matrix.CreateRotationZ(angle) *
             Matrix.CreateScale(1f) *
-            Matrix.CreateTranslation(globalPos.X, globalPos.Y, 0);
+            Matrix.CreateTranslation(position.X, position.Y, 0);
 
 
     }
 
     public void Movement()
     {
-        oldPos = globalPos;
+        oldPos = position;
         if (velocity != Vector2.Zero)
         {
-            globalPos += velocity / 10;
+            position += velocity / 10;
             
             if (velocity.X < 0.2f && velocity.X > -0.2f) velocity.X = 0;
             else { velocity.X = velocity.X / 1.50f; }
@@ -145,13 +143,13 @@ public class Player : Entity
         }
 
         //Rectangle playercollider = new Rectangle((int)(PlayerPosition.X / ScreenManager.Instance.DrawScale().M11), (int)(PlayerPosition.Y / ScreenManager.Instance.DrawScale().M22), 32, 32);
-        Rectangle tmp = new Rectangle((int)this.globalPos.X + (int)Camera.CameraPosition.X, (int)this.globalPos.Y + (int)Camera.CameraPosition.Y, 32, 32);
+        Rectangle tmp = new Rectangle((int)this.position.X + (int)Camera.CameraPosition.X, (int)this.position.Y + (int)Camera.CameraPosition.Y, 32, 32);
         foreach (Visual v in GameplayScreen.allInrangeBlocks)
         {
             if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
             {
                 //testColor = Color.Red;
-                globalPos = oldPos;
+                position = oldPos;
                 velocity = -velocity;
                 break;
             }
@@ -165,14 +163,8 @@ public class Player : Entity
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, Color.White, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
+        spriteBatch.Draw(image, position + Camera.CameraPosition, null, Color.White, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
         ps.draw(spriteBatch);
-    }
-
-    public Vector2 PlayerPosition
-    {
-        get { return globalPos; }
-        set { globalPos = value; }
     }
 
     public float FacingAngle

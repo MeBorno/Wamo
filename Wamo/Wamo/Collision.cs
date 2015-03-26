@@ -41,12 +41,12 @@ public class Collision
         for (int x = 0; x < b.Width; x++)
             for (int y = 0; y < b.Height; y++)
             {
-                int thisx = b.X - (int)(obj1.Position.X) + x;
-                int thisy = b.Y - (int)(obj1.Position.Y) + y;
-                int objx = b.X - (int)(obj2.Position.X) + x;
-                int objy = b.Y - (int)(obj2.Position.Y) + y;
-                if (GetPixelColor(obj1.Image, thisx, thisy).A != 0
-                    && GetPixelColor(obj2.Image, objx, objy).A != 0)
+                int obj1x = b.X - (int)(obj1.Position.X) + x;
+                int obj1y = b.Y - (int)(obj1.Position.Y) + y;
+                int obj2x = b.X - (int)(obj2.Position.X) + x;
+                int obj2y = b.Y - (int)(obj2.Position.Y) + y;
+                if (GetPixelColor(obj1.Image, obj1x, obj1y).A != 0
+                    && GetPixelColor(obj2.Image, obj2x, obj2y).A != 0)
                     return true;
             }
         return false;

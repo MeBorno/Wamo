@@ -13,7 +13,7 @@ public class Options
         options = new Dictionary<string, object>();
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
-        options.Add("role", State.Doctor);
+        options.Add("role", State.System);
 
         options.Add("fog", false);
         options.Add("paralyze", false);
