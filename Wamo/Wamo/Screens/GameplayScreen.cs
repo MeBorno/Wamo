@@ -120,11 +120,7 @@ public class GameplayScreen : GameScreen
             lights.Add(playerFOV);
             
         }
-        else if (Options.GetValue<State>("role") == State.Robot)
-        {
-            playerFOV = new PointLight(lightEffect, Vector2.Zero, 100, Color.White, 1.0f);
-            lights.Add(playerFOV);
-        }
+       
         
         Options.SetValue("lightEngine", true);
         abilityProgress = new ProgressBar[5];
@@ -225,7 +221,7 @@ public class GameplayScreen : GameScreen
         
         CameraMovement(); //alles met camera movement
 
-        if (Options.GetValue<State>("role") == State.System || Options.GetValue<State>("role") == State.Robot) //TODO eigenlijk alleen robot
+        if (Options.GetValue<State>("role") == State.Robot) //TODO eigenlijk alleen robot
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -755,17 +751,17 @@ public class GameplayScreen : GameScreen
         #region doctor abilities
     private void DocAbFour()
     {
-        throw new NotImplementedException();
+        //scramble
     }
 
     private void DocAbThree()
     {
-        //FOG Hij moet ding sturen 
+        //FOG Hij moet ding sturen DOE JE DING JORN
     }
 
     private void DocAbTwo()
     {
-        throw new NotImplementedException();
+        //zie hieronder maar dan met robot
     }
 
     private void DocAbOne()
@@ -780,7 +776,12 @@ public class GameplayScreen : GameScreen
 
     private void DocAbZero()
     {
-        throw new NotImplementedException();
+        if (inputManager.MouseLeftButtonReleased())
+        {
+            Visual door = new Visual(blockTexture, new Pose2D(new Vector2(16 + (int)(((Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11) - Camera.CameraPosition.X) / 32) * 32, 16 + (int)(((Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22) - Camera.CameraPosition.Y) /32) * 32),0f,1f));
+            blocks.Add(door);
+            usingAbility = false;
+        }
     }
         #endregion
         #region robot abilities
@@ -915,6 +916,7 @@ public class GameplayScreen : GameScreen
         abilityBar.Resizable = false;
         abilityBar.Passive = true; //geen user input
         abilityBar.BorderVisible = false;
+        
 
         for (int i = 0; i < 5; i++)
         {
