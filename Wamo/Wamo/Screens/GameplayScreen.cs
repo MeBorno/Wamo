@@ -15,6 +15,7 @@ using System.IO;
 
 public class GameplayScreen : GameScreen
 {
+    #region dit
     GraphicsDevice GraphicsDevice;
     ParticleSystem psUp; //Voor particles die boven shadow liggen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
@@ -29,7 +30,6 @@ public class GameplayScreen : GameScreen
 
     public PointLight playerFOV;
     Visual newBlock;
-    //InputManager inputManager;
     SpriteFont font;
     Vector2 oldCameraPosition;
 
@@ -73,7 +73,8 @@ public class GameplayScreen : GameScreen
     List<Visual> sonarBlocks;
 
     int[] timer;
-    
+    #endregion
+
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
         base.LoadContent(Content, inputManager);
@@ -222,6 +223,9 @@ public class GameplayScreen : GameScreen
         if (Options.GetValue<State>("role") == State.System || //TODO:: uiteindelijk alleen robot
             Options.GetValue<State>("role") == State.Robot)
         
+        CameraMovement(); //alles met camera movement
+
+        if (Options.GetValue<State>("role") == State.System || Options.GetValue<State>("role") == State.Robot) //TODO eigenlijk alleen robot
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -230,108 +234,47 @@ public class GameplayScreen : GameScreen
             NetworkManager.Instance.SendMessage(msg);
         }
 
-        if (Options.GetValue<State>("role") == State.Doctor && !Options.GetValue<bool>("paralyze"))
-        {
-            if (inputManager.KeyDown(Keys.Down, Keys.S))
-            {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
-            }
-            if (inputManager.KeyDown(Keys.Up, Keys.W))
-            {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
-            }
-            if (inputManager.KeyDown(Keys.Left, Keys.A))
-            {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
-            }
-            if (inputManager.KeyDown(Keys.Right, Keys.D))
-            {
-                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
-            }
-        }
-
-        
         evilPoints += 0.010;
+        CheckAbilities(gameTime); //checks bij abilities
+        psUp.update(gameTime); //update particlesystem
+        psDown.update(gameTime); //update particlesystem
+        CheckSound(gameTime);
+        CheckItems(gameTime); //check traps,cells,projectiles
+        FindNearbyBlocks(); //checkt alle blocks of ze dichtbij zijn
 
-        for (int i = 0; i < 5; i++)
+        robot1.Update(gameTime, inputManager, player, blocks, healthBar);
+
+        ///DONE IN ROBOT1
+        /*if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
         {
+          //  psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
+            robot1.TestColor = Color.Pink;
+        }
+        else
+        {
+            robot1.TestColor = Color.Blue;
+        }*/ 
 
-            if (abilityProgress[i].Value < abilityProgress[i].Range)
-            {
-                abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
-                abilityButton[i].Color = Color.Gray;
-            }
-            else
-            {
-                abilityButton[i].Color = Color.Red;
-
-            }
-
+            Timers();
         }
 
-        for (int i = 0; i < 5; i++)
+    private static void FindNearbyBlocks()
+    {
+        inrange.Clear();
+        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
+        foreach (Visual v in blocks)
         {
-            abilityButton[i].MouseUp += b_clicked;
-            abilityButton[i].MouseOver += b_over;
-            abilityButton[i].MouseOut += b_out;
-            upgradeButton[i].MouseUp += u_clicked;
-            if (Options.GetValue<State>("role") == State.System)
-                soundButton[i].MousePress += s_clicked;
-        }
-
-        psUp.update(gameTime);
-        psDown.update(gameTime);
-
-        if (usingAbility)
-        {
-            if (Options.GetValue<State>("role") == State.System)
-                switch (currentAbility)
-                {
-                    case 0: SysAbZero(); break;
-                    case 1: SysAbOne(); break;
-                    case 2: SysAbTwo(); break;
-                    case 3: SysAbThree(); break;
-                    case 4: SysAbFour(); break;
-                }
-            if (Options.GetValue<State>("role") == State.Robot)
-                switch (currentAbility)
-                {
-                    case 0: RobAbZero(); break;
-                    case 1: RobAbOne(); break;
-                    case 2: RobAbTwo(); break;
-                    case 3: RobAbThree(); break;
-                    case 4: RobAbFour(); break;
-                }
-            if (Options.GetValue<State>("role") == State.Doctor)
-                switch (currentAbility)
-                {
-                    case 0: DocAbZero(); break;
-                    case 1: DocAbOne(); break;
-                    case 2: DocAbTwo(); break;
-                    case 3: DocAbThree(); break;
-                    case 4: DocAbFour(); break;
-                }
 
 
-        }
-        foreach (PointLight l in lights)
-        {
-            if (l.Radius == 110)
+            if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
             {
-                l.Power -= 0.0025f;
-                if (l.Power < 0.10f)
-                {
-                    lights.Remove(l);
-                    break;
-                }
-
-                if (isUpgraded[0])
-                {
-                    lights[1].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-                }
+                inrange.Add(v);
             }
         }
+    }
 
+    private void CheckSound(GameTime gameTime)
+    {
         if (playingSoundEffect)
         {
             if (soundEffectTimer > 0)
@@ -346,7 +289,10 @@ public class GameplayScreen : GameScreen
                 playingSoundEffect = false;
             }
         }
+    }
 
+    private void CheckItems(GameTime gameTime)
+    {
         foreach (EnergyCell ev in energyCells)
         {
             ev.Update(gameTime, inputManager);
@@ -367,17 +313,16 @@ public class GameplayScreen : GameScreen
         {
             p.Update(gameTime, inputManager);
             //if (p.CheckCollision()) collision met enemies vd
-            //if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1,-1))
+            //if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1,-1))                 
             if(Collision.CollidesWith(p, robot1))
             {
-                //Vector2 collpos = TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix);
                 Vector2 collpos = robot1.Position;
-                psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f); 
+                psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
                 psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
                 psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
                 p.UnloadContent();
             }
-            
+
         }
 
         for (int i = 0; i < 6; i++)
@@ -391,76 +336,159 @@ public class GameplayScreen : GameScreen
                     upgradeButton[i].Text = "Found";
                     upgradeButton[i].BackColor = Color.Green;
                 }
-                else if (i == 6){
-                    
+                else if (i == 6)
+                {
+
                 }
             }
         }
-            if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
-            //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
+        if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
+        //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
+        {
+            for (int i = 0; i < 5; i++)
             {
-                for (int i = 0; i < 5; i++)
+                if (upgradeButton[i].Text == "Upgrade")
                 {
-                    if (upgradeButton[i].Text == "Upgrade")
-                    {
-                        upgradeButton[i].Color = Color.White;
-                        upgradeButton[i].Enabled = true;
-                    }
+                    upgradeButton[i].Color = Color.White;
+                    upgradeButton[i].Enabled = true;
                 }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                upgradeButton[i].Color = Color.Gray;
+                upgradeButton[i].Enabled = false;
+            }
+        }
+
+        foreach (PointLight l in lights)
+        {
+            if (l.Radius == 110)
+            {
+                l.Power -= 0.0025f;
+                if (l.Power < 0.10f)
+                {
+                    lights.Remove(l);
+                    break;
+                }
+
+                if (isUpgraded[0])
+                {
+                    lights[1].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
+                }
+            }
+        }
+    }
+
+    private void CheckAbilities(GameTime gameTime)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (abilityProgress[i].Value < abilityProgress[i].Range)
+            {
+                abilityProgress[i].Value += gameTime.ElapsedGameTime.Milliseconds;
+                abilityButton[i].Color = Color.Gray;
             }
             else
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    upgradeButton[i].Color = Color.Gray;
-                    upgradeButton[i].Enabled = false;
-                }
+                abilityButton[i].Color = Color.Red;
             }
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            abilityButton[i].MouseUp += b_clicked;
+            abilityButton[i].MouseOver += b_over;
+            abilityButton[i].MouseOut += b_out;
+            upgradeButton[i].MouseUp += u_clicked;
+            if (Options.GetValue<State>("role") == State.System)
+                soundButton[i].MousePress += s_clicked;
+        }
 
-            inrange.Clear();
-            Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
+        if (usingAbility)
+        {
+            if (Options.GetValue<State>("role") == State.System)
+                switch (currentAbility)
+                {
+                    case 0: SysAbZero(); break;
+                    case 1: SysAbOne(); break;
+                    case 2: SysAbTwo(); break;
+                    case 3: SysAbThree(); break;
+                    case 4: SysAbFour(); break;
+                }
+
+            if (Options.GetValue<State>("role") == State.Robot)
+                switch (currentAbility)
+                {
+                    case 0: RobAbZero(); break;
+                    case 1: RobAbOne(); break;
+                    case 2: RobAbTwo(); break;
+                    case 3: RobAbThree(); break;
+                    case 4: RobAbFour(); break;
+                }
+            if (Options.GetValue<State>("role") == State.Doctor)
+                switch (currentAbility)
+                {
+                    case 0: DocAbZero(); break;
+                    case 1: DocAbOne(); break;
+                    case 2: DocAbTwo(); break;
+                    case 3: DocAbThree(); break;
+                    case 4: DocAbFour(); break;
+                }
+        }
+
+        if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
+        {
+            psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200, 200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
+            Options.SetValue("fog", true);
+        }
+
+        if (Options.GetValue<State>("role") == State.Doctor && Options.GetValue<bool>("paralyze"))
+        {
+            for (int i = 0; i < 5; i++)
+                abilityButton[i].Enabled = false;
+        }
+
+        if (Options.GetValue<bool>("paralyze"))
+            timer[0] += gameTime.ElapsedGameTime.Milliseconds;
+    }
+
+    private void CameraMovement()
+    {
+        if (Options.GetValue<State>("role") == State.System)
+            playerFOV.Position = player.Position + Camera.CameraPosition; //wat is dit? TODO
+
+        if (Options.GetValue<State>("role") != State.Doctor)
+        {
+            Vector2 offset = Vector2.Zero;
+            if (player.Position.Y > 300)
+                offset.Y += (player.Position.Y - 300);
+            if (player.Position.X > 400)
+                offset.X += (player.Position.X - 400);
+            if (player.Position.Y > 300 || player.Position.X > 400)
+                Camera.CameraPosition = -offset;
+        }
+
+        if (oldCameraPosition != Camera.CameraPosition)
+        {
             foreach (Visual v in blocks)
-            {
-
-
-                if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
-                {
-                    inrange.Add(v);
-                }
-            }
-            robot1.Update(gameTime, inputManager, player, blocks, healthBar);
-       ////This is done in robot1 itself currently.
-        /* if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
-        {
-          //  psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
-            robot1.TestColor = Color.Pink;
+                v.Pose.Position = v.Pose.Position - (oldCameraPosition - Camera.CameraPosition);
+            oldCameraPosition = Camera.CameraPosition;
         }
-       
-        else
+
+        if (Options.GetValue<State>("role") == State.Doctor && !Options.GetValue<bool>("paralyze"))
         {
-            robot1.TestColor = Color.Blue;
-        }*/
-
-
-            
-            if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
-            {
-               
-                    psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200,200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
-                    Options.SetValue("fog", true);
-            }
-
-            if (Options.GetValue<State>("role") == State.Doctor && Options.GetValue<bool>("paralyze"))
-            {
-                for (int i = 0; i < 5; i++)
-                    abilityButton[i].Enabled = false;
-            }
-
-            if(Options.GetValue<bool>("paralyze"))
-                timer[0] += gameTime.ElapsedGameTime.Milliseconds;
-
-            Timers();
+            if (inputManager.KeyDown(Keys.Down, Keys.S))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y - 10);
+            if (inputManager.KeyDown(Keys.Up, Keys.W))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X, Camera.CameraPosition.Y + 10);
+            if (inputManager.KeyDown(Keys.Left, Keys.A))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X + 10, Camera.CameraPosition.Y);
+            if (inputManager.KeyDown(Keys.Right, Keys.D))
+                Camera.CameraPosition = new Vector2(Camera.CameraPosition.X - 10, Camera.CameraPosition.Y);
         }
+    }
 
     public void Timers()
     {
