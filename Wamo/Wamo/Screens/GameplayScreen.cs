@@ -69,6 +69,7 @@ public class GameplayScreen : GameScreen
     Vector2 paintEndPos = Vector2.Zero;
 
     RobotItem[] robotItems;
+    static List<Visual> inrange;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -133,7 +134,9 @@ public class GameplayScreen : GameScreen
         soundButton = new Button[5];
         CreateHud();
         LoadMap();
-       
+
+        inrange = new List<Visual>();
+
         psUp = new ParticleSystem();
         psDown = new ParticleSystem();
 
@@ -384,6 +387,17 @@ public class GameplayScreen : GameScreen
                 {
                     upgradeButton[i].Color = Color.Gray;
                     upgradeButton[i].Enabled = false;
+                }
+            }
+            inrange.Clear();
+            Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
+            foreach (Visual v in blocks)
+            {
+
+
+                if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
+                {
+                    inrange.Add(v);
                 }
             }
             robot1.Update(gameTime, inputManager, player, blocks);
@@ -922,18 +936,9 @@ public class GameplayScreen : GameScreen
             
            
         }
-        List<Visual> inrange = new List<Visual>();
+        
 
-        Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
-        foreach (Visual v in blocks)
-        {
-
-
-            if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
-            {
-                inrange.Add(v);
-            }
-        }
+        
 
         try
         {
@@ -941,7 +946,7 @@ public class GameplayScreen : GameScreen
         }
         catch (System.InvalidOperationException e) { }
         
-        inrange.Clear();
+        
     }
 
     /// <summary>
@@ -989,9 +994,9 @@ public class GameplayScreen : GameScreen
         spriteBatch.End();
     }
 
-    public static List<Visual> allBlocks
+    public static List<Visual> allInrangeBlocks
     {
-        get { return blocks; }
+        get { return inrange; }
     }
 
     public static int CellCount
