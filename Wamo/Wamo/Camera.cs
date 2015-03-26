@@ -18,11 +18,13 @@ public class Camera
         get { return cameraPosition; }
         set
         {
-            if (value.X > 0 || value.Y > 0 || value.X < -1240 || value.Y < -1240)
+            if (value.X > 0 || value.Y > 0 || value.X < -1240 || value.Y < -1240) //todo, JUISTE RESOLUTIE
                 return;
             else
             {
+
                 cameraPosition = value;
+                
             }
         }
     }

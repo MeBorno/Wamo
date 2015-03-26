@@ -200,7 +200,18 @@ public class GameplayScreen : GameScreen
     {
         inputManager.Update();
         if (Options.GetValue<State>("role") == State.System)
-            playerFOV.Position = player.PlayerPosition + Camera.CameraPosition;
+            playerFOV.Position = player.PlayerPosition + Camera.CameraPosition; //wat is dit? TODO
+
+        if (Options.GetValue<State>("role") != State.Doctor)
+        {
+            Vector2 offset = Vector2.Zero;
+            if (player.PlayerPosition.Y > 300)
+                offset.Y += (player.PlayerPosition.Y - 300);
+            if (player.PlayerPosition.X > 400)
+                offset.X += (player.PlayerPosition.X - 400);
+            if (player.PlayerPosition.Y > 300 || player.PlayerPosition.X > 400)
+                Camera.CameraPosition = -offset;
+        }
 
         if (oldCameraPosition != Camera.CameraPosition)
         {
@@ -209,13 +220,11 @@ public class GameplayScreen : GameScreen
             oldCameraPosition = Camera.CameraPosition;
         }
 
-
         if (Options.GetValue<State>("role") == State.System ||
             Options.GetValue<State>("role") == State.Robot)
         //if (Options.GetValue<State>("role") == State.Robot)
         {
             player.Update(gameTime, inputManager);
-
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
             msg.Write((byte)PacketTypes.MOVE);
             msg.Write((string)(player.PlayerPosition.X + " " + player.PlayerPosition.Y + " " + player.FacingAngle + " " + player.Velocity.X + " " + player.Velocity.Y));
