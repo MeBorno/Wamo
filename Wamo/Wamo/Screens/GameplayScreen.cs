@@ -360,6 +360,7 @@ public class GameplayScreen : GameScreen
                 upgradeButton[i].Enabled = false;
             }
         }
+        robot1.Update(gameTime, inputManager, player, blocks);
     }
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
