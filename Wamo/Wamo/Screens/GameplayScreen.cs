@@ -225,7 +225,7 @@ public class GameplayScreen : GameScreen
         
         CameraMovement(); //alles met camera movement
 
-        if (Options.GetValue<State>("role") == State.System || Options.GetValue<State>("role") == State.Robot) //TODO eigenlijk alleen robot
+        if (Options.GetValue<State>("role") == State.Robot) // || Options.GetValue<State>("role") == State.System) //TODO eigenlijk alleen robot
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
