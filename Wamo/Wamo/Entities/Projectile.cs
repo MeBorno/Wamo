@@ -17,15 +17,16 @@ public class Projectile : Entity
     Vector2 position, direction, speed;
     Boolean visible = true;
     ParticleSystem ps;
+    float angle;
 
-    public Projectile(string imagelink, Vector2 pos, Vector2 dir)
+    public Projectile(string imagelink, Vector2 pos, Vector2 dir, float angl)
     {
         this.image = Wamo.manager.Content.Load<Texture2D>("content/" + imagelink);
         this.position = pos;
         this.direction = dir;
         placement = new Rectangle((int)position.X, (int)position.Y, this.image.Width, this.image.Height);
         ps = new ParticleSystem();
-
+        angle = angl;
         //projec moet van pos naar direction gaan, via speed. angle gebruiken?
     }
 
@@ -65,7 +66,7 @@ public class Projectile : Entity
     public override void Draw(SpriteBatch spriteBatch)
     {
         if (visible)
-            spriteBatch.Draw(image, placement, null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0f);
+            spriteBatch.Draw(image, placement, null, Color.White, 0.0f, new Vector2(75f, 12.5f), SpriteEffects.None, 0f);
     }
 }
 

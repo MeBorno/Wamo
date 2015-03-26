@@ -108,7 +108,7 @@ public class GameplayScreen : GameScreen
         lights.Clear();
 
         if ((Options.GetValue<State>("role") == State.None))
-            Options.SetValue("role", State.System);
+            Options.SetValue("role", State.Robot);
 
         if (Options.GetValue<State>("role") == State.System)
         {
@@ -352,6 +352,11 @@ public class GameplayScreen : GameScreen
                 healhBar.Value -= 10;
             }
         }
+        foreach (Projectile p in projectiles)
+        {
+            p.Update(gameTime, inputManager);
+            //if (p.CheckCollision()) collision met enemies vd 
+        }
 
         for (int i = 0; i < 6; i++)
         {
@@ -409,7 +414,7 @@ public class GameplayScreen : GameScreen
 
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Doctor)
+        if (Options.GetValue<State>("role") != State.Robot) // MOET DOCTOR ZIJN
         {
 
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
@@ -704,7 +709,8 @@ public class GameplayScreen : GameScreen
     {
         if (inputManager.MouseLeftButtonReleased())
         {
-            Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
+            Vector2 dir = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
+            Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), -player.FacingAngle);
             projectiles.Add(rocket);
             usingAbility = false;
         }
@@ -954,7 +960,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<State>("role") != State.Doctor)
+        if (Options.GetValue<State>("role") != State.Robot) //MOET DOCTOR ZIJN
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 
@@ -985,6 +991,10 @@ public class GameplayScreen : GameScreen
         foreach (Trap t in traps)
         {
             t.Draw(spriteBatch);
+        }
+        foreach (Projectile p in projectiles)
+        {
+            p.Draw(spriteBatch);
         }
         for (int i = 0; i < 5; i++)
             robotItems[i].Draw(spriteBatch);
