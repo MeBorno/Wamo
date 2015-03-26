@@ -165,7 +165,7 @@ public class Player : Entity
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, testColor, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
+        spriteBatch.Draw(image, globalPos + Camera.CameraPosition, null, Color.White, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
         ps.draw(spriteBatch);
     }
 

@@ -7,11 +7,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using TomShane.Neoforce.Controls;
 
 public class Robot1 : Entity
 {
     SpriteFont font;
-    Vector2 velocity;
+    Vector2 velocity, knockbackVelocity;
     Vector2 globalPos;
     float angle = 0.0f;
     Color testColor = Color.Blue;
@@ -53,7 +54,7 @@ public class Robot1 : Entity
         moveAnimation.UnloadContent();
     }
 
-    public void Update(GameTime gameTime, InputManager inputManager, Player player, List<Visual> blocks)
+    public void Update(GameTime gameTime, InputManager inputManager, Player player, List<Visual> blocks, ProgressBar healthBar)
     {
         if (DoPathFinding(player, blocks))
         {
@@ -63,7 +64,10 @@ public class Robot1 : Entity
             velocity = positionDifference;
             angle = (float)Math.Atan2(positionDifference.Y, positionDifference.X);
         }
-        //Movement();
+
+        Movement();
+        CheckPlayerCollision(player, healthBar);
+
         matrix =
             Matrix.CreateTranslation(16, 16, 0) *
             Matrix.CreateRotationZ(angle) *
@@ -85,6 +89,18 @@ public class Robot1 : Entity
             else { velocity.Y = velocity.Y / 1.50f; }
 
         }
+
+        if (knockbackVelocity != Vector2.Zero)
+        {
+            globalPos += knockbackVelocity;
+
+            if (knockbackVelocity.X < 0.2f && knockbackVelocity.X > -0.2f) knockbackVelocity.X = 0;
+            else { knockbackVelocity.X = knockbackVelocity.X / 1.20f; }
+            if (knockbackVelocity.Y < 0.01f && knockbackVelocity.Y > -0.01f) knockbackVelocity.Y = 0;
+            else { knockbackVelocity.Y = knockbackVelocity.Y / 1.20f; }
+
+        }
+
         Rectangle tmp = new Rectangle((int)this.globalPos.X + (int)Camera.CameraPosition.X, (int)this.globalPos.Y + (int)Camera.CameraPosition.Y, 32, 32);
         foreach (Visual v in GameplayScreen.allInrangeBlocks)
         {
@@ -131,6 +147,38 @@ public class Robot1 : Entity
             }
         }
         return true;
+    }
+
+    public void CheckPlayerCollision(Player player, ProgressBar healthBar)
+    {
+        Vector2 positionDifference = player.PlayerPosition - globalPos;
+        Rectangle rectRobot = new Rectangle((int)globalPos.X, (int)globalPos.Y, 32, 32);
+        Rectangle rectPlayer = new Rectangle((int)player.PlayerPosition.X, (int)player.PlayerPosition.Y, 32, 32);
+        if (rectRobot.Intersects(rectPlayer))
+        {
+            healthBar.Value -= 10;
+            if (positionDifference.X > 0)
+            {
+                player.Velocity = new Vector2(this.velocity.X * 15, player.Velocity.Y);
+                knockbackVelocity.X = -this.velocity.X * 2;
+            }
+            if (positionDifference.X < 0)
+            {
+                player.Velocity = new Vector2(this.velocity.X * 15, player.Velocity.Y);
+                knockbackVelocity.X = -this.velocity.X * 2;
+            }
+            if (positionDifference.Y > 0)
+            {
+                player.Velocity = new Vector2(player.Velocity.X, this.velocity.Y * 15);
+                knockbackVelocity.Y = -this.velocity.Y * 2;
+            }
+            if (positionDifference.Y < 0)
+            {
+                player.Velocity = new Vector2(player.Velocity.X, this.velocity.Y * 15);
+                knockbackVelocity.Y = -this.velocity.Y * 2;
+            }
+            
+        }
     }
 
     public Vector2 RobotPosition
