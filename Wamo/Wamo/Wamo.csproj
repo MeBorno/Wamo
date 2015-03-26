@@ -82,6 +82,7 @@
     <Compile Include="Animation\FadeAnimation.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Entities\Enemy.cs" />
+    <Compile Include="Entities\Goggles.cs" />
     <Compile Include="Entities\Projectile.cs" />
     <Compile Include="Entities\Trap.cs" />
     <Compile Include="Entities\EnergyCell.cs" />
