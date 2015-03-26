@@ -70,6 +70,7 @@ public class GameplayScreen : GameScreen
 
     RobotItem[] robotItems;
     static List<Visual> inrange;
+    List<Visual> sonarBlocks;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -136,6 +137,7 @@ public class GameplayScreen : GameScreen
         LoadMap();
 
         inrange = new List<Visual>();
+        sonarBlocks = new List<Visual>();
 
         psUp = new ParticleSystem();
         psDown = new ParticleSystem();
@@ -389,6 +391,7 @@ public class GameplayScreen : GameScreen
                     upgradeButton[i].Enabled = false;
                 }
             }
+
             inrange.Clear();
             Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1400, 900);
             foreach (Visual v in blocks)
@@ -401,17 +404,15 @@ public class GameplayScreen : GameScreen
                 }
             }
             robot1.Update(gameTime, inputManager, player, blocks);
+
         }
     
 
     public override void PreDraw(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
-
         if (Options.GetValue<State>("role") != State.Doctor)
         {
-
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
             CombineAndDraw(GraphicsDevice); // Combine
@@ -429,9 +430,12 @@ public class GameplayScreen : GameScreen
         if (Options.GetValue<State>("role") != State.Doctor)
             spriteBatch.DrawString(font, "Energy Cells: " + (int)cellCount, new Vector2(10, 30), Color.Blue); //TODO:: mooier font?
 
-        
-       
-
+        if(Options.GetValue<State>("role") == State.Robot && currentAbility == 1)
+            foreach (Visual v in sonarBlocks)
+            {
+                Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
+                spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
+            }
     }
 
     public void LoadMap()
@@ -488,15 +492,13 @@ public class GameplayScreen : GameScreen
     {
         playingSoundEffect = true;
         soundEffectTimer = (float)beep.Duration.TotalMilliseconds;
-
         switch (soundID)
         {
             case 0: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), -1.0f, 0.0f); break;
             case 1: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, 0.0f); break;
             case 2: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 1.0f, 0.0f); break;
             case 3: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, -1.0f); break;
-            case 4: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, 1.0f); break;
-                
+            case 4: beep.Play(Math.Min(1.0f, Options.GetValue<float>("soundVolume")), 0.0f, 1.0f); break;          
         }
 
     }
@@ -696,16 +698,37 @@ public class GameplayScreen : GameScreen
 
     private void RobAbOne()
     {
-        throw new NotImplementedException();
+        sonarBlocks.Clear();
+        //Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X) - 150, (int)(-Camera.CameraPosition.Y) - 150, 300, 300);
+        Rectangle tmp = new Rectangle((int)(player.PlayerPosition.X) - 150, (int)(player.PlayerPosition.Y) - 150, 300, 300);
+        foreach (Visual v in blocks)
+        {
+            if (tmp.Contains(new Rectangle((int)(v.Pose.Position.X) - (int)(Camera.CameraPosition.X), (int)(v.Pose.Position.Y) - (int)(Camera.CameraPosition.Y), -(int)v.Pose.Scale.X * 64, -(int)v.Pose.Scale.Y * 64)))
+            {
+                sonarBlocks.Add(v);
+            }
+        }
 
     }
 
     private void RobAbZero()
     {
+        /*
         if (inputManager.MouseLeftButtonReleased())
         {
             Projectile rocket = new Projectile("rocket", player.PlayerPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22));
             projectiles.Add(rocket);
+            usingAbility = false;
+        }
+         */
+
+        if (inputManager.MouseLeftButtonDown())
+        {
+            if(isUpgraded[0] == false)
+                psUp.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), Color.Red, Color.Yellow);
+            if(isUpgraded[0] == true)
+                psUp.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), Color.Blue, Color.Yellow);
+
             usingAbility = false;
         }
     }
@@ -852,17 +875,13 @@ public class GameplayScreen : GameScreen
     private void CombineAndDraw(GraphicsDevice GraphicsDevice)
     {
         GraphicsDevice.SetRenderTarget(null);
-
         GraphicsDevice.Clear(Color.Black);
-
         GraphicsDevice.BlendState = BlendState.Opaque;
         // Samplers states are set by the shader itself            
         GraphicsDevice.DepthStencilState = DepthStencilState.Default;
         GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
-
         combineEffect.Parameters["colorMap"].SetValue(colorMap);
         combineEffect.Parameters["lightMap"].SetValue(lightMap);
-
         combineEffect.Techniques[0].Passes[0].Apply();
         quad.Render(GraphicsDevice, Vector2.One * -1.0f, Vector2.One);
     }
@@ -929,24 +948,11 @@ public class GameplayScreen : GameScreen
         GraphicsDevice.DepthStencilState = DepthStencilState.None;
         GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
-        if (Mouse.GetState().RightButton == ButtonState.Pressed)
-        {
-            //lights[0].Position = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
-            psUp.CreateCannon(null, 10, 300, player.PlayerPosition + Camera.CameraPosition, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22),Color.Red,Color.Yellow);
-            
-           
-        }
-        
-
-        
-
         try
         {
             foreach (PointLight l in lights) l.Render(GraphicsDevice, inrange);
         }
-        catch (System.InvalidOperationException e) { }
-        
-        
+        catch (System.InvalidOperationException e) { } 
     }
 
     /// <summary>
