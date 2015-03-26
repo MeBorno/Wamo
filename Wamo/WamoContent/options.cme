@@ -8,7 +8,7 @@ musicVolume=[float]0,0
 soundVolume=[float]1,0
 
 # Network Options
-defaultIP=127.0.0.1
+defaultIP=127.0.0.1 #77.173.43.109
 
 # Debug Options
 debugDrawHitbox=[bool]true

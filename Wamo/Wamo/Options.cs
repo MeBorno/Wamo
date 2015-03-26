@@ -13,7 +13,8 @@ public class Options
         options = new Dictionary<string, object>();
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
-        options.Add("role", State.System);
+        options.Add("role", State.Robot);
+        options.Add("fog", false);
 
         if (File.Exists(fname))
         {

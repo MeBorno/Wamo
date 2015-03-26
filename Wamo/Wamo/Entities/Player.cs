@@ -47,6 +47,7 @@ public class Player : Entity
                     
                 }
             }
+        pixeldata = TextureTo2DArray(image);
         globalPos = position;
 
         ps = new ParticleSystem();
@@ -120,6 +121,12 @@ public class Player : Entity
         double b = (inputManager.MousePos().X - Camera.CameraPosition.X) - globalPos.X;
         angle = (float)Math.Atan2(a, b);
         Movement();
+        matrix =
+            Matrix.CreateTranslation(16, 16, 0) *
+            Matrix.CreateRotationZ(angle) *
+            Matrix.CreateScale(1f) *
+            Matrix.CreateTranslation(globalPos.X, globalPos.Y, 0);
+
 
     }
 
@@ -139,7 +146,7 @@ public class Player : Entity
 
         //Rectangle playercollider = new Rectangle((int)(PlayerPosition.X / ScreenManager.Instance.DrawScale().M11), (int)(PlayerPosition.Y / ScreenManager.Instance.DrawScale().M22), 32, 32);
         Rectangle tmp = new Rectangle((int)this.globalPos.X + (int)Camera.CameraPosition.X, (int)this.globalPos.Y + (int)Camera.CameraPosition.Y, 32, 32);
-        foreach (Visual v in GameplayScreen.allBlocks)
+        foreach (Visual v in GameplayScreen.allInrangeBlocks)
         {
             if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
             {

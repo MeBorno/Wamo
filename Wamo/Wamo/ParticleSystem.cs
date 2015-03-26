@@ -13,7 +13,9 @@ public class ParticleSystem
      */
     List<Particle> particleList;
     List<Cannon> cannonList;
-    Texture2D pixelParticle;
+    Texture2D smokeParticle;
+    Texture2D smokeParticle2;
+    Texture2D fireParticle;
     Texture2D circleParticle;
     Random r;
 
@@ -23,7 +25,9 @@ public class ParticleSystem
      */
     public ParticleSystem()
     {
-        pixelParticle = Wamo.manager.Content.Load<Texture2D>("Content/smoke");
+        smokeParticle = Wamo.manager.Content.Load<Texture2D>("Content/smoke");
+        smokeParticle2 = Wamo.manager.Content.Load<Texture2D>("Content/smoke2"); //DDeze is veel dikker voor FOG
+        fireParticle = Wamo.manager.Content.Load<Texture2D>("Content/fire");
         circleParticle = Wamo.manager.Content.Load<Texture2D>("Content/Circle");
         particleList = new List<Particle>();
         particleList.Clear();
@@ -87,7 +91,7 @@ public class ParticleSystem
 
             Color color = averageColor * (float)(r.Next(1,20) / 20.0);
             
-            CreateParticle(pixelParticle, position, ttl, 1f, angle, scale, color,color, fade, opacity_change);
+            CreateParticle(smokeParticle, position, ttl, 1f, angle, scale, color,color, fade, opacity_change);
         }
     }
 
@@ -127,16 +131,10 @@ public class ParticleSystem
 
         for (int i = 0; i < amount; i++)
         {
-            if (startPos.X < endPos.X)
-            {
-               // Vector2 tmp = new Vector2(0, r.Next(0, GameEnvironment.Screen.Y));
-               // CreateParticle(pixelParticle, tmp, 6000f, r.Next(10, 20) * ((float)GameEnvironment.Random.NextDouble() + 0.6f), 90, GameEnvironment.Random.Next(2, 10) * (float)GameEnvironment.Random.NextDouble(), color, true, 0.010f);
-            }
-            else
-            {
-               // Vector2 tmp = new Vector2(GameEnvironment.Screen.X, GameEnvironment.Random.Next(0, GameEnvironment.Screen.Y));
-               // CreateParticle(pixelParticle, tmp, 6000f, GameEnvironment.Random.Next(-20, -10) * ((float)GameEnvironment.Random.NextDouble() + 0.6f), 90, GameEnvironment.Random.Next(2, 10) * (float)GameEnvironment.Random.NextDouble(), color, true, 0.010f);
-            }
+            int xPos = r.Next((int)startPos.X,(int)endPos.X);
+            int yPos = r.Next((int)startPos.Y,(int)endPos.Y);
+            float angle = (float)r.NextDouble() * 360f;
+            CreateParticle(smokeParticle2, new Vector2(xPos, yPos), 10000, (float)r.NextDouble(), angle, 15f + (float)r.NextDouble() * 10f, color, color,true,0.05f);
         }
     }
 
@@ -182,7 +180,7 @@ public class ParticleSystem
         tmp.duration = duration;
         tmp.endPos = endPos;
         if(texture == null)
-        tmp.sprite = pixelParticle;
+        tmp.sprite = fireParticle;
         else
         {
             tmp.sprite = texture;
@@ -197,33 +195,37 @@ public class ParticleSystem
     {
         List<Particle> removeParticle = new List<Particle>();
         List<Cannon> removeCannon = new List<Cannon>();
-        foreach(Particle p in particleList)
+        try
         {
-            if (p.fade && p.opacity < 1.0f && p.time_alive == 0)
+            foreach (Particle p in particleList)
             {
-                p.opacity += p.opacity_change;
-            }
-            else
-            {
-                p.time_alive += gameTime.ElapsedGameTime.Milliseconds;
-                if (p.time_alive >= p.time_duration)
+                if (p.fade && p.opacity < 1.0f && p.time_alive == 0)
                 {
-                    if (p.fade && p.opacity > 0.0f)
-                        p.opacity -= p.opacity_change;
-                    else
-                        removeParticle.Add(p);
+                    p.opacity += p.opacity_change;
                 }
+                else
+                {
+                    p.time_alive += gameTime.ElapsedGameTime.Milliseconds;
+                    if (p.time_alive >= p.time_duration)
+                    {
+                        if (p.fade && p.opacity > 0.0f)
+                            p.opacity -= p.opacity_change;
+                        else
+                            removeParticle.Add(p);
+                    }
+                }
+                if (p.currentColor.G < p.endColor.G)
+                    p.currentColor.G += 5;
+
+                p.position += new Vector2((float)(Math.Sin(toRad(p.angle)) * p.speed), (float)(Math.Cos(toRad(p.angle)) * p.speed));
             }
-            if (p.currentColor.G < p.endColor.G)
-                p.currentColor.G += 5;
+        } catch(Exception e) {}
 
-            p.position += new Vector2((float)(Math.Sin(toRad(p.angle)) * p.speed), (float)(Math.Cos(toRad(p.angle)) * p.speed));
-        }
-
-        foreach(Particle p in removeParticle)
+        try
         {
-            particleList.Remove(p);
-        }
+            foreach(Particle p in removeParticle)
+                particleList.Remove(p);
+        } catch(Exception e) {}
 
         foreach (Cannon c in cannonList)
         {
@@ -234,7 +236,7 @@ public class ParticleSystem
                     Color tmpColor = c.startColor;
                     //angle
                     //dit is voor vuur;
-                    CreateParticle(c.sprite, c.startPos, c.duration, tmpSpeed, c.angle, (float)r.NextDouble(), tmpColor, c.endColor, true);
+                    CreateParticle(c.sprite, c.startPos, c.duration, tmpSpeed, c.angle, 1f, tmpColor, c.endColor, true);
                 }
             }
             else
@@ -253,7 +255,7 @@ public class ParticleSystem
     {
         foreach (Particle p in particleList)
         {
-            sb.Draw(p.sprite, p.position, null,p.currentColor * p.opacity, 0f, new Vector2(p.sprite.Width/2 * p.scale, p.sprite.Height/2 * p.scale), p.scale, SpriteEffects.None, 0.0f);// / GameEnvironment.Camera.Scale.M11);
+            sb.Draw(p.sprite, p.position - new Vector2(p.sprite.Width/2 * p.scale, p.sprite.Height/2 * p.scale), null,p.currentColor * p.opacity,p.angle, Vector2.Zero, p.scale, SpriteEffects.None, 0.0f);// / GameEnvironment.Camera.Scale.M11);
         }
     }
 
