@@ -14,6 +14,7 @@ public class ParticleSystem
     List<Particle> particleList;
     List<Cannon> cannonList;
     Texture2D smokeParticle;
+    Texture2D smokeParticle2;
     Texture2D fireParticle;
     Texture2D circleParticle;
     Random r;
@@ -25,6 +26,7 @@ public class ParticleSystem
     public ParticleSystem()
     {
         smokeParticle = Wamo.manager.Content.Load<Texture2D>("Content/smoke");
+        smokeParticle2 = Wamo.manager.Content.Load<Texture2D>("Content/smoke2"); //DDeze is veel dikker voor FOG
         fireParticle = Wamo.manager.Content.Load<Texture2D>("Content/fire");
         circleParticle = Wamo.manager.Content.Load<Texture2D>("Content/Circle");
         particleList = new List<Particle>();
@@ -129,16 +131,10 @@ public class ParticleSystem
 
         for (int i = 0; i < amount; i++)
         {
-            if (startPos.X < endPos.X)
-            {
-               // Vector2 tmp = new Vector2(0, r.Next(0, GameEnvironment.Screen.Y));
-               // CreateParticle(pixelParticle, tmp, 6000f, r.Next(10, 20) * ((float)GameEnvironment.Random.NextDouble() + 0.6f), 90, GameEnvironment.Random.Next(2, 10) * (float)GameEnvironment.Random.NextDouble(), color, true, 0.010f);
-            }
-            else
-            {
-               // Vector2 tmp = new Vector2(GameEnvironment.Screen.X, GameEnvironment.Random.Next(0, GameEnvironment.Screen.Y));
-               // CreateParticle(pixelParticle, tmp, 6000f, GameEnvironment.Random.Next(-20, -10) * ((float)GameEnvironment.Random.NextDouble() + 0.6f), 90, GameEnvironment.Random.Next(2, 10) * (float)GameEnvironment.Random.NextDouble(), color, true, 0.010f);
-            }
+            int xPos = r.Next((int)startPos.X,(int)endPos.X);
+            int yPos = r.Next((int)startPos.Y,(int)endPos.Y);
+            float angle = (float)r.NextDouble() * 360f;
+            CreateParticle(smokeParticle2, new Vector2(xPos, yPos), 10000, (float)r.NextDouble(), angle, 15f + (float)r.NextDouble() * 10f, color, color,true,0.05f);
         }
     }
 
@@ -259,7 +255,7 @@ public class ParticleSystem
     {
         foreach (Particle p in particleList)
         {
-            sb.Draw(p.sprite, p.position - new Vector2(p.sprite.Width/2 * p.scale, p.sprite.Height/2 * p.scale), null,p.currentColor * p.opacity, 0f, Vector2.Zero, p.scale, SpriteEffects.None, 0.0f);// / GameEnvironment.Camera.Scale.M11);
+            sb.Draw(p.sprite, p.position - new Vector2(p.sprite.Width/2 * p.scale, p.sprite.Height/2 * p.scale), null,p.currentColor * p.opacity,p.angle, Vector2.Zero, p.scale, SpriteEffects.None, 0.0f);// / GameEnvironment.Camera.Scale.M11);
         }
     }
 

@@ -71,6 +71,7 @@ public class GameplayScreen : GameScreen
     RobotItem[] robotItems;
     static List<Visual> inrange;
     List<Visual> sonarBlocks;
+    bool yes = true;
     
     public override void LoadContent(ContentManager Content, InputManager inputManager)
     {
@@ -366,7 +367,16 @@ public class GameplayScreen : GameScreen
         foreach (Projectile p in projectiles)
         {
             p.Update(gameTime, inputManager);
-            //if (p.CheckCollision()) collision met enemies vd 
+            //if (p.CheckCollision()) collision met enemies vd
+            if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1,-1))
+            {
+                Vector2 collpos = TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix);
+                psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f); 
+                psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                p.UnloadContent();
+            }
+            
         }
 
         for (int i = 0; i < 6; i++)
@@ -418,6 +428,19 @@ public class GameplayScreen : GameScreen
                 }
             }
             robot1.Update(gameTime, inputManager, player, blocks, healthBar);
+        if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
+        {
+            psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
+        }
+
+
+            
+            if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
+            {
+               
+                    psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200,200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
+                    Options.SetValue("fog", true);
+            }
 
         }
     
@@ -438,8 +461,9 @@ public class GameplayScreen : GameScreen
     {
         base.Draw(spriteBatch);
         robot1.Draw(spriteBatch);
-        psUp.draw(spriteBatch);
         player.Draw(spriteBatch);
+        psUp.draw(spriteBatch);
+       
         if (Options.GetValue<State>("role") == State.Doctor)
             spriteBatch.DrawString(font, "EvilPoints: " + (int)evilPoints, new Vector2(10, 30), Color.Red);
         if (Options.GetValue<State>("role") != State.Doctor)
@@ -672,7 +696,7 @@ public class GameplayScreen : GameScreen
 
     private void DocAbThree()
     {
-        throw new NotImplementedException();
+        //FOG Hij moet ding sturen 
     }
 
     private void DocAbTwo()
@@ -701,9 +725,9 @@ public class GameplayScreen : GameScreen
         throw new NotImplementedException();
     }
 
-    private void RobAbThree()
+    private void RobAbThree() 
     {
-        throw new NotImplementedException();
+        
     }
 
     private void RobAbTwo()
@@ -1017,6 +1041,43 @@ public class GameplayScreen : GameScreen
             psDown.draw(spriteBatch);
 
         spriteBatch.End();
+    }
+
+    public Vector2 TexturesCollide(Color[,] tex1, Matrix mat1, Color[,] tex2, Matrix mat2)
+    {
+        Matrix mat1to2 = mat1 * Matrix.Invert(mat2);
+        int width1 = tex1.GetLength(0);
+        int height1 = tex1.GetLength(1);
+        int width2 = tex2.GetLength(0);
+        int height2 = tex2.GetLength(1);
+
+        for (int x1 = 0; x1 < width1; x1++)
+        {
+            for (int y1 = 0; y1 < height1; y1++)
+            {
+                Vector2 pos1 = new Vector2(x1, y1);
+                Vector2 pos2 = Vector2.Transform(pos1, mat1to2);
+
+                int x2 = (int)pos2.X;
+                int y2 = (int)pos2.Y;
+                if ((x2 >= 0) && (x2 < width2))
+                {
+                    if ((y2 >= 0) && (y2 < height2))
+                    {
+                        if (tex1[x1, y1].A > 0)
+                        {
+                            if (tex2[x2, y2].A > 0)
+                            {
+                                Vector2 screenPos = Vector2.Transform(pos1, mat1);
+                                return screenPos;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new Vector2(-1, -1);
     }
 
     public static List<Visual> allInrangeBlocks
