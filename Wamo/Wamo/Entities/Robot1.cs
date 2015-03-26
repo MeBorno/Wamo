@@ -13,7 +13,7 @@ public class Robot1 : Entity
     SpriteFont font;
     Vector2 velocity;
     Vector2 globalPos;
-    float angle;
+    float angle = 0.0f;
     Color testColor = Color.Blue;
     
 
@@ -60,13 +60,8 @@ public class Robot1 : Entity
             positionDifference.Normalize();
             positionDifference = Vector2.Multiply(positionDifference, 5.0f);
             velocity = positionDifference;
-            //Rotation = (float)Math.Atan2(positionDifference.X, positionDifference.Y);
+            angle = (float)Math.Atan2(positionDifference.Y, positionDifference.X);
         }
-
-
-        double a = (player.PlayerPosition.Y - Camera.CameraPosition.Y) - globalPos.Y;
-        double b = (player.PlayerPosition.X - Camera.CameraPosition.X) - globalPos.X;
-        angle = (float)Math.Atan2(a, b);
         Movement();
 
     }
@@ -105,6 +100,7 @@ public class Robot1 : Entity
 
     public bool DoPathFinding(Player player, List<Visual> blocks)
     {
+        //Checks which blocks are in camera view and puts it in a list
         List<Visual> blocksinrange = new List<Visual>();
         Rectangle tmp = new Rectangle((int)(-Camera.CameraPosition.X), (int)(-Camera.CameraPosition.Y), 1600, 1200);
         foreach (Visual v in blocks)
@@ -112,24 +108,24 @@ public class Robot1 : Entity
             if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), (int)v.Pose.Scale.X * 64, (int)v.Pose.Scale.Y * 64)))
                 blocksinrange.Add(v);
         }
+        //Logging values, measuring distances etc.
         Vector2 tmpPosition = globalPos;
-
         Vector2 positionDifference = player.PlayerPosition - globalPos;
         Vector2 tmpPositionDifference = positionDifference;
         positionDifference.Normalize();
         positionDifference = Vector2.Multiply(positionDifference, 5.0f);
         Vector2 tmpVelocity = positionDifference;
-        float tmpRotation = (float)Math.Atan2(positionDifference.X, positionDifference.Y);
 
+        //Checks step by step (velocity influence) if the path is free
         while (tmpPosition != player.PlayerPosition)
         {
             tmpPosition += tmpVelocity;
-            Rectangle tmp2 = new Rectangle((int)this.globalPos.X + (int)Camera.CameraPosition.X, (int)this.globalPos.Y + (int)Camera.CameraPosition.Y, 32, 32);
+            Rectangle tmp2 = new Rectangle((int)tmpPosition.X, (int)tmpPosition.Y, 32, 32);
             foreach (Visual v in blocksinrange)
             {
                 if (tmp2.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
                     return false;
-                if (tmpPosition.X > -positionDifference.X && tmpPosition.Y > -positionDifference.Y)
+                if (tmpPosition.X > -tmpPositionDifference.X && tmpPosition.Y > -tmpPositionDifference.Y)
                     return true;
             }
         }
