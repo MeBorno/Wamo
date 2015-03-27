@@ -812,6 +812,7 @@ public class GameplayScreen : GameScreen
     private void RobAbFour()
     {
         //invincibility
+        player.Immune = true;
     }
 
     private void RobAbThree() 

@@ -186,5 +186,11 @@ public class Player : Entity
         get { return testColor; }
         set { testColor = value; }
     }
+
+    public bool Immune
+    {
+        get { return immune; }
+        set { immune = value; }
+    }
 }
 
