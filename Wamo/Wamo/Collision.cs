@@ -33,7 +33,7 @@ public class Collision
 
     public static bool CollidesWith(Entity obj1, Entity obj2)
     {
-        if (obj1 == null || obj2 == null || obj1.Position == null || obj2.Position == null) return false;
+        if (obj1 == null || obj2 == null) return false;
         Rectangle obj1Rectangle = new Rectangle((int)obj1.Position.X, (int)obj1.Position.Y, (int)obj1.Image.Width, (int)obj1.Image.Height);
         Rectangle obj2Rectangle = new Rectangle((int)obj2.Position.X, (int)obj2.Position.Y, (int)obj2.Image.Width, (int)obj2.Image.Height);
         if (!obj1Rectangle.Intersects(obj2Rectangle))
