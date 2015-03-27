@@ -133,7 +133,7 @@ public class Robot1 : Entity
         Vector2 positionDifference = player.Position - position;
         if (Collision.CollidesWith(this, player))
         {
-            healthBar.Value -= 10;
+            if (!Options.GetValue<bool>("immune")) healthBar.Value -= 10;
             if (positionDifference.X > 0)
             {
                 player.Velocity = new Vector2(this.velocity.X * 15, player.Velocity.Y);
