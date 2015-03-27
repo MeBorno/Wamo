@@ -105,6 +105,10 @@ public class GameplayScreen : GameScreen
 
         player = new Player();
         player.LoadContent(content, inputManager);
+
+
+        Vector2 hjdkPosition = new Vector2(220, 250);
+
        
         lights.Clear();
 
@@ -167,15 +171,24 @@ public class GameplayScreen : GameScreen
             if (state == State.System)
             {
                 int abil = (int)message.ReadByte();
-                if (abil == 0)
-                {
-                    string[] data = message.ReadString().Split(' ');
-                    lights.Add(new PointLight(lightEffect, new Vector2(int.Parse(data[0]) / ScreenManager.Instance.DrawScale().M11, int.Parse(data[1]) / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
-                }
-                else if (abil == 3 && Options.GetValue<State>("role") == State.Robot)
+                if (abil == 0) { }
+                else if(abil == 3 && Options.GetValue<State>("role") == State.Robot)
                 {
                     string[] data = message.ReadString().Split(' ');
                     psUp.CreateTrail(100, new Vector2(float.Parse(data[0]), float.Parse(data[1])), new Vector2(float.Parse(data[2]), float.Parse(data[3])), Color.Red, true, 0.05f);
+                }
+            }
+            else if(state == State.Doctor)
+            {
+                int abil = (int)message.ReadByte();
+                if(abil == 0)
+                {
+
+                }
+                else if (abil == 1 && Options.GetValue<State>("role") != State.Doctor)
+                {
+                    string[] data = message.ReadString().Split(' ');
+                    traps.Add(new Trap(new Vector2(int.Parse(data[0]), int.Parse(data[1]))));
                 }
             }
         }
@@ -735,16 +748,8 @@ public class GameplayScreen : GameScreen
     {
         if (inputManager.MouseLeftButtonReleased())
         {
-            lights.Add(new PointLight(lightEffect,new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
+            lights.Add(new PointLight(lightEffect, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
             usingAbility = false;
-
-            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
-            msg.Write((byte)PacketTypes.ABILITIES);
-            msg.Write((byte)Options.GetValue<State>("role"));
-            msg.Write((byte)0);
-            msg.Write((string)(inputManager.MousePosClean().X + " " + inputManager.MousePosClean().Y));
-            NetworkManager.Instance.SendMessage(msg);
-           
         }
         
     }
@@ -824,6 +829,14 @@ public class GameplayScreen : GameScreen
         if (inputManager.MouseLeftButtonReleased())
         {
             Trap tmp = new Trap(new Vector2((int)(((Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11) - Camera.CameraPosition.X) / 16) * 16, (int)(((Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22) - Camera.CameraPosition.Y) / 16) * 16));
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.ABILITIES);
+            msg.Write((byte)Options.GetValue<State>("role"));
+            msg.Write((byte)1);
+            msg.Write((string)(tmp.Position.X + " " + tmp.Position.Y));
+            NetworkManager.Instance.SendMessage(msg);
+
             traps.Add(tmp);
             usingAbility = false;
         }
@@ -842,17 +855,26 @@ public class GameplayScreen : GameScreen
         #region robot abilities
     private void RobAbFour()
     {
-        throw new NotImplementedException();
+        //invincibility
+        player.Immune = true;
     }
 
     private void RobAbThree() 
     {
+
         //unlock door
+
+        //gotta go fast
+
     }
 
     private void RobAbTwo()
     {
+
         //speedboost
+
+        //unlock doors
+
     }
 
     private void RobAbOne()

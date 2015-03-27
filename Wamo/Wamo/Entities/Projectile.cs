@@ -12,7 +12,6 @@ public class Projectile : Entity
 {
     private InputManager inputManager;
     SpriteFont font;
-    Texture2D image;
     Rectangle placement;
     Vector2 direction, speed;
     Boolean visible = true;

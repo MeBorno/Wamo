@@ -15,34 +15,15 @@ public class Robot1 : Entity
     Vector2 velocity, knockbackVelocity;
     float angle = 0.0f;
     Color testColor = Color.White;
-    
 
-    public override void LoadContent(ContentManager content, InputManager inputManager)
+
+    public void LoadContent(ContentManager content, InputManager inputManager, Vector2 positionz)
     {
+        base.LoadContent(content, inputManager);       
         velocity = Vector2.Zero;
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
-        base.LoadContent(content, inputManager);
-
-        fileManager = new FileManager();
-        fileManager.LoadContent("Load/robot1.cme", attributes, contents);
-
-        Vector2 tmpFrames = Vector2.Zero;
-
-        for (int i = 0; i < attributes.Count; i++)
-            for (int j = 0; j < attributes[i].Count; j++)
-            {
-                switch (attributes[i][j])
-                {
-                    case "Image": image = content.Load<Texture2D>(contents[i][j]);
-                        break;
-                    case "Position":
-                        {
-                            string[] pos = contents[i][j].Split(' ');
-                            position = new Vector2(int.Parse(pos[0]), int.Parse(pos[1]));
-                            break;
-                        }
-                }
-            }
+        image = content.Load<Texture2D>("Sprites/test");
+        this.position = positionz;        
         pixeldata = TextureTo2DArray(image);
     }
 
@@ -150,10 +131,7 @@ public class Robot1 : Entity
     public void CheckPlayerCollision(Player player, ProgressBar healthBar)
     {
         Vector2 positionDifference = player.Position - position;
-        Rectangle rectRobot = new Rectangle((int)position.X, (int)position.Y, 32, 32);
-        Rectangle rectPlayer = new Rectangle((int)player.Position.X, (int)player.Position.Y, 32, 32);
-        if( Collision.CollidesWith(this, player))
-        //if (rectRobot.Intersects(rectPlayer))
+        if (Collision.CollidesWith(this, player))
         {
             healthBar.Value -= 10;
             if (positionDifference.X > 0)
@@ -176,8 +154,10 @@ public class Robot1 : Entity
                 player.Velocity = new Vector2(player.Velocity.X, this.velocity.Y * 15);
                 knockbackVelocity.Y = -this.velocity.Y * 2;
             }
-            
+            player.TestColor = Color.Red;
         }
+        else
+            player.TestColor = Color.Blue;
     }
 
     public Color TestColor

@@ -17,6 +17,8 @@ public class Player : Entity
     float angle;
     Color testColor = Color.Blue;
     ParticleSystem ps;
+    bool immune;
+    TimeSpan immunitytimer;
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
@@ -47,7 +49,7 @@ public class Player : Entity
                 }
             }
         pixeldata = TextureTo2DArray(image);
-
+        immune = false;
         ps = new ParticleSystem();
       
 
@@ -177,6 +179,18 @@ public class Player : Entity
     {
         get { return velocity; }
         set { velocity = value; }
+    }
+
+    public Color TestColor
+    {
+        get { return testColor; }
+        set { testColor = value; }
+    }
+
+    public bool Immune
+    {
+        get { return immune; }
+        set { immune = value; }
     }
 }
 
