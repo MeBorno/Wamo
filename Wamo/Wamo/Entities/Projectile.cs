@@ -75,5 +75,10 @@ public class Projectile : Entity
         if (visible)
             spriteBatch.Draw(image, placement, null, Color.White, angle, new Vector2(0, image.Height/2), SpriteEffects.None, 0f);
     }
+
+    public float Angle
+    {
+        get { return angle; }
+    }
 }
 

@@ -172,24 +172,37 @@ public class GameplayScreen : GameScreen
             {
                 int abil = (int)message.ReadByte();
                 if (abil == 0) { }
-                else if(abil == 3 && Options.GetValue<State>("role") == State.Robot)
+                else if (abil == 1)  Options.SetValue("robotLight", true);
+                else if (abil == 3 && Options.GetValue<State>("role") == State.Robot)
                 {
                     string[] data = message.ReadString().Split(' ');
                     psUp.CreateTrail(100, new Vector2(float.Parse(data[0]), float.Parse(data[1])), new Vector2(float.Parse(data[2]), float.Parse(data[3])), Color.Red, true, 0.05f);
                 }
+                else if (abil == 4) Options.SetValue("paralyze", true);
             }
             else if(state == State.Doctor)
             {
                 int abil = (int)message.ReadByte();
-                if(abil == 0)
-                {
-
-                }
+                if (abil == 0) { }
                 else if (abil == 1 && Options.GetValue<State>("role") != State.Doctor)
                 {
                     string[] data = message.ReadString().Split(' ');
                     traps.Add(new Trap(new Vector2(int.Parse(data[0]), int.Parse(data[1]))));
                 }
+                else if (abil == 3) Options.SetValue("fog", true);
+                else if (abil == 4) Options.SetValue("scramble", true);
+            }
+            else if (state == State.Robot)
+            {
+                int abil = (int)message.ReadByte();
+                if (abil == 0) 
+                {
+                    string[] data = message.ReadString().Split(' ');
+                    projectiles.Add(new Projectile("Sprites/rocket", new Vector2(int.Parse(data[0]), int.Parse(data[1])), Vector2.Zero, float.Parse(data[2])));
+                }
+                else if (abil == 1) { }
+                else if (abil == 3) { }
+                else if (abil == 4) Options.SetValue("immune", true);
             }
         }
         else if (type == PacketTypes.MOVE)
@@ -772,7 +785,12 @@ public class GameplayScreen : GameScreen
     {
         //TODO:: stuur command zodat er licht komt bij de speler die robot is.
         //upgrade, meer zicht
-        Options.SetValue("robotLight", true);
+        NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+        msg.Write((byte)PacketTypes.ABILITIES);
+        msg.Write((byte)Options.GetValue<State>("role"));
+        msg.Write((byte)1);
+        msg.Write((string)("robotLight true"));
+        NetworkManager.Instance.SendMessage(msg);
         usingAbility = false;
     }
     public void SysAbTwo() 
@@ -809,20 +827,35 @@ public class GameplayScreen : GameScreen
     }
     public void SysAbFour() 
     {
-        Options.SetValue("paralyze", true);
+        NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+        msg.Write((byte)PacketTypes.ABILITIES);
+        msg.Write((byte)Options.GetValue<State>("role"));
+        msg.Write((byte)4);
+        msg.Write((string)("paralyze true"));
+        NetworkManager.Instance.SendMessage(msg);
         usingAbility = false;
     }
     #endregion
-        #region doctor abilities
+    #region doctor abilities
     private void DocAbFour()
     {
-        Options.SetValue("scramble", true); //dit moet bij andere spelers aankomen
+        NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+        msg.Write((byte)PacketTypes.ABILITIES);
+        msg.Write((byte)Options.GetValue<State>("role"));
+        msg.Write((byte)4);
+        msg.Write((string)("scramble true"));
+        NetworkManager.Instance.SendMessage(msg);
         usingAbility = false;
     }
 
     private void DocAbThree()
     {
-        Options.SetValue("fog", true); //dit is dat fog ding, deze moet bij andere speler aankomen
+        NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+        msg.Write((byte)PacketTypes.ABILITIES);
+        msg.Write((byte)Options.GetValue<State>("role"));
+        msg.Write((byte)3);
+        msg.Write((string)("fog true"));
+        NetworkManager.Instance.SendMessage(msg);
         usingAbility = false;
     }
 
@@ -866,11 +899,16 @@ public class GameplayScreen : GameScreen
         }
     }
         #endregion
-        #region robot abilities
+    #region robot abilities
     private void RobAbFour()
     {
         //invincibility
-        Options.SetValue("immune", true);
+        NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+        msg.Write((byte)PacketTypes.ABILITIES);
+        msg.Write((byte)Options.GetValue<State>("role"));
+        msg.Write((byte)4);
+        msg.Write((string)("immune true"));
+        NetworkManager.Instance.SendMessage(msg);
     }
 
     private void RobAbThree() 
@@ -913,6 +951,13 @@ public class GameplayScreen : GameScreen
         {
             Projectile rocket = new Projectile("Sprites/rocket", player.Position, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), player.FacingAngle);
             projectiles.Add(rocket);
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.ABILITIES);
+            msg.Write((byte)Options.GetValue<State>("role"));
+            msg.Write((byte)0);
+            msg.Write((string)(rocket.Position.X + " " + rocket.Position.Y + " " + rocket.Angle));
+            NetworkManager.Instance.SendMessage(msg);
             usingAbility = false;
         }
          
