@@ -185,8 +185,8 @@ public class GameplayScreen : GameScreen
                 if(abil == 0)
                 {
 
-                } 
-                else if( abil == 1)
+                }
+                else if (abil == 1 && Options.GetValue<State>("role") != State.Doctor)
                 {
                     string[] data = message.ReadString().Split(' ');
                     traps.Add(new Trap(new Vector2(int.Parse(data[0]), int.Parse(data[1]))));
