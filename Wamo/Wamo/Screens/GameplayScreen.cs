@@ -376,6 +376,7 @@ public class GameplayScreen : GameScreen
                     psUp.CreateExplosion(40, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
                     psUp.CreateExplosion(30, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
                     psUp.CreateExplosion(90, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                    r.UnloadContent();
                     rocket.StopUse();
                 }
             }
@@ -608,7 +609,13 @@ public class GameplayScreen : GameScreen
                 abilityButton[i].Enabled = true;
         }
 
-        if (timer[1] > 2500 && Options.GetValue<bool>("immune"))
+        if (timer[1] > 2500 && Options.GetValue<bool>("immune") && Options.GetValue<State>("role") == State.Robot && !isUpgraded[4])
+        {
+            timer[1] = 0;
+            Options.SetValue("immune", false);
+        }
+
+        if (timer[1] > 4000 && Options.GetValue<bool>("immune") && Options.GetValue<State>("role") == State.Robot && isUpgraded[4])
         {
             timer[1] = 0;
             Options.SetValue("immune", false);
