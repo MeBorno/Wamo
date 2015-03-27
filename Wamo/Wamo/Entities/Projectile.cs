@@ -31,6 +31,19 @@ public class Projectile : Entity
         speed = new Vector2((float)Math.Cos(angl) * 7f, (float)Math.Sin(angl) * 7f);
     }
 
+    public void SetUse(Vector2 pos, float angl)
+    {
+        this.position = pos;
+        angle = angl;
+        speed = new Vector2((float)Math.Cos(angl) * 7f, (float)Math.Sin(angl) * 7f);
+    }
+
+    public void StopUse()
+    {
+        this.position = new Vector2(-100, -100);
+        speed = Vector2.Zero;
+    }
+
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
@@ -79,6 +92,12 @@ public class Projectile : Entity
     public float Angle
     {
         get { return angle; }
+    }
+
+    public Vector2 Speed
+    {
+        get { return speed; }
+        set { speed = value; }
     }
 }
 

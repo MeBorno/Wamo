@@ -20,6 +20,7 @@ public class GameplayScreen : GameScreen
     ParticleSystem psUp; //Voor particles die boven shadow liggen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
     static Player player;
+    Projectile rocket;
     double evilPoints = 30;
     SoundEffect beep;
     Tile[,] textureGrid;
@@ -104,6 +105,8 @@ public class GameplayScreen : GameScreen
         lights.Add(new PointLight(lightEffect, new Vector2(300, 300), 500, Color.White, 1.0f));
 
         player = new Player();
+        rocket = new Projectile("Sprites/rocket", new Vector2(-100, -100), Vector2.Zero, 0f);
+
         player.LoadContent(content, inputManager);
 
 
@@ -146,6 +149,7 @@ public class GameplayScreen : GameScreen
         traps = new List<Trap>();
         robots = new List<Robot1>();
         projectiles = new List<Projectile>();
+        projectiles.Add(rocket);
         robotItems = new RobotItem[6]{
             new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(1400,700),2),
             new RobotItem(new Vector2(1000,1000),3),new RobotItem(new Vector2(512,1000),4),new RobotItem(new Vector2(700,700),5)
@@ -349,7 +353,7 @@ public class GameplayScreen : GameScreen
                     psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
                     psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
                     psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
-                    p.UnloadContent();
+                    rocket.StopUse();
                 }
             }
         }
@@ -613,7 +617,7 @@ public class GameplayScreen : GameScreen
     {
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Doctor) // MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Robot) // MOET DOCTOR ZIJN
         {
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
@@ -989,9 +993,7 @@ public class GameplayScreen : GameScreen
         
         if (inputManager.MouseLeftButtonReleased())
         {
-            Projectile rocket = new Projectile("Sprites/rocket", player.Position, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), player.FacingAngle);
-            projectiles.Add(rocket);
-
+            rocket.SetUse(player.Position, player.FacingAngle);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
             msg.Write((byte)PacketTypes.ABILITIES);
             msg.Write((byte)Options.GetValue<State>("role"));
@@ -1028,18 +1030,18 @@ public class GameplayScreen : GameScreen
         abilityUpgradeName = new string[5];
         switch (Options.GetValue<State>("role"))
         {
-            case State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Fog", "Scramble" }; //namen van de abilities
+            case State.Doctor: abilityNames = new string[5] { "Wall", "Trap", "Monster", "Fog", "Scramble" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Unknown", "Create trap at mouse position", "Create monster at mouse position", "unknown", "Scramble the sounds of the system" };
+                abilityDiscription = new string[5] { "Place an impassable wall", "Create trap at mouse position", "Create monster at mouse position", "Fog the vision of the robot", "Scramble the sounds of the system" };
                 abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
                 break;
-            case State.Robot: abilityNames = new string[5] { "Shoot", "Sonar", "Boost", "Unknown", "Invincible" }; //namen van de abilities
+            case State.Robot: abilityNames = new string[5] { "Shoot", "Sonar", "Boost", "Open Door", "Invincible" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Dit is de eerste ability, het doet niks...", "oh waaait hoooo wat lalala", "ik heb te weinig geslapen", "dit is nummer 4 right", "kijk mij nou random shit bedenken." };
+                abilityDiscription = new string[5] { "Shoots a rocket at the targeted location", "See walls in a short radius around you", "Move 50% faster", "Open a door", "Become immune to damage for 2.5 seconds" };
                 break;
             case State.System: abilityNames = new string[5] { "Light", "Vision Surge", "Destroy", "Paint", "Paralyze" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 4000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse.", "Restore minimal vision for the Robot", "Destroy stuff from Doctor", "Paint at mouse for Robot", "kijk mij nou random shit bedenken." };
+                abilityDiscription = new string[5] { "Create a small temporary light at the position of your mouse.", "Restore minimal vision for the Robot", "Destroy stuff from Doctor", "Paint at mouse for Robot", "Paralyze the doctor" };
                 abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
                 #region Soundbar
                 int[] soundButtonPositions;
@@ -1241,7 +1243,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<State>("role") != State.Doctor) //MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Robot) //MOET DOCTOR ZIJN
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 
