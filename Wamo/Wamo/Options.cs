@@ -17,6 +17,7 @@ public class Options
 
         options.Add("fog", false);
         options.Add("paralyze", false);
+        options.Add("immune", false);
 
         if (File.Exists(fname))
         {

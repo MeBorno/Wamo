@@ -313,7 +313,7 @@ public class GameplayScreen : GameScreen
                 psDown.CreateExplosion(40, new Vector2(player.Position.X - 16, player.Position.Y - 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
                 psDown.CreateExplosion(30, new Vector2(player.Position.X - 16, player.Position.Y - 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
                 psDown.CreateExplosion(90, new Vector2(player.Position.X - 16, player.Position.Y - 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
-                healthBar.Value -= 10;
+                if (!Options.GetValue<bool>("immune")) healthBar.Value -= 10;
             }
         }
         foreach (Projectile p in projectiles)
@@ -459,6 +459,11 @@ public class GameplayScreen : GameScreen
 
         if (Options.GetValue<bool>("paralyze"))
             timer[0] += gameTime.ElapsedGameTime.Milliseconds;
+
+        if (Options.GetValue<bool>("immune"))
+        {
+            timer[1] += gameTime.ElapsedGameTime.Milliseconds;
+        }
     }
 
     private void CameraMovement()
@@ -504,6 +509,12 @@ public class GameplayScreen : GameScreen
             Options.SetValue("paralyze", false);
             for (int i = 0; i < 5; i++)
                 abilityButton[i].Enabled = true;
+        }
+
+        if (Options.GetValue<State>("role") == State.Robot && timer[1] > 2500 && Options.GetValue<bool>("immune"))
+        {
+            timer[1] = 0;
+            Options.SetValue("immune", false);
         }
     }
     
@@ -799,7 +810,7 @@ public class GameplayScreen : GameScreen
     private void RobAbFour()
     {
         //invincibility
-        player.Immune = true;
+        Options.SetValue("immune", true);
     }
 
     private void RobAbThree() 
