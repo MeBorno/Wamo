@@ -13,13 +13,14 @@ public class Options
         options = new Dictionary<string, object>();
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
-        options.Add("role", State.System);
+        options.Add("role", State.Robot);
         options.Add("scramble", false);
         options.Add("fog", false);
         options.Add("paralyze", false);
         options.Add("robotLight", false);
         options.Add("painting", false);
         options.Add("immune", false);
+        options.Add("boost", false);
 
 
         if (File.Exists(fname))
