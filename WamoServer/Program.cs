@@ -98,6 +98,21 @@ class Program
                                 outmsg.Write((string)inc.ReadString());
                                 Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
                             }
+                            else if (type == PacketTypes.ROBOTMOVE)
+                            {
+                                NetOutgoingMessage outmsg = Server.CreateMessage();
+                                outmsg.Write((byte)PacketTypes.ROBOTMOVE);
+                                outmsg.Write((byte)inc.ReadByte());
+                                outmsg.Write((string)inc.ReadString());
+                                Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                            }
+                            else if (type == PacketTypes.TOGGLE)
+                            {
+                                NetOutgoingMessage outmsg = Server.CreateMessage();
+                                outmsg.Write((byte)PacketTypes.TOGGLE);
+                                outmsg.Write((string)inc.ReadString());
+                                Server.SendMessage(outmsg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                            }
                             break;
                         }
 
@@ -214,7 +229,9 @@ class Program
         ROLESELECT,
         STATEUPDATE,
         SOUNDEFFECT,
-        ABILITIES
+        ABILITIES,
+        ROBOTMOVE,
+        TOGGLE
     }
     enum State
     {

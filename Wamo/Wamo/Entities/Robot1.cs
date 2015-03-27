@@ -177,5 +177,15 @@ public class Robot1 : Entity
         get { return testColor; }
         set { testColor = value; }
     }
+
+    public float Angle
+    {
+        get { return angle; }
+    }
+
+    public Vector2 Velocity
+    {
+        get { return velocity; }
+    }
 }
 

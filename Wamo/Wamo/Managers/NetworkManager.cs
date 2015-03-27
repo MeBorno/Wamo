@@ -165,7 +165,9 @@ public enum PacketTypes
     ROLESELECT,
     STATEUPDATE,
     SOUNDEFFECT,
-    ABILITIES
+    ABILITIES,
+    ROBOTMOVE,
+    TOGGLE
 }
 public enum State
 {

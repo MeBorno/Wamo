@@ -168,9 +168,6 @@ public class GameplayScreen : GameScreen
             new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(800,80),2),
             new RobotItem(new Vector2(800,550),3),new RobotItem(new Vector2(512,1000),4),new RobotItem(new Vector2(700,700),5)
         };
-        Robot1 testRobot = new Robot1();
-        testRobot.LoadContent(content, inputManager, new Vector2(220,250));        
-        robots.Add(testRobot);
     }
 
     public override void UnloadContent()
@@ -236,6 +233,25 @@ public class GameplayScreen : GameScreen
                 player.Velocity = new Vector2(float.Parse(data[3]), float.Parse(data[4]));
             }
         }
+        else if (type == PacketTypes.ROBOTMOVE)
+        {
+            if (Options.GetValue<State>("role") != State.Robot)
+            {
+                foreach (Robot1 r in robots)
+                {
+                    if (robots.IndexOf(r) == message.ReadByte())
+                    {
+                        string[] data = message.ReadString().Split(' ');
+                        r.Position = new Vector2(float.Parse(data[0]), float.Parse(data[1]));
+                    }
+                }
+            }
+        }
+        else if (type == PacketTypes.TOGGLE)
+        {
+            string[] data = message.ReadString().Split(' ');
+            if (data[0] == "robotDead") Options.SetValue("robotDead", true);
+        }
     }
 
     public override void Update(GameTime gameTime)
@@ -285,13 +301,28 @@ public class GameplayScreen : GameScreen
         CheckItems(gameTime); //check traps,cells,projectiles
         FindNearbyBlocks(); //checkt alle blocks of ze dichtbij zijn
 
-        foreach (Robot1 r in robots)
+        if (Options.GetValue<State>("role") == State.Robot)
         {
-            r.Update(gameTime, inputManager, player, blocks, healthBar);
+            foreach (Robot1 r in robots)
+            {
+                r.Update(gameTime, inputManager, player, blocks, healthBar);
+                NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+                msg.Write((byte)PacketTypes.ROBOTMOVE);
+                msg.Write((byte)robots.IndexOf(r));
+                msg.Write((string)(r.Position.X + " " + r.Position.Y + " " + r.Angle + " " + r.Velocity.X + " " + r.Velocity.Y));
+                NetworkManager.Instance.SendMessage(msg);
+            }
         }
 
         if (healthBar.Value <= 0)
+        {
             Options.SetValue("robotDead", true);
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.TOGGLE);
+            msg.Write((string)"robotDead true");
+            NetworkManager.Instance.SendMessage(msg);
+            
+        }
 
         if (Options.GetValue<bool>("robotDead"))
         {
