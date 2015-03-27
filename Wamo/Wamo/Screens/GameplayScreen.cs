@@ -505,8 +505,11 @@ public class GameplayScreen : GameScreen
 
         if (Options.GetValue<State>("role") == State.Robot && Options.GetValue<bool>("robotLight"))
         {
-            lights[0].Radius = 200;
-            lights[0].Power = 1.0f;
+            try
+            {
+                lights[0].Radius = 200;
+                lights[0].Power = 1.0f;
+            } catch(Exception e) { }
         }
 
         if (Options.GetValue<bool>("paralyze"))
