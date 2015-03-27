@@ -610,7 +610,7 @@ public class GameplayScreen : GameScreen
     {
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Robot) // MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Doctor) // MOET DOCTOR ZIJN
         {
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
@@ -977,7 +977,7 @@ public class GameplayScreen : GameScreen
                 sonarBlocks.Add(v);
             }
         }
-
+        usingAbility = false;
     }
 
     private void RobAbZero()
@@ -1237,7 +1237,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<State>("role") != State.Robot) //MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Doctor) //MOET DOCTOR ZIJN
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 
