@@ -14,12 +14,13 @@ public class Options
         options.Add("shutDown", false);
         options.Add("lightEngine", false);
         options.Add("role", State.System);
-
         options.Add("scramble", false);
         options.Add("fog", false);
         options.Add("paralyze", false);
         options.Add("robotLight", false);
         options.Add("painting", false);
+        options.Add("immune", false);
+
 
         if (File.Exists(fname))
         {
