@@ -31,7 +31,7 @@ public class Robot1 : Entity
     public override void UnloadContent()
     {
         base.UnloadContent();
-        moveAnimation.UnloadContent();
+        //moveAnimation.UnloadContent();
     }
 
     public void Update(GameTime gameTime, InputManager inputManager, Player player, List<Visual> blocks, ProgressBar healthBar)
