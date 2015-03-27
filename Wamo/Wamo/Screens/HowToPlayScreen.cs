@@ -12,7 +12,7 @@ using TomShane.Neoforce.Controls;
 public class HowToPlayScreen : GameScreen
 {
     SpriteFont font;
-    Texture2D screen1, screen2, screen3, screen4;
+    Texture2D screen1, screen2, screen3, screen4, currentscreen;
     Button[] screenButton;
 
     public override void LoadContent(ContentManager Content, InputManager inputManager)
@@ -24,6 +24,7 @@ public class HowToPlayScreen : GameScreen
         screen2 = content.Load<Texture2D>("GUI/HowTo/2");
         screen3 = content.Load<Texture2D>("GUI/HowTo/3");
         screen4 = content.Load<Texture2D>("GUI/HowTo/4");
+        currentscreen = screen1;
         screenButton = new Button[4];
 
         Window screenBar = new Window(Wamo.manager);
@@ -56,9 +57,20 @@ public class HowToPlayScreen : GameScreen
 
     public override void Update(GameTime gameTime)
     {
+        if (inputManager.KeyPressed(Keys.NumPad1)) 
+            currentscreen = screen1;
+        if (inputManager.KeyPressed(Keys.NumPad2)) 
+            currentscreen = screen2;
+        if (inputManager.KeyPressed(Keys.NumPad3)) 
+            currentscreen = screen3;
+        if (inputManager.KeyPressed(Keys.NumPad4)) 
+            currentscreen = screen4;
+        if (inputManager.KeyPressed(Keys.Back)) { } //terugnaarmenu
+        
     }
 
     public override void Draw(SpriteBatch spriteBatch)
     {
+        spriteBatch.Draw(currentscreen, new Vector2(0, 0), Color.White);
     }
 }
