@@ -169,11 +169,7 @@ public class GameplayScreen : GameScreen
             if (state == State.System)
             {
                 int abil = (int)message.ReadByte();
-                if (abil == 0)
-                {
-                    string[] data = message.ReadString().Split(' ');
-                    lights.Add(new PointLight(lightEffect, new Vector2(int.Parse(data[0]) / ScreenManager.Instance.DrawScale().M11, int.Parse(data[1]) / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
-                }
+                if (abil == 0) { }
                 else if(abil == 3 && Options.GetValue<State>("role") == State.Robot)
                 {
                     string[] data = message.ReadString().Split(' ');
@@ -707,17 +703,8 @@ public class GameplayScreen : GameScreen
     {
         if (inputManager.MouseLeftButtonReleased())
         {
-            PointLight light = new PointLight(lightEffect, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f);
-            lights.Add(light);
+            lights.Add(new PointLight(lightEffect, new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
             usingAbility = false;
-
-            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
-            msg.Write((byte)PacketTypes.ABILITIES);
-            msg.Write((byte)Options.GetValue<State>("role"));
-            msg.Write((byte)0);
-            msg.Write((string)(light.Position.X + " " + light.Position.Y));
-            NetworkManager.Instance.SendMessage(msg);
-           
         }
         //upgrade, light follows mouse
     }
