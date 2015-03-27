@@ -26,6 +26,7 @@ public class MenuManager
     SpriteFont font;
     Vector2 position;
     Rectangle source;
+    Texture2D background;
     int axis;
     string align;
 
@@ -63,6 +64,8 @@ public class MenuManager
                     case "Animation": animationTypes.Add(contents[i][j]);
                         break;
                     case "Align": align = contents[i][j];
+                        break;
+                    case "Background": background = content.Load<Texture2D>(contents[i][j]);
                         break;
                     case "LinkType": linkType.Add(contents[i][j]);
                         break;
@@ -131,20 +134,21 @@ public class MenuManager
                 if (itemNumber == i) animation[i][j].IsActive = true;
                 else animation[i][j].IsActive = false;
 
-                if (animation[i][j].IsActive) animation[i][j].Color = Color.White;
-                else animation[i][j].Color = new Color(0.2f, 0.2f, 0.2f);
+                if (animation[i][j].IsActive) animation[i][j].Color = new Color(26, 153, 241);
+                else animation[i][j].Color = Color.White;
                 animation[i][j].Update(gameTime);
             }
     }
 
     public void Draw(SpriteBatch spriteBatch)
     {
+        spriteBatch.Draw(background, new Rectangle(0, 0, background.Width, background.Height), Color.White);
         for (int i = 0; i < animation.Count; i++)
             for (int j = 0; j < animation[i].Count; j++)
             {
                 animation[i][j].Draw(spriteBatch);
                 //ScreenManager.Instance.DrawRectangle(spriteBatch, animation[i][j].Hitbox, Color.Red);
-            }
+            }        
     }
 
     private void PerformAction(string action, InputManager inputManager)
@@ -178,6 +182,10 @@ public class MenuManager
         Vector2 dimensions = Vector2.Zero;
         tmpAnimation = new List<Animation>();
 
+        Vector2 offset = new Vector2(0, 88);
+
+
+
         if (align.Contains("Center"))
         {
             for (int i = 0; i < menuItems.Count; i++)
@@ -186,8 +194,8 @@ public class MenuManager
                 dimensions.Y += font.MeasureString(menuItems[i]).Y + menuImages[i].Height;
             }
 
-            if (axis == 1) pos.X = (ScreenManager.Instance.BaseDimensions.X - dimensions.X) / 2;
-            else pos.Y = (ScreenManager.Instance.BaseDimensions.Y - dimensions.Y) / 2;
+            if (axis == 1) pos.X = (ScreenManager.Instance.BaseDimensions.X - dimensions.X) / 2 + offset.X;
+            else pos.Y = (ScreenManager.Instance.BaseDimensions.Y - dimensions.Y) / 2 + offset.Y;
             
         }
         else pos = position;
@@ -207,7 +215,7 @@ public class MenuManager
                         tmpAnimation.Add(new Animation());
                         tmpAnimation[tmpAnimation.Count - 1].LoadContent(content, menuImages[i], menuItems[i], pos);
                         tmpAnimation[tmpAnimation.Count - 1].Font = font;
-                        tmpAnimation[tmpAnimation.Count - 1].Color = new Color(0.2f, 0.2f, 0.2f);
+                        tmpAnimation[tmpAnimation.Count - 1].Color = Color.White;
                         break;
                 }
             }

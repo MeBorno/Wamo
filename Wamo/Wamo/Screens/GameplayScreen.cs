@@ -198,7 +198,7 @@ public class GameplayScreen : GameScreen
                 if (abil == 0) 
                 {
                     string[] data = message.ReadString().Split(' ');
-                    projectiles.Add(new Projectile("Sprites/rocket", new Vector2(int.Parse(data[0]), int.Parse(data[1])), Vector2.Zero, float.Parse(data[2])));
+                    projectiles.Add(new Projectile("Sprites/rocket", new Vector2(float.Parse(data[0]), float.Parse(data[1])), Vector2.Zero, float.Parse(data[2])));
                 }
                 else if (abil == 1) { }
                 else if (abil == 3) { }
@@ -356,7 +356,7 @@ public class GameplayScreen : GameScreen
             robotItems[i].Update(gameTime, inputManager);
             if (robotItems[i].CheckCollision(new Rectangle((int)player.Position.X, (int)player.Position.Y, 32, 32)))
             {
-                if (Options.GetValue<State>("role") == State.Robot && i != 6)
+                if (Options.GetValue<State>("role") == State.Robot && i < 5)
                 {
                     isUpgraded[i] = true;
                     upgradeButton[i].Text = "Found";

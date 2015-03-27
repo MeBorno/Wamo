@@ -1,7 +1,7 @@
 Load=[Title]
 
-Load=[Axis][Font][Animation][Align]
-[2][GUI/Fonts/debug][Fade][Center]
+Load=[Axis][Font][Animation][Align][Background]
+[2][GUI/Fonts/debug][Fade][Center][GUI/titlescreen]
 
 Load=[Item][LinkType][LinkID]
 [Start a Game][Screen][LobbyScreen]
