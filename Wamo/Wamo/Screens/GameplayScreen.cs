@@ -15,7 +15,7 @@ using System.IO;
 
 public class GameplayScreen : GameScreen
 {
-    #region dit
+    #region Field Region
     GraphicsDevice GraphicsDevice;
     ParticleSystem psUp; //Voor particles die boven shadow liggen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
@@ -74,6 +74,8 @@ public class GameplayScreen : GameScreen
     List<Visual> sonarBlocks;
 
     int[] timer;
+
+    Texture2D winScreen, winDoctorScreen, lossScreen, lossDoctorScreen;
     #endregion
 
     public override void LoadContent(ContentManager Content, InputManager inputManager)
@@ -89,6 +91,11 @@ public class GameplayScreen : GameScreen
         timer = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         int windowWidth = Options.GetValue<int>("screenWidth");
         int windowHeight = Options.GetValue<int>("screenHeight");
+
+        winScreen = Content.Load<Texture2D>("GUI/win");
+        winDoctorScreen = Content.Load<Texture2D>("GUI/winDoctor");
+        lossScreen = Content.Load<Texture2D>("GUI/loss");
+        lossDoctorScreen = Content.Load<Texture2D>("GUI/lossDoctor");
 
         colorMap = new RenderTarget2D(GraphicsDevice, windowWidth, windowHeight, false, SurfaceFormat.Color, DepthFormat.Depth16, 16, RenderTargetUsage.DiscardContents);
         lightMap = new RenderTarget2D(GraphicsDevice, windowWidth, windowHeight, false, SurfaceFormat.Color, DepthFormat.Depth16, 16, RenderTargetUsage.DiscardContents);
@@ -170,7 +177,7 @@ public class GameplayScreen : GameScreen
     {
         base.UnloadContent();
         player.UnloadContent();
-        
+        Wamo.manager.Dispose();
     }
 
     public override void NetworkMessage(NetIncomingMessage message)
@@ -261,7 +268,7 @@ public class GameplayScreen : GameScreen
         CameraMovement(); //alles met camera movement
 
 
-        if (Options.GetValue<State>("role") == State.Robot)
+        if (Options.GetValue<State>("role") == State.Robot && !Options.GetValue<bool>("robotDead"))
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -286,14 +293,21 @@ public class GameplayScreen : GameScreen
         if (healthBar.Value <= 0)
             Options.SetValue("robotDead", true);
 
-        if (Options.GetValue<bool>("robotDead") && Options.GetValue<State>("role") != State.Doctor)
+        if (Options.GetValue<bool>("robotDead"))
         {
-            //"You lose" - screen TODO::
+            if(inputManager.KeyPressed(Keys.Space))
+                ScreenManager.Instance.AddScreen(new TitleScreen(), inputManager);
+
+            if(Options.GetValue<State>("role") != State.Doctor)
+            {
+                //"You lose" - screen TODO::
+            }
+            else
+            {
+                //"You win" - screen TODO::
+            }
         }
-        else if(Options.GetValue<bool>("robotDead"))
-        {
-            //"You win" - screen TODO::
-        }
+        
 
 
 
@@ -364,6 +378,7 @@ public class GameplayScreen : GameScreen
                     psUp.CreateExplosion(40, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
                     psUp.CreateExplosion(30, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
                     psUp.CreateExplosion(90, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                    r.UnloadContent();
                     rocket.StopUse();
                 }
             }
@@ -382,6 +397,7 @@ public class GameplayScreen : GameScreen
                 }
                 else if (i == 6)
                 {
+                    Options.SetValue("allFound", true);
                     if (Options.GetValue<State>("role") != State.Doctor)
                     {
                         //"You win" - screen TODO::
@@ -596,7 +612,13 @@ public class GameplayScreen : GameScreen
                 abilityButton[i].Enabled = true;
         }
 
-        if (timer[1] > 2500 && Options.GetValue<bool>("immune"))
+        if (timer[1] > 2500 && Options.GetValue<bool>("immune") && Options.GetValue<State>("role") == State.Robot && !isUpgraded[4])
+        {
+            timer[1] = 0;
+            Options.SetValue("immune", false);
+        }
+
+        if (timer[1] > 4000 && Options.GetValue<bool>("immune") && Options.GetValue<State>("role") == State.Robot && isUpgraded[4])
         {
             timer[1] = 0;
             Options.SetValue("immune", false);
@@ -638,7 +660,8 @@ public class GameplayScreen : GameScreen
     {
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Doctor) // f DOCTOR ZIJN
+
+        if (Options.GetValue<State>("role") != State.Doctor) // f DOCTOR ZIJ
         {
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
@@ -671,6 +694,27 @@ public class GameplayScreen : GameScreen
                 Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
                 spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
             }
+
+        if (Options.GetValue<bool>("robotDead") && Options.GetValue<State>("role") != State.Doctor)
+        {
+            //"You lose" - screen TODO::
+            spriteBatch.Draw(lossScreen, new Rectangle(0, 0, lossScreen.Width, lossScreen.Height), Color.White);
+        }
+        else if (Options.GetValue<bool>("robotDead"))
+        {
+            //"You win" - screen TODO::
+            spriteBatch.Draw(winDoctorScreen, new Rectangle(0, 0, winScreen.Width, winScreen.Height), Color.White);
+        }
+        if (Options.GetValue<bool>("allFound") && Options.GetValue<State>("role") != State.Doctor)
+        {
+            //"You lose" - screen TODO::
+            spriteBatch.Draw(winScreen, new Rectangle(0, 0, lossScreen.Width, lossScreen.Height), Color.White);
+        }
+        else if (Options.GetValue<bool>("allFound"))
+        {
+            //"You win" - screen TODO::
+            spriteBatch.Draw(lossDoctorScreen, new Rectangle(0, 0, winScreen.Width, winScreen.Height), Color.White);
+        }
     }
 
     public void LoadMap()

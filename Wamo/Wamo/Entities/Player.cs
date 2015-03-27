@@ -60,7 +60,7 @@ public class Player : Entity
     public override void UnloadContent()
     {
         base.UnloadContent();
-        moveAnimation.UnloadContent();
+        //moveAnimation.UnloadContent();
     }
 
     public override void Update(GameTime gameTime, InputManager inputManager)

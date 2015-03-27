@@ -36,6 +36,12 @@ public class Robot1 : Entity
 
     public void Update(GameTime gameTime, InputManager inputManager, Player player, List<Visual> blocks, ProgressBar healthBar)
     {
+        if(Options.GetValue<bool>("robotDead"))
+        {
+            angle += 0.1f;
+            return;
+        }
+
         if (DoPathFinding(player, blocks))
         {
             Vector2 positionDifference = player.Position - position;
