@@ -148,17 +148,18 @@ public class GameplayScreen : GameScreen
         psUp = new ParticleSystem();
         psDown = new ParticleSystem();
 
-        energyCells = new EnergyCell[6]{
-            new EnergyCell(new Vector2(300,300)), new EnergyCell(new Vector2(400,400)), new EnergyCell(new Vector2(500,500)),
-            new EnergyCell(new Vector2(600,500)), new EnergyCell(new Vector2(500,600)), new EnergyCell(new Vector2(400,700))
+        energyCells = new EnergyCell[9]{
+            new EnergyCell(new Vector2(64,320)), new EnergyCell(new Vector2(64,690)), new EnergyCell(new Vector2(520,320)),
+            new EnergyCell(new Vector2(290,864)), new EnergyCell(new Vector2(768,140)), new EnergyCell(new Vector2(600,416)),
+            new EnergyCell(new Vector2(1120,224)), new EnergyCell(new Vector2(1216,288)), new EnergyCell(new Vector2(1120,640))
         };
         traps = new List<Trap>();
         robots = new List<Robot1>();
         projectiles = new List<Projectile>();
         projectiles.Add(rocket);
         robotItems = new RobotItem[6]{
-            new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(1400,700),2),
-            new RobotItem(new Vector2(1000,1000),3),new RobotItem(new Vector2(512,1000),4),new RobotItem(new Vector2(700,700),5)
+            new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(800,80),2),
+            new RobotItem(new Vector2(800,550),3),new RobotItem(new Vector2(512,1000),4),new RobotItem(new Vector2(700,700),5)
         };
         Robot1 testRobot = new Robot1();
         testRobot.LoadContent(content, inputManager, new Vector2(220,250));        
@@ -1290,7 +1291,7 @@ public class GameplayScreen : GameScreen
         }
        
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6; i++)
             robotItems[i].Draw(spriteBatch);
 
 
