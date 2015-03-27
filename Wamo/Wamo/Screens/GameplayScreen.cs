@@ -207,6 +207,13 @@ public class GameplayScreen : GameScreen
                     string[] data = message.ReadString().Split(' ');
                     traps.Add(new Trap(new Vector2(int.Parse(data[0]), int.Parse(data[1]))));
                 }
+                else if (abil == 2)
+                {
+                    string[] data = message.ReadString().Split(' ');
+                    Robot1 newRobot = new Robot1();
+                    newRobot.LoadContent(content, inputManager, new Vector2(int.Parse(data[0]), int.Parse(data[1])));
+                    robots.Add(newRobot);
+                }
                 else if (abil == 3) Options.SetValue("fog", true);
                 else if (abil == 4) Options.SetValue("scramble", true);
             }
@@ -1010,7 +1017,14 @@ public class GameplayScreen : GameScreen
             
             Robot1 newRobot = new Robot1();
             newRobot.LoadContent(content, inputManager, (inputManager.MousePos() + Camera.CameraPosition));
-            robots.Add(newRobot);
+            //robots.Add(newRobot);
+
+            NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
+            msg.Write((byte)PacketTypes.ABILITIES);
+            msg.Write((byte)Options.GetValue<State>("role"));
+            msg.Write((byte)2);
+            msg.Write((string)(newRobot.Position.X + " " + newRobot.Position.X + " " + newRobot.Angle));
+            NetworkManager.Instance.SendMessage(msg);
             usingAbility = false;
         }
     }
