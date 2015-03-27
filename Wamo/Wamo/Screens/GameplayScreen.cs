@@ -389,6 +389,26 @@ public class GameplayScreen : GameScreen
             }
         }
 
+        if (evilPoints > 30 && Options.GetValue<State>("role") == State.Doctor)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (upgradeButton[i].Text == "Upgrade")
+                {
+                    upgradeButton[i].Color = Color.White;
+                    upgradeButton[i].Enabled = true;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                upgradeButton[i].Color = Color.Gray;
+                upgradeButton[i].Enabled = false;
+            }
+        }
+
         foreach (PointLight l in lights)
         {
             if (l.Radius == 110)
@@ -693,8 +713,7 @@ public class GameplayScreen : GameScreen
     #region events
     void b_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
     {
-        Color[] colorRange;
-        colorRange = new Color[5]{Color.Blue, Color.Red, Color.Yellow, Color.Purple, Color.Green};
+        
         Button b = (Button)sender;
         for(int i = 0; i < 5; i++)
             if (b.Name == abilityProgress[i].Name + i) //zoek id die overeenkomt met aangeklikte button
@@ -755,7 +774,22 @@ public class GameplayScreen : GameScreen
 
     void u_clicked(object sender, TomShane.Neoforce.Controls.EventArgs e)
     {
-        if (cellCount >= 3)
+        if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
+        {
+            Button b = (Button)sender;
+            for (int i = 0; i < 5; i++)
+                if (b.Name == "u" + i && isUpgraded[i] == false) //zoek id die overeenkomt met aangeklikte upgade button
+                {
+                    //TODO:: check/reset etcetera
+                    isUpgraded[i] = true;    
+                        cellCount -= 3;
+                    upgradeButton[i].Color = Color.Gray;
+                    upgradeButton[i].Enabled = false;
+                    upgradeButton[i].Text = "Bought";
+                    break;
+                }
+        }
+        if (evilPoints >= 30 && Options.GetValue<State>("role") == State.Doctor)
         {
             Button b = (Button)sender;
             for (int i = 0; i < 5; i++)
@@ -763,7 +797,7 @@ public class GameplayScreen : GameScreen
                 {
                     //TODO:: check/reset etcetera
                     isUpgraded[i] = true;
-                    cellCount -= 3;
+                    evilPoints -= 30;
                     upgradeButton[i].Color = Color.Gray;
                     upgradeButton[i].Enabled = false;
                     upgradeButton[i].Text = "Bought";
@@ -993,7 +1027,7 @@ public class GameplayScreen : GameScreen
             case State.Doctor: abilityNames = new string[5] { "Unknown", "Trap", "Monster", "Fog", "Scramble" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
                 abilityDiscription = new string[5] { "Unknown", "Create trap at mouse position", "Create monster at mouse position", "unknown", "Scramble the sounds of the system" };
-
+                abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
                 break;
             case State.Robot: abilityNames = new string[5] { "Shoot", "Sonar", "Boost", "Unknown", "Invincible" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
