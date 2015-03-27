@@ -361,9 +361,9 @@ public class GameplayScreen : GameScreen
                 if (Collision.CollidesWith(p, r))
                 {
                     Vector2 collpos = r.Position;
-                    psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
-                    psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
-                    psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                    psUp.CreateExplosion(40, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                    psUp.CreateExplosion(30, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                    psUp.CreateExplosion(90, collpos + Camera.CameraPosition + new Vector2(16, 16), Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
                     rocket.StopUse();
                 }
             }
@@ -638,7 +638,7 @@ public class GameplayScreen : GameScreen
     {
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Doctor) // MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Robot) // MOET DOCTOR ZIJN
         {
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
@@ -978,6 +978,7 @@ public class GameplayScreen : GameScreen
         msg.Write((byte)4);
         msg.Write((string)("immune true"));
         NetworkManager.Instance.SendMessage(msg);
+        usingAbility = false;
     }
 
     private void RobAbThree() 
@@ -1266,7 +1267,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<State>("role") != State.Doctor) //MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Robot) //MOET DOCTOR ZIJN
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 
