@@ -70,12 +70,12 @@ public class Player : Entity
         if (Options.GetValue<bool>("boost"))
         {
             speed = 7.5f;
-            diagonalspeed = 10.6f;
+            diagonalspeed = 5.30f;
         }
         else
         {
             speed = 5f;
-            diagonalspeed = 7.07f;
+            diagonalspeed = 3.54f;
         }
 
         if (inputManager.KeyDown(Keys.Right, Keys.D))
