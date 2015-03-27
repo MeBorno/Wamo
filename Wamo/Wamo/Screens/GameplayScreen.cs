@@ -124,6 +124,12 @@ public class GameplayScreen : GameScreen
             lights.Add(playerFOV);
             
         }
+
+        if (Options.GetValue<State>("role") == State.Robot)
+        {
+            PointLight tmp = new PointLight(lightEffect, player.Position - Camera.CameraPosition, 200, Color.White, 0.0f);
+            lights.Add(tmp);
+        }
        
         
         Options.SetValue("lightEngine", true);
@@ -248,13 +254,13 @@ public class GameplayScreen : GameScreen
             oldCameraPosition = Camera.CameraPosition;
         }
 
-        if (Options.GetValue<State>("role") == State.System || //TODO:: uiteindelijk alleen robot
-            Options.GetValue<State>("role") == State.Robot)
+        //if (Options.GetValue<State>("role") == State.System ||
+        //    Options.GetValue<State>("role") == State.Robot)
         
         CameraMovement(); //alles met camera movement
 
 
-        if (Options.GetValue<State>("role") == State.Robot) // || Options.GetValue<State>("role") == State.System) //TODO eigenlijk alleen robot
+        if (Options.GetValue<State>("role") == State.Robot)
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -275,16 +281,20 @@ public class GameplayScreen : GameScreen
         {
             r.Update(gameTime, inputManager, player, blocks, healthBar);
         }
-        ///DONE IN ROBOT1
-        /*if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
+
+        if (healthBar.Value <= 0)
+            Options.SetValue("robotDead", true);
+
+        if (Options.GetValue<bool>("robotDead") && Options.GetValue<State>("role") != State.Doctor)
         {
-          //  psDown.CreateExplosion(40, TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix), Color.Red, true);
-            robot1.TestColor = Color.Pink;
+            //"You lose" - screen TODO::
         }
-        else
+        else if(Options.GetValue<bool>("robotDead"))
         {
-            robot1.TestColor = Color.Blue;
-        }*/ 
+            //"You win" - screen TODO::
+        }
+
+
 
             Timers();
         }
@@ -371,7 +381,14 @@ public class GameplayScreen : GameScreen
                 }
                 else if (i == 6)
                 {
-                    //TODO WIN THE GAME
+                    if (Options.GetValue<State>("role") != State.Doctor)
+                    {
+                        //"You win" - screen TODO::
+                    }
+                    else
+                    {
+                        //"You lose" - screen TODO::
+                    }
                 }
             }
         }
@@ -1035,7 +1052,7 @@ public class GameplayScreen : GameScreen
         {
             case State.Doctor: abilityNames = new string[5] { "Wall", "Trap", "Monster", "Fog", "Scramble" }; //namen van de abilities
                 abilityCooldowns = new int[5] { 5000, 10000, 20000, 40000, 80000 }; //cooldown van de abilities
-                abilityDiscription = new string[5] { "Place an impassable wall", "Create trap at mouse position", "Create monster at mouse position", "Fog the vision of the robot", "Scramble the sounds of the system" };
+                abilityDiscription = new string[5] { "Place an impassable wall", "Create trap at mouse position", "Create monster at mouse position", "Fog the vision of the System", "Scramble the sounds of the System" };
                 abilityUpgradeName = new string[5] { "Upgrade", "Upgrade", "Upgrade", "Upgrade", "Upgrade" };
                 break;
             case State.Robot: abilityNames = new string[5] { "Shoot", "Sonar", "Boost", "Open Door", "Invincible" }; //namen van de abilities
@@ -1058,7 +1075,9 @@ public class GameplayScreen : GameScreen
                 soundBar.Resizable = false;
                 soundBar.Passive = true; //geen user input
                 soundBar.BorderVisible = false;
-
+                string[] soundNames;
+                soundNames = new string[5]{"Low","Normal","High","Left","Right"};
+                
                 for (int i = 0; i < 5; i++)
                 {
                     soundButton[i] = new Button(Wamo.manager);
@@ -1066,7 +1085,7 @@ public class GameplayScreen : GameScreen
                     soundButton[i].Name = i.ToString();
                     soundButton[i].SetPosition(soundButtonPositions[i], soundButtonPositions[i + 5]);
                     soundButton[i].SetSize(60, 60);
-                    soundButton[i].Text = "sound";
+                    soundButton[i].Text = soundNames[i];
                     soundButton[i].Parent = soundBar;
                     soundButton[i].Anchor = Anchors.None;
                 }
