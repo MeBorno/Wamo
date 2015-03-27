@@ -50,7 +50,6 @@ public class Player : Entity
             }
         pixeldata = TextureTo2DArray(image);
         immune = false;
-        immunitytimer = 0;
         ps = new ParticleSystem();
       
 
