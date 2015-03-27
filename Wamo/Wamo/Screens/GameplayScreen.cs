@@ -20,7 +20,6 @@ public class GameplayScreen : GameScreen
     ParticleSystem psUp; //Voor particles die boven shadow liggen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
     static Player player;
-    Robot1 robot1;
     double evilPoints = 30;
     SoundEffect beep;
     Tile[,] textureGrid;
@@ -61,6 +60,7 @@ public class GameplayScreen : GameScreen
     float soundEffectTimer;
 
     EnergyCell[] energyCells;
+    List<Robot1> robots;
     List<Trap> traps;
     List<Projectile> projectiles;
     public static int cellCount = 0;
@@ -105,9 +105,6 @@ public class GameplayScreen : GameScreen
 
         player = new Player();
         player.LoadContent(content, inputManager);
-
-        robot1 = new Robot1();
-        robot1.LoadContent(content, inputManager);
        
         lights.Clear();
 
@@ -143,6 +140,7 @@ public class GameplayScreen : GameScreen
             new EnergyCell(new Vector2(600,500)), new EnergyCell(new Vector2(500,600)), new EnergyCell(new Vector2(400,700))
         };
         traps = new List<Trap>();
+        robots = new List<Robot1>();
         projectiles = new List<Projectile>();
         robotItems = new RobotItem[6]{
             new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(1400,700),2),
@@ -154,14 +152,15 @@ public class GameplayScreen : GameScreen
     {
         base.UnloadContent();
         player.UnloadContent();
-        robot1.UnloadContent();
+        
     }
 
     public override void NetworkMessage(NetIncomingMessage message)
     {
         message.Position = 0;
         PacketTypes type = (PacketTypes)message.ReadByte();
-        if (type == PacketTypes.SOUNDEFFECT) PlaySound((int)message.ReadByte());
+        if (type == PacketTypes.SOUNDEFFECT && Options.GetValue<bool>("scramble")) PlaySound(5- (int)message.ReadByte());
+        else if (type == PacketTypes.SOUNDEFFECT) PlaySound((int)message.ReadByte());
         else if (type == PacketTypes.ABILITIES)
         {
             State state = (State)message.ReadByte();
@@ -173,7 +172,7 @@ public class GameplayScreen : GameScreen
                     string[] data = message.ReadString().Split(' ');
                     lights.Add(new PointLight(lightEffect, new Vector2(int.Parse(data[0]) / ScreenManager.Instance.DrawScale().M11, int.Parse(data[1]) / ScreenManager.Instance.DrawScale().M22), 110, Color.Red, 1.0f));
                 }
-                else if(abil == 3 && Options.GetValue<State>("role") == State.Robot)
+                else if (abil == 3 && Options.GetValue<State>("role") == State.Robot)
                 {
                     string[] data = message.ReadString().Split(' ');
                     psUp.CreateTrail(100, new Vector2(float.Parse(data[0]), float.Parse(data[1])), new Vector2(float.Parse(data[2]), float.Parse(data[3])), Color.Red, true, 0.05f);
@@ -182,7 +181,7 @@ public class GameplayScreen : GameScreen
         }
         else if (type == PacketTypes.MOVE)
         {
-            if(Options.GetValue<State>("role") != State.Robot)
+            if (Options.GetValue<State>("role") != State.Robot)
             {
                 string[] data = message.ReadString().Split(' ');
                 player.Position = new Vector2(float.Parse(data[0]), float.Parse(data[1]));
@@ -239,8 +238,10 @@ public class GameplayScreen : GameScreen
         CheckItems(gameTime); //check traps,cells,projectiles
         FindNearbyBlocks(); //checkt alle blocks of ze dichtbij zijn
 
-        robot1.Update(gameTime, inputManager, player, blocks, healthBar);
-
+        foreach (Robot1 r in robots)
+        {
+            r.Update(gameTime, inputManager, player, blocks, healthBar);
+        }
         ///DONE IN ROBOT1
         /*if (TexturesCollide(player.Pixeldata, player.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1, -1))
         {
@@ -310,16 +311,18 @@ public class GameplayScreen : GameScreen
         {
             p.Update(gameTime, inputManager);
             //if (p.CheckCollision()) collision met enemies vd
-            //if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1,-1))                 
-            if(Collision.CollidesWith(p, robot1))
+            //if (TexturesCollide(p.Pixeldata, p.Matrix, robot1.Pixeldata, robot1.Matrix) != new Vector2(-1,-1)) 
+            foreach (Robot1 r in robots)
             {
-                Vector2 collpos = robot1.Position;
-                psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
-                psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
-                psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
-                p.UnloadContent();
+                if (Collision.CollidesWith(p, r))
+                {
+                    Vector2 collpos = r.Position;
+                    psUp.CreateExplosion(40, collpos, Color.Orange, true, 0.15f, 200f, 0.50f, 10f);
+                    psUp.CreateExplosion(30, collpos, Color.Red, true, 0.15f, 300f, 0.50f, 10f);
+                    psUp.CreateExplosion(90, collpos, Color.Gray, true, 0.05f, 500f, 0.60f, 1f);
+                    p.UnloadContent();
+                }
             }
-
         }
 
         for (int i = 0; i < 6; i++)
@@ -335,12 +338,12 @@ public class GameplayScreen : GameScreen
                 }
                 else if (i == 6)
                 {
-
+                    //TODO WIN THE GAME
                 }
             }
         }
         if (cellCount >= 3 && Options.GetValue<State>("role") == State.System)
-        //TODO:: upgrade systemen (parts etcetera) checks hier bij deze if
+        
         {
             for (int i = 0; i < 5; i++)
             {
@@ -438,7 +441,7 @@ public class GameplayScreen : GameScreen
         if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("fog")) //dit met global option thingy zodat er op system scherm fog ontstaat
         {
             psUp.CreateStorm(50, Camera.CameraPosition - new Vector2(200, 200), Camera.CameraPosition + new Vector2(1000, 800), Color.Gray); //dit moet eigenlijk resolution achtig iets zijn
-            Options.SetValue("fog", true);
+            Options.SetValue("fog", false);
         }
 
         if (Options.GetValue<State>("role") == State.Doctor && Options.GetValue<bool>("paralyze"))
@@ -447,8 +450,23 @@ public class GameplayScreen : GameScreen
                 abilityButton[i].Enabled = false;
         }
 
+        if (Options.GetValue<State>("role") == State.Robot && Options.GetValue<bool>("robotLight"))
+        {
+            lights[0].Radius = 200;
+            lights[0].Power = 1.0f;
+        }
+
         if (Options.GetValue<bool>("paralyze"))
             timer[0] += gameTime.ElapsedGameTime.Milliseconds;
+
+        if (Options.GetValue<bool>("robotLight"))
+            timer[2] += gameTime.ElapsedGameTime.Milliseconds;
+
+        if (Options.GetValue<bool>("scramble"))
+            timer[3] += gameTime.ElapsedGameTime.Milliseconds;
+
+        if (Options.GetValue<bool>("painting"))
+            timer[4] += gameTime.ElapsedGameTime.Milliseconds;
     }
 
     private void CameraMovement()
@@ -487,14 +505,38 @@ public class GameplayScreen : GameScreen
         }
     }
 
-    public void Timers()
+    public void Timers() //dit zijn alle ability timers
     {
         if (Options.GetValue<State>("role") == State.Doctor && timer[0] > 5000 && Options.GetValue<bool>("paralyze"))
         {
+            timer[0] = 0;
             Options.SetValue("paralyze", false);
             for (int i = 0; i < 5; i++)
                 abilityButton[i].Enabled = true;
         }
+
+        if (Options.GetValue<State>("role") == State.Robot && timer[2] > 5000 && Options.GetValue<bool>("robotLight"))
+        {
+            timer[2] = 0;
+            Options.SetValue("robotLight", false);
+            lights[0].Power = 0.0f;
+            lights[0].Radius = 0;
+        }
+        if (Options.GetValue<State>("role") == State.System && timer[3] > 5000 && Options.GetValue<bool>("scramble"))
+        {
+            timer[3] = 0;
+            Options.SetValue("scramble", false);
+        }
+
+        if (Options.GetValue<State>("role") == State.System && Options.GetValue<bool>("painting") && (timer[4] > 5000 || currentAbility != 3))
+        {
+            timer[4] = 0;
+            Options.SetValue("painting", false);
+            if (currentAbility == 3)
+                usingAbility = false;
+        }
+      
+
     }
     
 
@@ -704,13 +746,15 @@ public class GameplayScreen : GameScreen
             NetworkManager.Instance.SendMessage(msg);
            
         }
-        //upgrade, light follows mouse
+        
     }
 
     public void SysAbOne() //creating light at robot
     {
         //TODO:: stuur command zodat er licht komt bij de speler die robot is.
         //upgrade, meer zicht
+        Options.SetValue("robotLight", true);
+        usingAbility = false;
     }
     public void SysAbTwo() 
     {
@@ -719,8 +763,8 @@ public class GameplayScreen : GameScreen
     }
     public void SysAbThree() 
     {
-        
-        //upgrade, meer paint
+
+        Options.SetValue("painting", true);
         if (inputManager.MouseLeftButtonDown() && paintStartPos == Vector2.Zero)
             paintStartPos = new Vector2(Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11, Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22);
         
@@ -746,23 +790,33 @@ public class GameplayScreen : GameScreen
     }
     public void SysAbFour() 
     {
-        //TODO:: think of something
+        Options.SetValue("paralyze", true);
+        usingAbility = false;
     }
     #endregion
         #region doctor abilities
     private void DocAbFour()
     {
-        //scramble
+        Options.SetValue("scramble", true); //dit moet bij andere spelers aankomen
+        usingAbility = false;
     }
 
     private void DocAbThree()
     {
-        //FOG Hij moet ding sturen DOE JE DING JORN
+        Options.SetValue("fog", true); //dit is dat fog ding, deze moet bij andere speler aankomen
+        usingAbility = false;
     }
 
     private void DocAbTwo()
     {
-        //zie hieronder maar dan met robot
+        if (inputManager.MouseLeftButtonReleased())
+        {
+           // Robot1 tmp = new Robot1(new Vector2((int)(((Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11) - Camera.CameraPosition.X) / 16) * 16, (int)(((Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22) - Camera.CameraPosition.Y) / 16) * 16));
+            
+            Robot1 newRobot = new Robot1();
+            robots.Add(newRobot);
+            usingAbility = false;
+        }
     }
 
     private void DocAbOne()
@@ -793,12 +847,12 @@ public class GameplayScreen : GameScreen
 
     private void RobAbThree() 
     {
-        
+        //unlock door
     }
 
     private void RobAbTwo()
     {
-        throw new NotImplementedException();
+        //speedboost
     }
 
     private void RobAbOne()
@@ -1104,7 +1158,8 @@ public class GameplayScreen : GameScreen
             t.Draw(spriteBatch);
         }
 
-        robot1.Draw(spriteBatch);
+        foreach (Robot1 r in robots)
+            r.Draw(spriteBatch);
 
         foreach (Projectile p in projectiles)
         {
