@@ -122,7 +122,7 @@ public class GameplayScreen : GameScreen
        
         lights.Clear();
 
-        if ((Options.GetValue<State>("role") == State.None))
+        //if ((Options.GetValue<State>("role") == State.None))
             Options.SetValue("role", State.Robot);
 
         if (Options.GetValue<State>("role") == State.System)
