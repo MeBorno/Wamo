@@ -75,7 +75,7 @@ public class GameplayScreen : GameScreen
 
     int[] timer;
 
-    Texture2D winScreen, lossScreen;
+    Texture2D winScreen, winDoctorScreen, lossScreen, lossDoctorScreen;
     #endregion
 
     public override void LoadContent(ContentManager Content, InputManager inputManager)
@@ -93,7 +93,9 @@ public class GameplayScreen : GameScreen
         int windowHeight = Options.GetValue<int>("screenHeight");
 
         winScreen = Content.Load<Texture2D>("GUI/win");
+        winDoctorScreen = Content.Load<Texture2D>("GUI/winDoctor");
         lossScreen = Content.Load<Texture2D>("GUI/loss");
+        lossDoctorScreen = Content.Load<Texture2D>("GUI/lossDoctor");
 
         colorMap = new RenderTarget2D(GraphicsDevice, windowWidth, windowHeight, false, SurfaceFormat.Color, DepthFormat.Depth16, 16, RenderTargetUsage.DiscardContents);
         lightMap = new RenderTarget2D(GraphicsDevice, windowWidth, windowHeight, false, SurfaceFormat.Color, DepthFormat.Depth16, 16, RenderTargetUsage.DiscardContents);
@@ -175,7 +177,7 @@ public class GameplayScreen : GameScreen
     {
         base.UnloadContent();
         player.UnloadContent();
-        
+        Wamo.manager.Dispose();
     }
 
     public override void NetworkMessage(NetIncomingMessage message)
@@ -395,6 +397,7 @@ public class GameplayScreen : GameScreen
                 }
                 else if (i == 6)
                 {
+                    Options.SetValue("allFound", true);
                     if (Options.GetValue<State>("role") != State.Doctor)
                     {
                         //"You win" - screen TODO::
@@ -699,7 +702,17 @@ public class GameplayScreen : GameScreen
         else if (Options.GetValue<bool>("robotDead"))
         {
             //"You win" - screen TODO::
-            spriteBatch.Draw(winScreen, new Rectangle(0, 0, winScreen.Width, winScreen.Height), Color.White);
+            spriteBatch.Draw(winDoctorScreen, new Rectangle(0, 0, winScreen.Width, winScreen.Height), Color.White);
+        }
+        if (Options.GetValue<bool>("allFound") && Options.GetValue<State>("role") != State.Doctor)
+        {
+            //"You lose" - screen TODO::
+            spriteBatch.Draw(winScreen, new Rectangle(0, 0, lossScreen.Width, lossScreen.Height), Color.White);
+        }
+        else if (Options.GetValue<bool>("allFound"))
+        {
+            //"You win" - screen TODO::
+            spriteBatch.Draw(lossDoctorScreen, new Rectangle(0, 0, winScreen.Width, winScreen.Height), Color.White);
         }
     }
 
