@@ -181,6 +181,7 @@ public class Robot1 : Entity
     public float Angle
     {
         get { return angle; }
+        set { angle = value; }
     }
 
     public Vector2 Velocity

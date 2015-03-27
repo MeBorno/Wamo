@@ -201,7 +201,11 @@ public class GameplayScreen : GameScreen
             else if(state == State.Doctor)
             {
                 int abil = (int)message.ReadByte();
-                if (abil == 0) { }
+                if (abil == 0) 
+                {
+                    string[] data = message.ReadString().Split(' ');
+                    traps.Add(new Trap(new Vector2(int.Parse(data[0]), int.Parse(data[1]))));
+                }
                 else if (abil == 1 && Options.GetValue<State>("role") != State.Doctor)
                 {
                     string[] data = message.ReadString().Split(' ');
@@ -211,7 +215,9 @@ public class GameplayScreen : GameScreen
                 {
                     string[] data = message.ReadString().Split(' ');
                     Robot1 newRobot = new Robot1();
-                    newRobot.LoadContent(content, inputManager, new Vector2(int.Parse(data[0]), int.Parse(data[1])));
+                    newRobot.LoadContent(content, inputManager, Vector2.Zero);
+                    newRobot.Position = new Vector2(int.Parse(data[0]), int.Parse(data[1]));
+                    newRobot.Angle = float.Parse(data[2]);
                     robots.Add(newRobot);
                 }
                 else if (abil == 3) Options.SetValue("fog", true);
@@ -328,7 +334,6 @@ public class GameplayScreen : GameScreen
             msg.Write((byte)PacketTypes.TOGGLE);
             msg.Write((string)"robotDead true");
             NetworkManager.Instance.SendMessage(msg);
-            
         }
 
         if (Options.GetValue<bool>("robotDead"))
