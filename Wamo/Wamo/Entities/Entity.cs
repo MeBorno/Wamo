@@ -69,6 +69,7 @@ public class Entity
     public Texture2D Image
     {
         get { return image; }
+        set { image = value; }
     }
 
     public Vector2 Position

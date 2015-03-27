@@ -11,6 +11,7 @@ using TomShane.Neoforce.Controls;
 
 public class Robot1 : Entity
 {
+    private InputManager inputManager;
     SpriteFont font;
     Vector2 velocity, knockbackVelocity;
     float angle = 0.0f;
@@ -22,7 +23,7 @@ public class Robot1 : Entity
         base.LoadContent(content, inputManager);       
         velocity = Vector2.Zero;
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
-        image = content.Load<Texture2D>("Sprites/test");
+        image = content.Load<Texture2D>("Sprites/enemy");
         this.position = positionz;        
         pixeldata = TextureTo2DArray(image);
     }
@@ -85,12 +86,17 @@ public class Robot1 : Entity
         {
             if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
             {
-                position = oldPos;
-                velocity = -velocity;
-                break;
+                Entity blockv = new Entity();
+                blockv.LoadContent(content, inputManager);
+                blockv.Image = v.Texture;
+                blockv.Position = v.Pose.Position - Camera.CameraPosition;
+                if (Collision.CollidesWith(this, blockv))
+                {
+                    position = oldPos;
+                    velocity = -velocity;
+                    break;
+                }
             }
-
-            //testColor = Color.Blue;
         }
     }
 

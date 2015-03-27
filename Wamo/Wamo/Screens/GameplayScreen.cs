@@ -150,6 +150,9 @@ public class GameplayScreen : GameScreen
             new RobotItem(new Vector2(128,128),0),new RobotItem(new Vector2(400,400),1),new RobotItem(new Vector2(1400,700),2),
             new RobotItem(new Vector2(1000,1000),3),new RobotItem(new Vector2(512,1000),4),new RobotItem(new Vector2(700,700),5)
         };
+        Robot1 testRobot = new Robot1();
+        testRobot.LoadContent(content, inputManager, new Vector2(220,250));        
+        robots.Add(testRobot);
     }
 
     public override void UnloadContent()
@@ -906,6 +909,7 @@ public class GameplayScreen : GameScreen
            // Robot1 tmp = new Robot1(new Vector2((int)(((Mouse.GetState().X / ScreenManager.Instance.DrawScale().M11) - Camera.CameraPosition.X) / 16) * 16, (int)(((Mouse.GetState().Y / ScreenManager.Instance.DrawScale().M22) - Camera.CameraPosition.Y) / 16) * 16));
             
             Robot1 newRobot = new Robot1();
+            newRobot.LoadContent(content, inputManager, (inputManager.MousePos() + Camera.CameraPosition));
             robots.Add(newRobot);
             usingAbility = false;
         }

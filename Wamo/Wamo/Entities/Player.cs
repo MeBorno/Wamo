@@ -165,10 +165,17 @@ public class Player : Entity
         {
             if (tmp.Intersects(new Rectangle((int)(v.Pose.Position.X), (int)(v.Pose.Position.Y), 32, 32)))
             {
-                //testColor = Color.Red;
-                position = oldPos;
-                velocity = -velocity;
-                break;
+                Entity blockv = new Entity();
+                blockv.LoadContent(content, inputManager);
+                blockv.Image = v.Texture;
+                blockv.Position = v.Pose.Position - Camera.CameraPosition;
+                if(Collision.CollidesWith(this, blockv))
+                {
+                    //testColor = Color.Red;
+                    position = oldPos;
+                    velocity = -velocity;
+                    break;
+                }                
             }
             
             testColor = Color.Blue;

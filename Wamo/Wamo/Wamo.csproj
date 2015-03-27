@@ -92,6 +92,7 @@
     <Compile Include="Managers\NetworkManager.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="ParticleSystem.cs" />
+    <Compile Include="Screens\HowToPlayScreen.cs" />
     <Compile Include="Screens\OptionScreen.cs" />
     <Compile Include="Screens\LobbyScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />

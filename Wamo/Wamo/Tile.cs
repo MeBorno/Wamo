@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-public class Tile
+public class Tile : Entity
 {
     /*
      * Field Region
      */
-    protected Texture2D sprite;
     protected int spriteID;
     protected bool solid;
 
@@ -17,17 +16,17 @@ public class Tile
     /*
      * Constructor
      */
-    public Tile(Texture2D sprite, int spriteID, bool isSolid = false)
+    public Tile(Texture2D image, int spriteID, bool isSolid = false)
     {
-        this.sprite = sprite;
+        this.image = image;
         this.spriteID = spriteID;
         this.solid = isSolid;
     }
 
-    public Tile(Texture2D sprite, int spriteX, int spriteY, bool isSolid = false)
+    public Tile(Texture2D image, int spriteX, int spriteY, bool isSolid = false)
     {
-        this.sprite = sprite;
-        this.spriteID = (spriteY * (sprite.Width / tile_size.X)) + spriteX;
+        this.image = image;
+        this.spriteID = (spriteY * (image.Width / tile_size.X)) + spriteX;
         this.solid = isSolid;
     }
 
@@ -39,7 +38,7 @@ public class Tile
         int x, y;
         getGridLocation(spriteID, out x, out y);
 
-        spriteBatch.Draw(sprite, new Rectangle((int)(position.X + Camera.CameraPosition.X), (int)(position.Y + Camera.CameraPosition.Y), tile_size.X, tile_size.Y),
+        spriteBatch.Draw(image, new Rectangle((int)(position.X + Camera.CameraPosition.X), (int)(position.Y + Camera.CameraPosition.Y), tile_size.X, tile_size.Y),
                                  new Rectangle((int)x, (int)y, tile_size.X, tile_size.Y),
                                  Color.White, 0.0f, Vector2.Zero, SpriteEffects.None, 0.2f);
     }
@@ -64,7 +63,7 @@ public class Tile
     /// <param name="y"></param>
     public void getGridLocation(int id, out int x, out int y)
     {
-        int columns = sprite.Width / tile_size.X;
+        int columns = image.Width / tile_size.X;
         int nx = 0, ny = 0;
         nx = (int)Math.Floor((double)(id % columns));// id % columns;
         ny = (int)Math.Floor((double)(id / columns));
