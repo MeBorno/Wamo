@@ -106,8 +106,9 @@ public class GameplayScreen : GameScreen
         player = new Player();
         player.LoadContent(content, inputManager);
 
+        Vector2 hjdkPosition = new Vector2(220, 250);
         robot1 = new Robot1();
-        robot1.LoadContent(content, inputManager);
+        robot1.LoadContent(content, inputManager, hjdkPosition);
        
         lights.Clear();
 

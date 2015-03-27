@@ -178,5 +178,11 @@ public class Player : Entity
         get { return velocity; }
         set { velocity = value; }
     }
+
+    public Color TestColor
+    {
+        get { return testColor; }
+        set { testColor = value; }
+    }
 }
 
