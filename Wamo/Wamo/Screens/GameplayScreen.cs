@@ -202,7 +202,7 @@ public class GameplayScreen : GameScreen
             else if (state == State.Robot)
             {
                 int abil = (int)message.ReadByte();
-                if (abil == 0) 
+                if (abil == 0 && Options.GetValue<State>("role") != State.Robot) 
                 {
                     string[] data = message.ReadString().Split(' ');
                     projectiles.Add(new Projectile("Sprites/rocket", new Vector2(float.Parse(data[0]), float.Parse(data[1])), Vector2.Zero, float.Parse(data[2])));
