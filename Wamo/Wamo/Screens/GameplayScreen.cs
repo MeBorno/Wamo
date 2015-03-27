@@ -15,7 +15,7 @@ using System.IO;
 
 public class GameplayScreen : GameScreen
 {
-    #region dit
+    #region Field Region
     GraphicsDevice GraphicsDevice;
     ParticleSystem psUp; //Voor particles die boven shadow liggen
     ParticleSystem psDown; //Voor particles die onder shadow liggen
@@ -74,6 +74,8 @@ public class GameplayScreen : GameScreen
     List<Visual> sonarBlocks;
 
     int[] timer;
+
+    Texture2D winScreen, lossScreen;
     #endregion
 
     public override void LoadContent(ContentManager Content, InputManager inputManager)
@@ -89,6 +91,9 @@ public class GameplayScreen : GameScreen
         timer = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         int windowWidth = Options.GetValue<int>("screenWidth");
         int windowHeight = Options.GetValue<int>("screenHeight");
+
+        winScreen = Content.Load<Texture2D>("GUI/win");
+        lossScreen = Content.Load<Texture2D>("GUI/loss");
 
         colorMap = new RenderTarget2D(GraphicsDevice, windowWidth, windowHeight, false, SurfaceFormat.Color, DepthFormat.Depth16, 16, RenderTargetUsage.DiscardContents);
         lightMap = new RenderTarget2D(GraphicsDevice, windowWidth, windowHeight, false, SurfaceFormat.Color, DepthFormat.Depth16, 16, RenderTargetUsage.DiscardContents);
@@ -261,7 +266,7 @@ public class GameplayScreen : GameScreen
         CameraMovement(); //alles met camera movement
 
 
-        if (Options.GetValue<State>("role") == State.Robot)
+        if (Options.GetValue<State>("role") == State.Robot && !Options.GetValue<bool>("robotDead"))
         {
             player.Update(gameTime, inputManager);
             NetOutgoingMessage msg = NetworkManager.Instance.CreateMessage();
@@ -286,14 +291,21 @@ public class GameplayScreen : GameScreen
         if (healthBar.Value <= 0)
             Options.SetValue("robotDead", true);
 
-        if (Options.GetValue<bool>("robotDead") && Options.GetValue<State>("role") != State.Doctor)
+        if (Options.GetValue<bool>("robotDead"))
         {
-            //"You lose" - screen TODO::
+            if(inputManager.KeyPressed(Keys.Space))
+                ScreenManager.Instance.AddScreen(new TitleScreen(), inputManager);
+
+            if(Options.GetValue<State>("role") != State.Doctor)
+            {
+                //"You lose" - screen TODO::
+            }
+            else
+            {
+                //"You win" - screen TODO::
+            }
         }
-        else if(Options.GetValue<bool>("robotDead"))
-        {
-            //"You win" - screen TODO::
-        }
+        
 
 
 
@@ -671,6 +683,17 @@ public class GameplayScreen : GameScreen
                 Vector2 origin = new Vector2(v.Texture.Width / 2.0f, v.Texture.Height / 2.0f);
                 spriteBatch.Draw(v.Texture, v.Pose.Position, null, Color.White, v.Pose.Rotation, origin, v.Pose.Scale, SpriteEffects.None, 0.1f);
             }
+
+        if (Options.GetValue<bool>("robotDead") && Options.GetValue<State>("role") != State.Doctor)
+        {
+            //"You lose" - screen TODO::
+            spriteBatch.Draw(lossScreen, new Rectangle(0, 0, lossScreen.Width, lossScreen.Height), Color.White);
+        }
+        else if (Options.GetValue<bool>("robotDead"))
+        {
+            //"You win" - screen TODO::
+            spriteBatch.Draw(winScreen, new Rectangle(0, 0, winScreen.Width, winScreen.Height), Color.White);
+        }
     }
 
     public void LoadMap()
