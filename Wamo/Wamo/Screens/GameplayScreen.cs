@@ -811,17 +811,17 @@ public class GameplayScreen : GameScreen
         #region robot abilities
     private void RobAbFour()
     {
-        throw new NotImplementedException();
+        //invincibility
     }
 
     private void RobAbThree() 
     {
-        
+        //gotta go fast
     }
 
     private void RobAbTwo()
     {
-        throw new NotImplementedException();
+        //unlock doors
     }
 
     private void RobAbOne()
