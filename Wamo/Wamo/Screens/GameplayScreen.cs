@@ -85,7 +85,7 @@ public class GameplayScreen : GameScreen
         paralyze = Content.Load<Texture2D>("paralyse");
         beep = Content.Load<SoundEffect>("beep");
         lightEffect = Content.Load<Effect>("Light");
-        timer = new int[5] { 0, 0, 0, 0, 0 };
+        timer = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         int windowWidth = Options.GetValue<int>("screenWidth");
         int windowHeight = Options.GetValue<int>("screenHeight");
 
@@ -484,8 +484,6 @@ public class GameplayScreen : GameScreen
 
         if (Options.GetValue<bool>("paralyze"))
             timer[0] += gameTime.ElapsedGameTime.Milliseconds;
-        if (Options.GetValue<bool>("immune"))
-            timer[1] += gameTime.ElapsedGameTime.Milliseconds;
 
         if (Options.GetValue<bool>("robotLight"))
             timer[2] += gameTime.ElapsedGameTime.Milliseconds;
@@ -498,6 +496,8 @@ public class GameplayScreen : GameScreen
 
         if (Options.GetValue<bool>("immune"))
             timer[1] += gameTime.ElapsedGameTime.Milliseconds;
+        if (Options.GetValue<bool>("boost"))
+            timer[5] += gameTime.ElapsedGameTime.Milliseconds;
         
 
     }
@@ -574,6 +574,12 @@ public class GameplayScreen : GameScreen
             if (currentAbility == 3)
                 usingAbility = false;
         }
+
+        if (Options.GetValue<bool>("boost") && Options.GetValue<State>("role") == State.Robot && timer[5] > 5000)
+        {
+            timer[5] = 0;
+            Options.SetValue("boost", false);
+        }
       
         
 
@@ -584,7 +590,7 @@ public class GameplayScreen : GameScreen
     {
         DrawColorMap(GraphicsDevice, spriteBatch);  // Draw the colors
 
-        if (Options.GetValue<State>("role") != State.Doctor) // MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Robot) // MOET DOCTOR ZIJN
         {
             DrawLightMap(GraphicsDevice, spriteBatch, 0.0f); // Draw the lights
             BlurRenderTarget(GraphicsDevice, lightMap, 2.5f);// Blurr the shadows
@@ -916,17 +922,13 @@ public class GameplayScreen : GameScreen
 
         //unlock door
 
-        //gotta go fast
-
     }
 
     private void RobAbTwo()
     {
-
         //speedboost
-
-        //unlock doors
-
+        Options.SetValue("boost", true);
+        usingAbility = false;
     }
 
     private void RobAbOne()
@@ -1201,7 +1203,7 @@ public class GameplayScreen : GameScreen
     /// </summary>
     private void DrawColorMap(GraphicsDevice GraphicsDevice, SpriteBatch spriteBatch)
     {
-        if (Options.GetValue<State>("role") != State.Doctor) //MOET DOCTOR ZIJN
+        if (Options.GetValue<State>("role") != State.Robot) //MOET DOCTOR ZIJN
         GraphicsDevice.SetRenderTarget(colorMap);
         GraphicsDevice.Clear(Color.White);
 

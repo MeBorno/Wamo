@@ -15,13 +15,16 @@ public class Player : Entity
     Vector2 velocity;
     Vector2 oldPos;
     float angle;
-    Color testColor = Color.Blue;
+    Color testColor = Color.White;
+    Color color;
     ParticleSystem ps;
-    bool immune;
-    TimeSpan immunitytimer;
+    float diagonalspeed, speed;
 
     public override void LoadContent(ContentManager content, InputManager inputManager)
     {
+        diagonalspeed = 7.07f;
+        speed = 5f;
+        color = Color.White;
         velocity = Vector2.Zero;
         font = content.Load<SpriteFont>("GUI/Fonts/debug");
         base.LoadContent(content, inputManager);
@@ -49,7 +52,6 @@ public class Player : Entity
                 }
             }
         pixeldata = TextureTo2DArray(image);
-        immune = false;
         ps = new ParticleSystem();
       
 
@@ -65,24 +67,35 @@ public class Player : Entity
     {
         ps.update(gameTime);
 
+        if (Options.GetValue<bool>("boost"))
+        {
+            speed = 7.5f;
+            diagonalspeed = 10.6f;
+        }
+        else
+        {
+            speed = 5f;
+            diagonalspeed = 7.07f;
+        }
+
         if (inputManager.KeyDown(Keys.Right, Keys.D))
         {
             if (inputManager.KeyDown(Keys.Down, Keys.S))
             {
                // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 4);
-                velocity.X += 7.07f;
-                velocity.Y += 7.07f;
+                velocity.X += diagonalspeed;
+                velocity.Y += diagonalspeed;
             }
             else if (inputManager.KeyDown(Keys.Up, Keys.W))
             {
                // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 5);
-                velocity.X += 7.07f;
-                velocity.Y -= 7.07f;
+                velocity.X += diagonalspeed;
+                velocity.Y -= diagonalspeed;
             }
             else
             {
                 //moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 2);
-                velocity.X += 10;
+                velocity.X += speed;
             }
         }
         else if (inputManager.KeyDown(Keys.Left, Keys.A))
@@ -90,30 +103,30 @@ public class Player : Entity
             if (inputManager.KeyDown(Keys.Down, Keys.S))
             {
                // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 6);
-                velocity.X -= 7.07f;
-                velocity.Y += 7.07f;
+                velocity.X -= diagonalspeed;
+                velocity.Y += diagonalspeed;
             }
             else if (inputManager.KeyDown(Keys.Up, Keys.W))
             {
                 //moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 7);
-                velocity.X -= 7.07f;
-                velocity.Y -= 7.07f;
+                velocity.X -= diagonalspeed;
+                velocity.Y -= diagonalspeed;
             }
             else
             {
                // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 1);
-                velocity.X -= 10;
+                velocity.X -= speed;
             }
         }
         else if (inputManager.KeyDown(Keys.Up, Keys.W))
         {
            // moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 3);
-            velocity.Y -= 10;
+            velocity.Y -= speed;
         }
         else if (inputManager.KeyDown(Keys.Down, Keys.S))
         {
             //moveAnimation.CurFrame = new Vector2(moveAnimation.CurFrame.X, 0);
-            velocity.Y += 10;
+            velocity.Y += speed;
         }
         
 
@@ -126,7 +139,9 @@ public class Player : Entity
             Matrix.CreateRotationZ(angle) *
             Matrix.CreateScale(1f) *
             Matrix.CreateTranslation(position.X, position.Y, 0);
-
+        if (Options.GetValue<bool>("immune"))
+            color = Color.Gold;
+        else color = Color.White;
 
     }
 
@@ -165,7 +180,7 @@ public class Player : Entity
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(image, position + Camera.CameraPosition, null, Color.White, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
+        spriteBatch.Draw(image, position + Camera.CameraPosition, null, color, angle, new Vector2(16, 16), 1f, SpriteEffects.None, 0.3f);
         ps.draw(spriteBatch);
     }
 
@@ -186,11 +201,17 @@ public class Player : Entity
         get { return testColor; }
         set { testColor = value; }
     }
-
-    public bool Immune
+    
+    public float Speed
     {
-        get { return immune; }
-        set { immune = value; }
+        get { return speed; }
+        set { speed = value; }
+    }
+
+    public float Diagonalspeed
+    {
+        get { return diagonalspeed; }
+        set { diagonalspeed = value; }
     }
 }
 
