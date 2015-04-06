@@ -159,10 +159,19 @@ class Program
                         {
                             int x, y, z;
                             x = y = z = 0;
-                            x = r.Next(0, 3);
-                            while (y == x) y = r.Next(0, 3);
-                            while (z == y || z == x) z = r.Next(0, 3);
 
+                            if (tmpList[0].name.StartsWith("A") || tmpList[0].name.StartsWith("B") || tmpList[0].name.StartsWith("C"))
+                            {
+                                x = ((tmpList[0].name.StartsWith("A")) ? 0 : (tmpList[0].name.StartsWith("B") ? 1 : 2));
+                                y = ((tmpList[1].name.StartsWith("A")) ? 0 : (tmpList[1].name.StartsWith("B") ? 1 : 2));
+                                z = ((tmpList[2].name.StartsWith("A")) ? 0 : (tmpList[2].name.StartsWith("B") ? 1 : 2));
+                            }
+                            else
+                            {
+                                x = r.Next(0, 3);
+                                while (y == x) y = r.Next(0, 3);
+                                while (z == y || z == x) z = r.Next(0, 3);
+                            }
                             tmpList[0].role = (State)(x + 3);
                             tmpList[1].role = (State)(y + 3);
                             tmpList[2].role = (State)(z + 3);
