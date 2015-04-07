@@ -240,10 +240,17 @@ public class GameplayScreen : GameScreen
         {
             if (Options.GetValue<State>("role") != State.Robot)
             {
-                string[] data = message.ReadString().Split(' ');
-                player.Position = new Vector2(float.Parse(data[0]), float.Parse(data[1]));
-                player.FacingAngle = float.Parse(data[2]);
-                player.Velocity = new Vector2(float.Parse(data[3]), float.Parse(data[4]));
+                try
+                {
+                    string test = message.ReadString();
+                    string[] data = test.Split(' ');
+                    player.Position = new Vector2(float.Parse(data[0]), float.Parse(data[1]));
+                    player.FacingAngle = float.Parse(data[2]);
+                    //player.Velocity = new Vector2(float.Parse(data[3]), float.Parse(data[4]));
+                    System.Console.WriteLine(data);
+                    System.Console.WriteLine(player.Position);
+                }
+                catch (Exception e) { }
             }
         }
         else if (type == PacketTypes.ROBOTMOVE)
