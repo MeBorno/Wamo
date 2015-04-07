@@ -48,7 +48,7 @@ public class HowToPlayScreen : GameScreen
             screenButton[i].Parent = screenBar;
             screenButton[i].Anchor = Anchors.None;
         }
-        Wamo.manager.Add(screenBar);
+       // Wamo.manager.Add(screenBar);
     }
 
     public override void UnloadContent()
@@ -58,15 +58,16 @@ public class HowToPlayScreen : GameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (inputManager.KeyPressed(Keys.NumPad1)) 
+        inputManager.Update();
+        if (inputManager.KeyPressed(Keys.D1)) 
             currentscreen = screen1;
-        if (inputManager.KeyPressed(Keys.NumPad2)) 
+        if (inputManager.KeyPressed(Keys.D2)) 
             currentscreen = screen2;
-        if (inputManager.KeyPressed(Keys.NumPad3)) 
+        if (inputManager.KeyPressed(Keys.D3)) 
             currentscreen = screen3;
-        if (inputManager.KeyPressed(Keys.NumPad4)) 
+        if (inputManager.KeyPressed(Keys.D4)) 
             currentscreen = screen4;
-        if (inputManager.KeyPressed(Keys.Back)) { } //terugnaarmenu
+        if (inputManager.KeyPressed(Keys.Enter)) { } //terugnaarmenu
         
     }
 
