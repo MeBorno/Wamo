@@ -48,6 +48,7 @@ public class HowToPlayScreen : GameScreen
             screenButton[i].Parent = screenBar;
             screenButton[i].Anchor = Anchors.None;
         }
+        Wamo.manager.Add(screenBar);
     }
 
     public override void UnloadContent()

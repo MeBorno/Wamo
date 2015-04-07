@@ -10,7 +10,10 @@ static class Program
     {
         using (Wamo game = new Wamo())
         {
-            game.Run();
+            
+                game.Run();
+            
+            
         }
     }
 }

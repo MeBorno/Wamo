@@ -213,12 +213,16 @@ public class GameplayScreen : GameScreen
                 }
                 else if (abil == 2)
                 {
-                    string[] data = message.ReadString().Split(' ');
-                    Robot1 newRobot = new Robot1();
-                    newRobot.LoadContent(content, inputManager, Vector2.Zero);
-                    newRobot.Position = new Vector2(int.Parse(data[0]), int.Parse(data[1]));
-                    newRobot.Angle = float.Parse(data[2]);
-                    robots.Add(newRobot);
+                    try
+                    {
+                        string[] data = message.ReadString().Split(' ');
+                        Robot1 newRobot = new Robot1();
+                        newRobot.LoadContent(content, inputManager, Vector2.Zero);
+                        newRobot.Position = new Vector2(int.Parse(data[0]), int.Parse(data[1]));
+                        newRobot.Angle = float.Parse(data[2]);
+                        robots.Add(newRobot);
+                    }
+                    catch (Exception e) { }
                 }
                 else if (abil == 3) Options.SetValue("fog", true);
                 else if (abil == 4) Options.SetValue("scramble", true);
