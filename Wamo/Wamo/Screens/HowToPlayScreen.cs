@@ -67,7 +67,10 @@ public class HowToPlayScreen : GameScreen
             currentscreen = screen3;
         if (inputManager.KeyPressed(Keys.D4)) 
             currentscreen = screen4;
-        if (inputManager.KeyPressed(Keys.Enter)) { } //terugnaarmenu
+        if (inputManager.KeyPressed(Keys.Enter)) {
+            ScreenManager.Instance.AddScreen(new TitleScreen(), inputManager);
+        
+        } //terugnaarmenu
         
     }
 
